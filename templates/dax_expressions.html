@@ -1,21 +1,12 @@
 {% extends "base.html" %} {% block title %}DAX Explorer - Power BI Explorer{%
 endblock %} {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css"
-/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
 <!-- Include FontAwesome for icons -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 {% endblock %} {% block breadcrumbs %}
 <li>
-  <a href="/dax-expressions"
-    ><i class="fas fa-code"></i
-    ><span class="breadcrumb-text">DAX Explorer</span></a
-  >
+  <a href="/dax-expressions"><i class="fas fa-code"></i><span class="breadcrumb-text">DAX Explorer</span></a>
 </li>
 {% endblock %} {% block content %}
 <!-- Page Header -->
@@ -30,18 +21,8 @@ endblock %} {% block head %}
 <div class="search-container">
   <div class="search-input-wrapper">
     <i class="fas fa-search"></i>
-    <input
-      type="search"
-      id="searchDax"
-      placeholder="Search DAX expressions..."
-      aria-label="Search DAX expressions"
-    />
-    <button
-      id="clearSearch"
-      class="clear-search"
-      style="display: none"
-      aria-label="Clear search"
-    >
+    <input type="search" id="searchDax" placeholder="Search DAX expressions..." aria-label="Search DAX expressions" />
+    <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
       <i class="fas fa-times"></i>
     </button>
   </div>
@@ -94,11 +75,7 @@ endblock %} {% block head %}
           </h3>
         </div>
         <div class="dax-actions">
-          <button
-            class="icon-button copy-name"
-            title="Copy measure name"
-            data-copy="{{ label }}"
-          >
+          <button class="icon-button copy-name" title="Copy measure name" data-copy="{{ label }}">
             <i class="fas fa-tag"></i>
           </button>
           <button class="icon-button toggle-expand" title="Expand/collapse">

@@ -1,10 +1,7 @@
 {% extends "base.html" %} {% block title %}Dashboard - Power BI Explorer{%
 endblock %} {% block breadcrumbs %}
 <li>
-  <a href="/"
-    ><i class="fas fa-home"></i
-    ><span class="breadcrumb-text">Dashboard</span></a
-  >
+  <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Dashboard</span></a>
 </li>
 {% endblock %} {% block content %}
 <!-- Dashboard Header -->
@@ -26,10 +23,7 @@ endblock %} {% block breadcrumbs %}
       </div>
       <div class="metric-info">
         <div class="metric-title">Total Visuals</div>
-        <div
-          class="metric-value"
-          data-value="{{ metrics.visual_count if metrics is defined else 32 }}"
-        >
+        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 32 }}">
           0
         </div>
       </div>
@@ -42,10 +36,7 @@ endblock %} {% block breadcrumbs %}
       </div>
       <div class="metric-info">
         <div class="metric-title">Measures</div>
-        <div
-          class="metric-value"
-          data-value="{{ metrics.measure_count if metrics is defined else 78 }}"
-        >
+        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 78 }}">
           0
         </div>
       </div>
@@ -58,10 +49,7 @@ endblock %} {% block breadcrumbs %}
       </div>
       <div class="metric-info">
         <div class="metric-title">Pages</div>
-        <div
-          class="metric-value"
-          data-value="{{ metrics.page_count if metrics is defined else 5 }}"
-        >
+        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 5 }}">
           0
         </div>
       </div>
@@ -74,10 +62,7 @@ endblock %} {% block breadcrumbs %}
       </div>
       <div class="metric-info">
         <div class="metric-title">Unused Measures</div>
-        <div
-          class="metric-value"
-          data-value="{{ metrics.unused_count if metrics is defined else 12 }}"
-        >
+        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 12 }}">
           0
         </div>
       </div>
@@ -105,9 +90,7 @@ endblock %} {% block breadcrumbs %}
         </div>
       </div>
       <div class="tool-card-footer">
-        <a href="/table-view" class="tool-button"
-          >Explore Fields <i class="fas fa-arrow-right"></i
-        ></a>
+        <a href="/table-view" class="tool-button">Explore Fields <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
 
@@ -126,9 +109,7 @@ endblock %} {% block breadcrumbs %}
         </div>
       </div>
       <div class="tool-card-footer">
-        <a href="/lineage-view" class="tool-button"
-          >View Diagram <i class="fas fa-arrow-right"></i
-        ></a>
+        <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
 
@@ -147,9 +128,7 @@ endblock %} {% block breadcrumbs %}
         </div>
       </div>
       <div class="tool-card-footer">
-        <a href="/dax-expressions" class="tool-button"
-          >Browse DAX <i class="fas fa-arrow-right"></i
-        ></a>
+        <a href="/dax-expressions" class="tool-button">Browse DAX <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
 
@@ -167,9 +146,7 @@ endblock %} {% block breadcrumbs %}
         </div>
       </div>
       <div class="tool-card-footer">
-        <a href="/source-explorer" class="tool-button"
-          >Explore Sources <i class="fas fa-arrow-right"></i
-        ></a>
+        <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
 
@@ -187,9 +164,7 @@ endblock %} {% block breadcrumbs %}
         </div>
       </div>
       <div class="tool-card-footer">
-        <a href="/unused-measures" class="tool-button"
-          >Find Unused Measures <i class="fas fa-arrow-right"></i
-        ></a>
+        <a href="/unused-measures" class="tool-button">Find Unused Measures <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
   </div>

@@ -1,6 +1,5 @@
 # Power BI Analysis Tool
 
-A comprehensive web application that helps you navigate, explore, and optimize your Power BI reports with advanced visualization and analysis tools.
 
 ![Power BI Analysis Tool](https://img.shields.io/badge/Power%20BI-Analysis%20Tool-217346?style=for-the-badge&logo=powerbi)
 ![Flask](https://img.shields.io/badge/Flask-Web%20App-0078D4?style=for-the-badge&logo=flask)

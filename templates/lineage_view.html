@@ -1,22 +1,12 @@
 {% extends "base.html" %} {% block title %}Data Lineage - Power BI Explorer{%
 endblock %} {% block head %}
 <!-- Include Vis Network CSS -->
-<link
-  href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <!-- Include FontAwesome for icons -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 {% endblock %} {% block breadcrumbs %}
 <li>
-  <a href="/lineage-view"
-    ><i class="fas fa-project-diagram"></i
-    ><span class="breadcrumb-text">Data Lineage</span></a
-  >
+  <a href="/lineage-view"><i class="fas fa-project-diagram"></i><span class="breadcrumb-text">Data Lineage</span></a>
 </li>
 {% endblock %} {% block content %}
 <!-- Page Header -->
@@ -44,9 +34,7 @@ endblock %} {% block head %}
       </div>
       <div class="panel-content">
         <div class="filter-group">
-          <label for="measureSelect" class="filter-label"
-            >Select a Measure:</label
-          >
+          <label for="measureSelect" class="filter-label">Select a Measure:</label>
           <div class="select-wrapper">
             <select id="measureSelect" class="filter-select">
               <option value="">All Measures</option>
@@ -58,12 +46,7 @@ endblock %} {% block head %}
 
         <div class="filter-checkboxes">
           <div class="checkbox-group">
-            <input
-              type="checkbox"
-              id="parentMeasures"
-              class="custom-checkbox"
-              checked
-            />
+            <input type="checkbox" id="parentMeasures" class="custom-checkbox" checked />
             <label for="parentMeasures" class="checkbox-label">
               <span class="checkbox-icon parent-icon"></span>
               Parent Measures
@@ -71,12 +54,7 @@ endblock %} {% block head %}
           </div>
 
           <div class="checkbox-group">
-            <input
-              type="checkbox"
-              id="finalMeasures"
-              class="custom-checkbox"
-              checked
-            />
+            <input type="checkbox" id="finalMeasures" class="custom-checkbox" checked />
             <label for="finalMeasures" class="checkbox-label">
               <span class="checkbox-icon final-icon"></span>
               Final Measures
@@ -84,12 +62,7 @@ endblock %} {% block head %}
           </div>
 
           <div class="checkbox-group">
-            <input
-              type="checkbox"
-              id="columns"
-              class="custom-checkbox"
-              checked
-            />
+            <input type="checkbox" id="columns" class="custom-checkbox" checked />
             <label for="columns" class="checkbox-label">
               <span class="checkbox-icon column-icon"></span>
               Columns
@@ -109,23 +82,12 @@ endblock %} {% block head %}
       </div>
       <div class="panel-content">
         <div class="radio-group">
-          <input
-            type="radio"
-            id="hierarchical"
-            name="layout"
-            class="custom-radio"
-            checked
-          />
+          <input type="radio" id="hierarchical" name="layout" class="custom-radio" checked />
           <label for="hierarchical" class="radio-label">Hierarchical</label>
         </div>
 
         <div class="radio-group">
-          <input
-            type="radio"
-            id="forceDirected"
-            name="layout"
-            class="custom-radio"
-          />
+          <input type="radio" id="forceDirected" name="layout" class="custom-radio" />
           <label for="forceDirected" class="radio-label">Force Directed</label>
         </div>
 
@@ -192,11 +154,7 @@ endblock %} {% block head %}
       </div>
 
       <!-- Network diagram -->
-      <div
-        id="mynetwork"
-        class="network-diagram"
-        aria-label="Measure dependencies visualization"
-      ></div>
+      <div id="mynetwork" class="network-diagram" aria-label="Measure dependencies visualization"></div>
 
       <!-- Loading overlay -->
       <div id="networkLoading" class="network-loading">
@@ -228,18 +186,9 @@ endblock %} {% block head %}
           <div class="search-container compact">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input
-                type="search"
-                id="searchLineage"
-                placeholder="Search lineage..."
-                aria-label="Search lineage details"
-              />
-              <button
-                id="clearSearch"
-                class="clear-search"
-                style="display: none"
-                aria-label="Clear search"
-              >
+              <input type="search" id="searchLineage" placeholder="Search lineage..."
+                aria-label="Search lineage details" />
+              <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
                 <i class="fas fa-times"></i>
               </button>
             </div>
