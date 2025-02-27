@@ -56,25 +56,40 @@ endblock %} {% block head %}
 </div>
 
 <!-- DAX Expressions List -->
-<div class="dax-container">
-  <!-- Loading state -->
-  <div id="daxLoading" class="dax-loading" style="display: none">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Loading expressions...</div>
+<div id="queriesContainer" class="queries-section">
+  <div class="table-toolbar">
+    <div class="table-info">
+      <div class="results-count">
+        <span id="expressionCount">{{ dax_expressions|length }}</span> expressions found
+      </div>
+    </div>
+    <div class="table-actions">
+      <button id="exportDax" class="action-button outline">
+        <i class="fas fa-download"></i> Export Expressions
+      </button>
+      <div class="view-toggle">
+        <button id="expandAll" class="action-button secondary">
+          <i class="fas fa-expand-alt"></i> Expand All
+        </button>
+        <button id="collapseAll" class="action-button secondary">
+          <i class="fas fa-compress-alt"></i> Collapse All
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- DAX expressions list -->
-  <div id="daxList" class="dax-list">
+  <!-- DAX Expressions List -->
+  <div id="daxList" class="queries-list">
     {% for label, expression in dax_expressions %}
-    <div class="dax-item" data-measure="{{ label }}">
-      <div class="dax-item-header">
-        <div class="dax-info">
-          <h3 class="dax-name">
+    <div class="query-item" data-measure="{{ label }}">
+      <div class="query-item-header">
+        <div class="query-info">
+          <h3 class="query-name">
             <span class="measure-icon"><i class="fas fa-calculator"></i></span>
             {{ label }}
           </h3>
         </div>
-        <div class="dax-actions">
+        <div class="query-actions">
           <button class="icon-button copy-name" title="Copy measure name" data-copy="{{ label }}">
             <i class="fas fa-tag"></i>
           </button>
@@ -83,8 +98,7 @@ endblock %} {% block head %}
           </button>
         </div>
       </div>
-
-      <div class="dax-item-content">
+      <div class="query-item-content">
         <div class="code-container">
           <pre><code class="language-dax">{{ expression }}</code></pre>
           <button class="copy-button" onclick="copyToClipboard(this)">
@@ -186,6 +200,19 @@ endblock %} {% block head %}
       }, 2000);
     }
 
+    function toggleItem(item, button) {
+      const isExpanded = item.classList.toggle("expanded");
+
+      // Update button icon
+      if (button) {
+        button.innerHTML = isExpanded
+          ? '<i class="fas fa-chevron-up"></i>'
+          : '<i class="fas fa-chevron-down"></i>';
+
+        button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
+      }
+    }
+
     // Set up event listeners
     setupEventListeners();
 
@@ -285,30 +312,30 @@ endblock %} {% block head %}
       // Toggle expand buttons
       document.querySelectorAll(".toggle-expand").forEach((button) => {
         button.addEventListener("click", function () {
-          const daxItem = this.closest(".dax-item");
-          toggleDaxItem(daxItem, this);
+          const item = this.closest(".query-item");
+          toggleItem(item, this);
         });
       });
 
       // Expand All button
-      if (expandAll) {
-        expandAll.addEventListener("click", function () {
-          daxItems.forEach((item) => {
+      if (document.getElementById("expandAll")) {
+        document.getElementById("expandAll").addEventListener("click", function () {
+          document.querySelectorAll(".query-item").forEach(item => {
             const button = item.querySelector(".toggle-expand");
             if (!item.classList.contains("expanded")) {
-              toggleDaxItem(item, button);
+              toggleItem(item, button);
             }
           });
         });
       }
 
       // Collapse All button
-      if (collapseAll) {
-        collapseAll.addEventListener("click", function () {
-          daxItems.forEach((item) => {
+      if (document.getElementById("collapseAll")) {
+        document.getElementById("collapseAll").addEventListener("click", function () {
+          document.querySelectorAll(".query-item").forEach(item => {
             const button = item.querySelector(".toggle-expand");
             if (item.classList.contains("expanded")) {
-              toggleDaxItem(item, button);
+              toggleItem(item, button);
             }
           });
         });
@@ -518,4 +545,82 @@ endblock %} {% block head %}
     }
   });
 </script>
+
+<style>
+  /* Query Items styling for DAX explorer (copied from source explorer) */
+  .queries-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .query-item {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .query-item:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+  }
+
+  .query-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .query-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .query-name {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .measure-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    margin-right: var(--space-2);
+  }
+
+  .query-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .query-item-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-normal), padding var(--transition-normal);
+  }
+
+  .query-item.expanded .query-item-content {
+    max-height: 2000px;
+    padding: var(--space-4);
+  }
+</style>
 {% endblock %}
