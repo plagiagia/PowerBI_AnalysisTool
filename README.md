@@ -4,7 +4,7 @@ A comprehensive web application that helps you navigate, explore, and optimize y
 
 ![Power BI Analysis Tool](https://img.shields.io/badge/Power%20BI-Analysis%20Tool-217346?style=for-the-badge&logo=powerbi)
 ![Flask](https://img.shields.io/badge/Flask-Web%20App-0078D4?style=for-the-badge&logo=flask)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+![License: Custom Non-Commercial](https://img.shields.io/badge/License-NonCommercial-red.svg?style=for-the-badge)
 
 ## 📋 Overview
 
@@ -148,7 +148,7 @@ PowerBI_AnalysisTool/
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under a Custom Non-Commercial License - see the [LICENSE](LICENSE) file for details. This license allows for personal and educational use but prohibits any commercial use or selling of this software or derivatives.
 
 ## 🌟 Future Enhancements
 
