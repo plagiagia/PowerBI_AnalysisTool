@@ -1,0 +1,1314 @@
+<<<<<<< Updated upstream
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Explorer - Lineage View</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lineage.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-logo">Power BI Explorer</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="/table-view" class="nav-link"><i class="fas fa-table"></i> Visual Fields</a>
+                <a href="/lineage-view" class="nav-link active"><i class="fas fa-project-diagram"></i> Data Lineage</a>
+                <a href="/dax-expressions" class="nav-link"><i class="fas fa-code"></i> DAX Explorer</a>
+                <a href="/source-explorer" class="nav-link"><i class="fas fa-database"></i> Source Explorer</a>
+                <a href="/unused-measures" class="nav-link"><i class="fas fa-broom"></i> Unused Measures</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-project-diagram"></i> Measure Dependencies Diagram</h1>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="controls-section">
+                    <div class="slicer-container">
+                        <label for="measureSelect">Select a Measure:</label>
+                        <select id="measureSelect" class="select-style">
+                            <option value="">All Measures</option>
+                        </select>
+                    </div>
+
+                    <div id="legend" class="legend-container">
+                        <div class="legend-item">
+                            <span class="legend-color-box" style="background-color: #f1c83b;"></span>
+                            <span>Parent Measure</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color-box" style="background-color: #23c4a7;"></span>
+                            <span>Final Measure</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color-box" style="background-color: #ADD8E6;"></span>
+                            <span>Column Node</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="network-section">
+                    <div id="mynetwork" class="network-container"></div>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-container">
+                        <table id="lineageTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-calculator"></i> Measure</th>
+                                    <th><i class="fas fa-level-up-alt"></i> Parent</th>
+                                    <th><i class="fas fa-level-down-alt"></i> Child</th>
+                                    <th><i class="fas fa-columns"></i> Columns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data rows will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        var nodesArray = {{ nodes | tojson | safe }};
+        var edgesArray = {{ edges | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='lineage_view.js') }}"></script>
+</body>
+</html>
+=======
+{% extends "base.html" %} {% block title %}Data Lineage - Power BI Explorer{%
+endblock %} {% block head %}
+<!-- Include Vis Network CSS -->
+<link
+  href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- Include FontAwesome for icons -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+{% endblock %} {% block breadcrumbs %}
+<li>
+  <a href="/lineage-view"
+    ><i class="fas fa-project-diagram"></i
+    ><span class="breadcrumb-text">Data Lineage</span></a
+  >
+</li>
+{% endblock %} {% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-project-diagram"></i> Measure Dependencies Diagram
+  </h1>
+  <p class="page-description">
+    Visualize the relationships between measures and columns to understand data
+    lineage.
+  </p>
+</div>
+
+<!-- Layout with filters on left and diagram on right -->
+<div class="lineage-layout">
+  <!-- Left sidebar with controls -->
+  <div class="lineage-controls">
+    <!-- Filter Panel -->
+    <div class="control-panel">
+      <div class="panel-header">
+        <h2 class="panel-title"><i class="fas fa-filter"></i> Filter</h2>
+        <button class="panel-toggle" aria-label="Toggle filter panel">
+          <i class="fas fa-chevron-up"></i>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div class="filter-group">
+          <label for="measureSelect" class="filter-label"
+            >Select a Measure:</label
+          >
+          <div class="select-wrapper">
+            <select id="measureSelect" class="filter-select">
+              <option value="">All Measures</option>
+              <!-- Options will be populated dynamically -->
+            </select>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="filter-checkboxes">
+          <div class="checkbox-group">
+            <input
+              type="checkbox"
+              id="parentMeasures"
+              class="custom-checkbox"
+              checked
+            />
+            <label for="parentMeasures" class="checkbox-label">
+              <span class="checkbox-icon parent-icon"></span>
+              Parent Measures
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input
+              type="checkbox"
+              id="finalMeasures"
+              class="custom-checkbox"
+              checked
+            />
+            <label for="finalMeasures" class="checkbox-label">
+              <span class="checkbox-icon final-icon"></span>
+              Final Measures
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input
+              type="checkbox"
+              id="columns"
+              class="custom-checkbox"
+              checked
+            />
+            <label for="columns" class="checkbox-label">
+              <span class="checkbox-icon column-icon"></span>
+              Columns
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout Panel -->
+    <div class="control-panel">
+      <div class="panel-header">
+        <h2 class="panel-title"><i class="fas fa-sitemap"></i> Layout</h2>
+        <button class="panel-toggle" aria-label="Toggle layout panel">
+          <i class="fas fa-chevron-up"></i>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div class="radio-group">
+          <input
+            type="radio"
+            id="hierarchical"
+            name="layout"
+            class="custom-radio"
+            checked
+          />
+          <label for="hierarchical" class="radio-label">Hierarchical</label>
+        </div>
+
+        <div class="radio-group">
+          <input
+            type="radio"
+            id="forceDirected"
+            name="layout"
+            class="custom-radio"
+          />
+          <label for="forceDirected" class="radio-label">Force Directed</label>
+        </div>
+
+        <div class="layout-actions">
+          <button id="fitView" class="action-button secondary">
+            <i class="fas fa-expand"></i> Fit View
+          </button>
+          <button id="resetView" class="action-button secondary">
+            <i class="fas fa-undo"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="control-panel">
+      <div class="panel-header">
+        <h2 class="panel-title"><i class="fas fa-chart-pie"></i> Statistics</h2>
+        <button class="panel-toggle" aria-label="Toggle stats panel">
+          <i class="fas fa-chevron-up"></i>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="parentMeasureCount">0</div>
+            <div class="stat-label">Parent Measures</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="finalMeasureCount">0</div>
+            <div class="stat-label">Final Measures</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="columnCount">0</div>
+            <div class="stat-label">Columns</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="relationshipCount">0</div>
+            <div class="stat-label">Relationships</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right content with network diagram -->
+  <div class="lineage-content">
+    <!-- Network Visualization -->
+    <div class="network-container">
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-color parent-color"></span>
+          <span class="legend-label">Parent Measure</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color final-color"></span>
+          <span class="legend-label">Final Measure</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color column-color"></span>
+          <span class="legend-label">Column</span>
+        </div>
+      </div>
+
+      <!-- Network diagram -->
+      <div
+        id="mynetwork"
+        class="network-diagram"
+        aria-label="Measure dependencies visualization"
+      ></div>
+
+      <!-- Loading overlay -->
+      <div id="networkLoading" class="network-loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading diagram...</div>
+      </div>
+
+      <!-- Network controls -->
+      <div class="network-controls">
+        <button id="zoomIn" class="network-button" aria-label="Zoom in">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button id="zoomOut" class="network-button" aria-label="Zoom out">
+          <i class="fas fa-minus"></i>
+        </button>
+        <button id="fullscreen" class="network-button" aria-label="Fullscreen">
+          <i class="fas fa-expand-arrows-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Details Panel -->
+    <div class="lineage-details">
+      <div class="details-header">
+        <h2 class="details-title">
+          <i class="fas fa-info-circle"></i> Lineage Details
+        </h2>
+        <div class="details-actions">
+          <div class="search-container compact">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input
+                type="search"
+                id="searchLineage"
+                placeholder="Search lineage..."
+                aria-label="Search lineage details"
+              />
+              <button
+                id="clearSearch"
+                class="clear-search"
+                style="display: none"
+                aria-label="Clear search"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <button id="exportLineage" class="action-button outline">
+            <i class="fas fa-download"></i> Export
+          </button>
+        </div>
+      </div>
+
+      <div class="details-content">
+        <div class="table-container">
+          <table id="lineageTable" class="data-table">
+            <thead>
+              <tr>
+                <th>Parent Measure</th>
+                <th>Child Measure</th>
+                <th>Column</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Table rows will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state for when no data is available -->
+        <div id="noDataMessage" class="empty-state" style="display: none">
+          <div class="empty-state-icon">
+            <i class="fas fa-info-circle"></i>
+          </div>
+          <h3 class="empty-state-title">No details to display</h3>
+          <p class="empty-state-message">
+            Select a node in the diagram to view its relationships.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<!-- Include Vis Network JS -->
+<script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+
+<!-- Data for the network diagram -->
+<script>
+  // Declare the nodes and edges data for the network diagram
+  const nodesArray = {{ nodes | tojson | safe }};
+  const edgesArray = {{ edges | tojson | safe }};
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // DOM Elements
+    const networkContainer = document.getElementById("mynetwork");
+    const networkLoading = document.getElementById("networkLoading");
+    const measureSelect = document.getElementById("measureSelect");
+    const parentMeasuresCheck = document.getElementById("parentMeasures");
+    const finalMeasuresCheck = document.getElementById("finalMeasures");
+    const columnsCheck = document.getElementById("columns");
+    const hierarchicalRadio = document.getElementById("hierarchical");
+    const forceDirectedRadio = document.getElementById("forceDirected");
+    const fitViewButton = document.getElementById("fitView");
+    const resetViewButton = document.getElementById("resetView");
+    const lineageTable = document.getElementById("lineageTable");
+    const searchLineage = document.getElementById("searchLineage");
+    const clearSearch = document.getElementById("clearSearch");
+    const noDataMessage = document.getElementById("noDataMessage");
+    const exportLineageButton = document.getElementById("exportLineage");
+    const zoomInButton = document.getElementById("zoomIn");
+    const zoomOutButton = document.getElementById("zoomOut");
+    const fullscreenButton = document.getElementById("fullscreen");
+
+    // Stats Elements
+    const parentMeasureCount = document.getElementById("parentMeasureCount");
+    const finalMeasureCount = document.getElementById("finalMeasureCount");
+    const columnCount = document.getElementById("columnCount");
+    const relationshipCount = document.getElementById("relationshipCount");
+
+    // Panel toggles
+    const panelToggles = document.querySelectorAll(".panel-toggle");
+
+    // State variables
+    let network = null;
+    let isFullscreen = false;
+    let currentSelection = null;
+    let nodeDataset = null;
+    let edgeDataset = null;
+
+    // Create sets to track parentNodes, childNodes, finalNodes
+    const parentNodeIds = new Set();
+    const childNodeIds = new Set();
+    const columnNodeIds = new Set();
+
+    // Initialize the network with nodes and edges
+    initializeNetwork();
+
+    // Setup event listeners
+    setupEventListeners();
+
+    // Update statistics
+    updateStatistics();
+
+    /**
+     * Initialize the network diagram
+     */
+    function initializeNetwork() {
+      // Show loading indicator
+      if (networkLoading) {
+        networkLoading.style.display = "flex";
+      }
+
+      // Process nodes to identify types based on edges
+      processNodesAndEdges();
+
+      // Create datasets for nodes and edges
+      nodeDataset = new vis.DataSet(nodesArray);
+      edgeDataset = new vis.DataSet(edgesArray);
+
+      // Network options
+      const options = {
+        nodes: {
+          shape: "dot",
+          size: 16,
+          font: {
+            size: 12,
+            face: "Inter, Segoe UI, sans-serif",
+          },
+          borderWidth: 2,
+          shadow: true,
+        },
+        edges: {
+          width: 1,
+          color: {
+            color: "#aaa",
+            highlight: "#3498db",
+          },
+          arrows: {
+            to: { enabled: true, scaleFactor: 0.5 },
+          },
+          smooth: {
+            enabled: true,
+            type: "dynamic",
+            roundness: 0.5,
+          },
+        },
+        physics: {
+          enabled: true,
+          barnesHut: {
+            gravitationalConstant: -2000,
+            centralGravity: 0.1,
+            springLength: 95,
+            springConstant: 0.04,
+            damping: 0.09,
+          },
+          stabilization: {
+            enabled: true,
+            iterations: 1000,
+            updateInterval: 100,
+          },
+        },
+        layout: {
+          improvedLayout: true,
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 200,
+          hideEdgesOnDrag: true,
+          navigationButtons: false,
+          keyboard: {
+            enabled: true,
+            speed: { x: 10, y: 10, zoom: 0.1 },
+          },
+          zoomView: true,
+        },
+      };
+
+      // Create the network
+      const data = {
+        nodes: nodeDataset,
+        edges: edgeDataset,
+      };
+
+      network = new vis.Network(networkContainer, data, options);
+
+      // Apply hierarchical layout initially if selected
+      if (hierarchicalRadio && hierarchicalRadio.checked) {
+        applyHierarchicalLayout();
+      }
+
+      // Hide loading indicator when the network is stabilized
+      network.on("stabilizationIterationsDone", function () {
+        if (networkLoading) {
+          networkLoading.style.display = "none";
+        }
+      });
+
+      // Handle node selection for details table
+      network.on("selectNode", function (params) {
+        if (params.nodes.length > 0) {
+          const nodeId = params.nodes[0];
+          currentSelection = nodeId;
+          updateDetailsTable(nodeId);
+        }
+      });
+
+      // Handle click on canvas (deselection)
+      network.on("click", function (params) {
+        if (params.nodes.length === 0) {
+          // Clicked on empty space
+          currentSelection = null;
+          populateDetailsTable(edgesArray); // Show all relationships
+        }
+      });
+
+      // Populate measure select options
+      populateMeasureSelect();
+
+      // Populate initial table with all relationships
+      populateDetailsTable(edgesArray);
+    }
+
+    /**
+     * Process nodes and edges to identify node types
+     */
+    function processNodesAndEdges() {
+      // Identify parent and child nodes from edges
+      edgesArray.forEach((edge) => {
+        const fromId = edge.from;
+        const toId = edge.to;
+
+        parentNodeIds.add(fromId);
+        childNodeIds.add(toId);
+      });
+
+      // Process nodes to set types and colors
+      nodesArray.forEach((node) => {
+        if (node.type === "column") {
+          // Column node
+          node.color = { background: "#ADD8E6", border: "#87CEEB" };
+          node.shape = "box";
+          columnNodeIds.add(node.id);
+        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
+          // Pure parent - no parents of its own
+          node.color = { background: "#F1C83B", border: "#DAA520" };
+        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Pure child - final measure
+          node.color = { background: "#23C4A7", border: "#20B2AA" };
+        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Both parent and child - intermediate measure
+          node.color = { background: "#F1C83B", border: "#DAA520" };
+        } else {
+          // Isolated node
+          node.color = { background: "#CCCCCC", border: "#999999" };
+        }
+      });
+    }
+
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Panel toggles
+      if (panelToggles.length > 0) {
+        panelToggles.forEach((toggle) => {
+          toggle.addEventListener("click", function () {
+            const panel = this.closest(".control-panel");
+            panel.classList.toggle("collapsed");
+
+            // Update toggle icon
+            const icon = this.querySelector("i");
+            if (panel.classList.contains("collapsed")) {
+              icon.className = "fas fa-chevron-down";
+            } else {
+              icon.className = "fas fa-chevron-up";
+            }
+          });
+        });
+      }
+
+      // Measure select dropdown
+      if (measureSelect) {
+        measureSelect.addEventListener("change", function () {
+          filterByMeasure(this.value);
+        });
+      }
+
+      // Filter checkboxes
+      if (parentMeasuresCheck) {
+        parentMeasuresCheck.addEventListener("change", applyFilters);
+      }
+
+      if (finalMeasuresCheck) {
+        finalMeasuresCheck.addEventListener("change", applyFilters);
+      }
+
+      if (columnsCheck) {
+        columnsCheck.addEventListener("change", applyFilters);
+      }
+
+      // Layout radio buttons
+      if (hierarchicalRadio) {
+        hierarchicalRadio.addEventListener("change", function () {
+          if (this.checked) {
+            applyHierarchicalLayout();
+          }
+        });
+      }
+
+      if (forceDirectedRadio) {
+        forceDirectedRadio.addEventListener("change", function () {
+          if (this.checked) {
+            applyForceDirectedLayout();
+          }
+        });
+      }
+
+      // Fit view button
+      if (fitViewButton) {
+        fitViewButton.addEventListener("click", function () {
+          if (network) {
+            network.fit({
+              animation: {
+                duration: 1000,
+                easingFunction: "easeInOutQuad",
+              },
+            });
+          }
+        });
+      }
+
+      // Reset view button
+      if (resetViewButton) {
+        resetViewButton.addEventListener("click", function () {
+          resetView();
+        });
+      }
+
+      // Search lineage
+      if (searchLineage) {
+        searchLineage.addEventListener("input", function () {
+          const searchTerm = this.value.toLowerCase();
+
+          // Show/hide clear button
+          if (clearSearch) {
+            clearSearch.style.display = searchTerm ? "block" : "none";
+          }
+
+          // Filter table rows
+          filterDetailsTable(searchTerm);
+        });
+      }
+
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function () {
+          if (searchLineage) {
+            searchLineage.value = "";
+            searchLineage.focus();
+            clearSearch.style.display = "none";
+
+            // Show all rows
+            filterDetailsTable("");
+          }
+        });
+      }
+
+      // Export lineage button
+      if (exportLineageButton) {
+        exportLineageButton.addEventListener("click", exportLineage);
+      }
+
+      // Zoom controls
+      if (zoomInButton) {
+        zoomInButton.addEventListener("click", function () {
+          if (network) {
+            const scale = network.getScale() * 1.2;
+            network.moveTo({ scale: scale });
+          }
+        });
+      }
+
+      if (zoomOutButton) {
+        zoomOutButton.addEventListener("click", function () {
+          if (network) {
+            const scale = network.getScale() / 1.2;
+            network.moveTo({ scale: scale });
+          }
+        });
+      }
+
+      // Fullscreen button
+      if (fullscreenButton) {
+        fullscreenButton.addEventListener("click", toggleFullscreen);
+      }
+    }
+
+    /**
+     * Populate the measure select dropdown
+     */
+    function populateMeasureSelect() {
+      if (!measureSelect) return;
+
+      // Clear existing options (except the first one)
+      while (measureSelect.options.length > 1) {
+        measureSelect.remove(1);
+      }
+
+      // Create optgroups
+      const parentGroup = document.createElement("optgroup");
+      parentGroup.label = "Parent Measures";
+
+      const finalGroup = document.createElement("optgroup");
+      finalGroup.label = "Final Measures";
+
+      const columnGroup = document.createElement("optgroup");
+      columnGroup.label = "Columns";
+
+      // Add nodes to respective groups
+      nodesArray.forEach((node) => {
+        const option = document.createElement("option");
+        option.value = node.id;
+        option.textContent = node.label;
+
+        if (node.type === "column") {
+          columnGroup.appendChild(option);
+        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
+          // Pure parent
+          parentGroup.appendChild(option);
+        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Pure child - final measure
+          finalGroup.appendChild(option);
+        } else {
+          // Both parent and child - add to parent group
+          parentGroup.appendChild(option);
+        }
+      });
+
+      // Add groups to select element if they have options
+      if (parentGroup.children.length > 0) {
+        measureSelect.appendChild(parentGroup);
+      }
+
+      if (finalGroup.children.length > 0) {
+        measureSelect.appendChild(finalGroup);
+      }
+
+      if (columnGroup.children.length > 0) {
+        measureSelect.appendChild(columnGroup);
+      }
+    }
+
+    /**
+     * Filter network by selected measure
+     * @param {string} measureId - ID of the selected measure
+     */
+    function filterByMeasure(measureId) {
+      if (!network || !nodeDataset || !edgeDataset) return;
+
+      if (!measureId) {
+        // Reset to show all nodes and edges
+        resetView();
+        return;
+      }
+
+      // Find direct connections (one level)
+      const connectedEdges = edgesArray.filter(
+        (edge) => edge.from === measureId || edge.to === measureId
+      );
+
+      // Get connected node IDs
+      const connectedNodeIds = new Set();
+      connectedNodeIds.add(measureId); // Add the selected measure
+
+      connectedEdges.forEach((edge) => {
+        connectedNodeIds.add(edge.from);
+        connectedNodeIds.add(edge.to);
+      });
+
+      // Update visibility of nodes
+      nodeDataset.forEach((node) => {
+        const isVisible = connectedNodeIds.has(node.id);
+        const updates = { id: node.id, hidden: !isVisible };
+        nodeDataset.update(updates);
+      });
+
+      // Update visibility of edges
+      edgeDataset.forEach((edge) => {
+        const isVisible =
+          connectedNodeIds.has(edge.from) && connectedNodeIds.has(edge.to);
+        const updates = { id: edge.id, hidden: !isVisible };
+        edgeDataset.update(updates);
+      });
+
+      // Update details table with filtered edges
+      populateDetailsTable(connectedEdges);
+
+      // Fit view to show visible nodes
+      if (network) {
+        network.fit({
+          animation: {
+            duration: 1000,
+            easingFunction: "easeInOutQuad",
+          },
+        });
+      }
+    }
+
+    /**
+     * Apply filters based on checkbox states
+     */
+    function applyFilters() {
+      if (!network || !nodeDataset) return;
+
+      const showParents = parentMeasuresCheck && parentMeasuresCheck.checked;
+      const showFinal = finalMeasuresCheck && finalMeasuresCheck.checked;
+      const showColumns = columnsCheck && columnsCheck.checked;
+
+      // Update node visibility
+      nodeDataset.forEach((node) => {
+        let visible = true;
+
+        if (node.type === "column") {
+          visible = showColumns;
+        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
+          // Pure parent
+          visible = showParents;
+        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Pure child - final measure
+          visible = showFinal;
+        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Both parent and child - consider it a parent for filtering
+          visible = showParents;
+        }
+
+        nodeDataset.update({ id: node.id, hidden: !visible });
+      });
+
+      // Update edge visibility
+      edgeDataset.forEach((edge) => {
+        const fromNode = nodeDataset.get(edge.from);
+        const toNode = nodeDataset.get(edge.to);
+
+        const isVisible =
+          fromNode && !fromNode.hidden && toNode && !toNode.hidden;
+
+        edgeDataset.update({ id: edge.id, hidden: !isVisible });
+      });
+
+      // Update details table
+      const visibleEdges = edgesArray.filter((edge) => {
+        const fromNode = nodeDataset.get(edge.from);
+        const toNode = nodeDataset.get(edge.to);
+
+        return fromNode && !fromNode.hidden && toNode && !toNode.hidden;
+      });
+
+      populateDetailsTable(visibleEdges);
+    }
+
+    /**
+     * Apply hierarchical layout
+     */
+    function applyHierarchicalLayout() {
+      if (!network) return;
+
+      network.setOptions({
+        layout: {
+          hierarchical: {
+            enabled: true,
+            direction: "LR", // Left to right
+            sortMethod: "directed",
+            levelSeparation: 150,
+            nodeSpacing: 120,
+          },
+        },
+      });
+    }
+
+    /**
+     * Apply force-directed layout
+     */
+    function applyForceDirectedLayout() {
+      if (!network) return;
+
+      network.setOptions({
+        layout: {
+          hierarchical: {
+            enabled: false,
+          },
+        },
+        physics: {
+          enabled: true,
+          barnesHut: {
+            gravitationalConstant: -2000,
+            centralGravity: 0.1,
+            springLength: 95,
+            springConstant: 0.04,
+            damping: 0.09,
+          },
+          stabilization: {
+            enabled: true,
+            iterations: 1000,
+          },
+        },
+      });
+    }
+
+    /**
+     * Reset the view to show all nodes and edges
+     */
+    function resetView() {
+      if (!network || !nodeDataset || !edgeDataset) return;
+
+      // Reset measure select
+      if (measureSelect) {
+        measureSelect.value = "";
+      }
+
+      // Reset filter checkboxes
+      if (parentMeasuresCheck) {
+        parentMeasuresCheck.checked = true;
+      }
+
+      if (finalMeasuresCheck) {
+        finalMeasuresCheck.checked = true;
+      }
+
+      if (columnsCheck) {
+        columnsCheck.checked = true;
+      }
+
+      // Show all nodes and edges
+      nodeDataset.forEach((node) => {
+        nodeDataset.update({ id: node.id, hidden: false });
+      });
+
+      edgeDataset.forEach((edge) => {
+        edgeDataset.update({ id: edge.id, hidden: false });
+      });
+
+      // Reset selection
+      currentSelection = null;
+
+      // Restore all relationships in details table
+      populateDetailsTable(edgesArray);
+
+      // Fit view
+      if (network) {
+        network.fit({
+          animation: {
+            duration: 1000,
+            easingFunction: "easeInOutQuad",
+          },
+        });
+      }
+    }
+
+    /**
+     * Update details table based on selected node
+     * @param {string} nodeId - ID of the selected node
+     */
+    function updateDetailsTable(nodeId) {
+      // Find connections related to this node
+      const relatedEdges = edgesArray.filter(
+        (edge) => edge.from === nodeId || edge.to === nodeId
+      );
+
+      // Populate table with these edges
+      populateDetailsTable(relatedEdges);
+    }
+
+    /**
+     * Populate the details table with edges
+     * @param {Array} edges - Array of edges to display
+     */
+    function populateDetailsTable(edges) {
+      if (!lineageTable) return;
+
+      const tbody = lineageTable.querySelector("tbody");
+      if (!tbody) return;
+
+      // Clear existing rows
+      tbody.innerHTML = "";
+
+      // Show/hide empty state
+      if (noDataMessage) {
+        noDataMessage.style.display = edges.length === 0 ? "flex" : "none";
+      }
+
+      if (edges.length === 0) return;
+
+      // Add rows for each edge
+      edges.forEach((edge) => {
+        const row = document.createElement("tr");
+
+        // Get node objects
+        const fromNode = nodesArray.find((n) => n.id === edge.from);
+        const toNode = nodesArray.find((n) => n.id === edge.to);
+
+        // Create cells
+        const fromCell = document.createElement("td");
+        const toCell = document.createElement("td");
+        const columnCell = document.createElement("td");
+
+        // Set content based on node types
+        if (fromNode && fromNode.type === "column") {
+          // This is a column-to-measure relationship
+          fromCell.textContent = "";
+          toCell.textContent = toNode ? toNode.label : "";
+          columnCell.textContent = fromNode.label;
+
+          // Add class to column name
+          columnCell.classList.add("column-name");
+        } else {
+          // This is a measure-to-measure relationship
+          fromCell.textContent = fromNode ? fromNode.label : "";
+          toCell.textContent = toNode ? toNode.label : "";
+          columnCell.textContent = "";
+
+          // Add classes based on node types
+          if (fromNode && parentNodeIds.has(fromNode.id)) {
+            fromCell.classList.add("parent-measure");
+          }
+
+          if (toNode && !parentNodeIds.has(toNode.id)) {
+            toCell.classList.add("final-measure");
+          }
+        }
+
+        // Append cells to row
+        row.appendChild(fromCell);
+        row.appendChild(toCell);
+        row.appendChild(columnCell);
+
+        // Add row to table
+        tbody.appendChild(row);
+      });
+    }
+
+    /**
+     * Filter the details table by search term
+     * @param {string} term - Search term
+     */
+    function filterDetailsTable(term) {
+      if (!lineageTable) return;
+
+      const tbody = lineageTable.querySelector("tbody");
+      if (!tbody) return;
+
+      const rows = tbody.querySelectorAll("tr");
+      let visibleCount = 0;
+
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        const isVisible = term === "" || text.includes(term);
+
+        row.style.display = isVisible ? "" : "none";
+
+        if (isVisible) {
+          visibleCount++;
+
+          // Highlight matching text if there's a search term
+          if (term) {
+            const cells = row.querySelectorAll("td");
+            cells.forEach((cell) => {
+              const originalText = cell.textContent;
+              if (originalText.toLowerCase().includes(term)) {
+                // Replace with highlighted version
+                const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+                cell.innerHTML = originalText.replace(
+                  regex,
+                  '<span class="search-highlight">$1</span>'
+                );
+              }
+            });
+          }
+        }
+      });
+
+      // Show/hide empty state
+      if (noDataMessage) {
+        noDataMessage.style.display = visibleCount === 0 ? "flex" : "none";
+      }
+    }
+
+    /**
+     * Escape special characters in string for regex
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    /**
+     * Export the lineage data
+     */
+    function exportLineage() {
+      if (!lineageTable) return;
+
+      // Get visible rows
+      const tbody = lineageTable.querySelector("tbody");
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.querySelectorAll("tr")).filter(
+        (row) => row.style.display !== "none"
+      );
+
+      // Prepare CSV data
+      const headers = ["Parent Measure", "Child Measure", "Column"];
+      const csvRows = [headers.join(",")];
+
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        const values = Array.from(cells).map((cell) => {
+          // Get text content without HTML
+          let text = cell.textContent.trim();
+
+          // Escape quotes and wrap in quotes if contains comma
+          if (text.includes(",") || text.includes('"')) {
+            text = '"' + text.replace(/"/g, '""') + '"';
+          }
+
+          return text;
+        });
+
+        csvRows.push(values.join(","));
+      });
+
+      // Create CSV content
+      const csvContent = csvRows.join("\n");
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "measure_lineage.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Show notification
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          "Lineage data exported to CSV",
+          "success"
+        );
+      }
+    }
+
+    /**
+     * Toggle fullscreen mode for the network container
+     */
+    function toggleFullscreen() {
+      const container = document.querySelector(".network-container");
+      if (!container) return;
+
+      if (!isFullscreen) {
+        // Enter fullscreen
+        container.classList.add("fullscreen");
+
+        if (fullscreenButton) {
+          fullscreenButton.innerHTML =
+            '<i class="fas fa-compress-arrows-alt"></i>';
+          fullscreenButton.setAttribute("aria-label", "Exit fullscreen");
+        }
+
+        isFullscreen = true;
+
+        // Resize network after transition
+        setTimeout(() => {
+          if (network) {
+            network.redraw();
+            network.fit();
+          }
+        }, 300);
+      } else {
+        // Exit fullscreen
+        container.classList.remove("fullscreen");
+
+        if (fullscreenButton) {
+          fullscreenButton.innerHTML =
+            '<i class="fas fa-expand-arrows-alt"></i>';
+          fullscreenButton.setAttribute("aria-label", "Fullscreen");
+        }
+
+        isFullscreen = false;
+
+        // Resize network after transition
+        setTimeout(() => {
+          if (network) {
+            network.redraw();
+            network.fit();
+          }
+        }, 300);
+      }
+    }
+
+    /**
+     * Update statistics display
+     */
+    function updateStatistics() {
+      // Count the different types of nodes
+      let parentCount = 0;
+      let finalCount = 0;
+      let colCount = 0;
+
+      nodesArray.forEach((node) => {
+        if (node.type === "column") {
+          colCount++;
+        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
+          // Pure parent
+          parentCount++;
+        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Pure child - final measure
+          finalCount++;
+        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+          // Both parent and child - count as parent
+          parentCount++;
+        }
+      });
+
+      // Update the statistics display
+      if (parentMeasureCount) {
+        parentMeasureCount.textContent = parentCount;
+      }
+
+      if (finalMeasureCount) {
+        finalMeasureCount.textContent = finalCount;
+      }
+
+      if (columnCount) {
+        columnCount.textContent = colCount;
+      }
+
+      if (relationshipCount) {
+        relationshipCount.textContent = edgesArray.length;
+      }
+
+      // Add animation for statistics
+      animateCounters();
+    }
+
+    /**
+     * Animate the statistics counters
+     */
+    function animateCounters() {
+      const counters = document.querySelectorAll(".stat-value");
+
+      counters.forEach((counter) => {
+        const target = parseInt(counter.textContent);
+        let count = 0;
+        const duration = 1500; // milliseconds
+        const increment = target / (duration / 16); // 60 FPS
+
+        const timer = setInterval(() => {
+          count += increment;
+
+          if (count >= target) {
+            counter.textContent = target;
+            clearInterval(timer);
+          } else {
+            counter.textContent = Math.floor(count);
+          }
+        }, 16);
+      });
+    }
+  });
+</script>
+{% endblock %}
+>>>>>>> Stashed changes

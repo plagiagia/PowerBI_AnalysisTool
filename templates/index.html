@@ -1,0 +1,636 @@
+<<<<<<< Updated upstream
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Explorer</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --accent-color: #10b981;
+            --dark-bg: #1e293b;
+            --light-text: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --gradient: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --border-radius-md: 8px;
+            --border-radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .nav-link {
+            color: var(--light-text);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background: var(--primary-color);
+        }
+
+        .index-page {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: var(--spacing-xl);
+        }
+
+        .index-page h1 {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
+            padding: var(--spacing-md);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 250px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--light-text);
+            font-weight: 600;
+        }
+
+        .card p {
+            margin-bottom: var(--spacing-xl);
+            opacity: 0.8;
+            flex-grow: 1;
+            line-height: 1.6;
+            color: var(--light-text);
+        }
+
+        .card .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient);
+            color: var(--light-text);
+            text-decoration: none;
+            border-radius: var(--border-radius-md);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-weight: 500;
+            width: fit-content;
+            margin-top: auto;
+        }
+
+        .card .button:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 1200px) {
+            .nav-content {
+                padding: 0 var(--spacing-md);
+            }
+            
+            .index-page {
+                padding: var(--spacing-lg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .index-page {
+                padding: var(--spacing-md);
+            }
+            
+            .card-container {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .card {
+                min-height: 200px;
+                padding: var(--spacing-lg);
+            }
+            
+            .index-page h1 {
+                font-size: 2rem;
+                margin-bottom: var(--spacing-xl);
+            }
+        }
+
+        @media print {
+            .navbar {
+                position: static;
+                background: none;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                print-color-adjust: exact;
+            }
+            
+            .card {
+                break-inside: avoid;
+                background: none;
+                border: 1px solid #000;
+            }
+            
+            .card::before {
+                display: none;
+            }
+            
+            .button {
+                border: 1px solid #000;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+ 
+    <body>
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="nav-logo">Power BI Explorer</div>
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                    <a href="{{ url_for('table_view') }}" class="nav-link {% if request.endpoint == 'table_view' %}active{% endif %}">Visual Fields</a>
+                    <a href="{{ url_for('lineage_view') }}" class="nav-link {% if request.endpoint == 'lineage_view' %}active{% endif %}">Data Lineage</a>
+                    <a href="{{ url_for('dax_expressions') }}" class="nav-link {% if request.endpoint == 'dax_expressions' %}active{% endif %}">DAX Explorer</a>
+                    <a href="{{ url_for('m_queries') }}" class="nav-link {% if request.endpoint == 'm_queries' %}active{% endif %}">Source Explorer</a>
+                    <a href="{{ url_for('unused_measures_view') }}" class="nav-link {% if request.endpoint == 'unused_measures_view' %}active{% endif %}">Unused Measures</a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="index-page">
+            <h1>Power BI Report Explorer</h1>
+
+            <div class="card-container">
+                <div class="card">
+                    <h2>Visual Fields Table</h2>
+                    <p>Get a detailed table view of the fields used in each visual component of your report, making it easier to manage and understand your data structure.</p>
+                    <a href="{{ url_for('table_view') }}" class="button">Explore Visual Fields</a>
+                </div>
+
+                <div class="card">
+                    <h2>Data Lineage Diagram</h2>
+                    <p>Visualize how measures and columns connect across your report with an interactive data lineage diagram. Understand dependencies and relationships.</p>
+                    <a href="{{ url_for('lineage_view') }}" class="button">View Data Lineage</a>
+                </div>
+
+                <div class="card">
+                    <h2>DAX Explorer</h2>
+                    <p>Explore and analyze your DAX formulas and calculations. Understand the logic behind your measures and calculated columns.</p>
+                    <a href="{{ url_for('dax_expressions') }}" class="button">Explore DAX Formulas</a>
+                </div>
+
+                <div class="card">
+                    <h2>Source Explorer</h2>
+                    <p>Examine and understand the M queries that form the foundation of your report's data sources. Optimize your data loading process.</p>
+                    <a href="{{ url_for('m_queries') }}" class="button">Explore M Queries</a>
+                </div>
+
+                <div class="card">
+                    <h2>Unused Measures</h2>
+                    <p>Identify and review measures that aren't currently used in any visual components. Clean up your report and improve performance.</p>
+                    <a href="{{ url_for('unused_measures_view') }}" class="button">Find Unused Measures</a>
+                </div>
+            </div>
+        </main>
+    </body>
+    </html>
+=======
+{% extends "base.html" %} {% block title %}Dashboard - Power BI Explorer{%
+endblock %} {% block breadcrumbs %}
+<li>
+  <a href="/"
+    ><i class="fas fa-home"></i
+    ><span class="breadcrumb-text">Dashboard</span></a
+  >
+</li>
+{% endblock %} {% block content %}
+<!-- Dashboard Header -->
+<section class="dashboard-header">
+  <h1 class="dashboard-title">Power BI Visuals Explorer</h1>
+  <p class="dashboard-description">
+    Explore and analyze your Power BI reports with advanced visualization and
+    diagnostics tools.
+  </p>
+</section>
+
+<!-- Metrics Section -->
+<section class="metrics-section">
+  <div class="metrics-grid">
+    <!-- Total Visuals Metric -->
+    <div class="metric-card">
+      <div class="metric-icon">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="metric-info">
+        <div class="metric-title">Total Visuals</div>
+        <div
+          class="metric-value"
+          data-value="{{ metrics.visual_count if metrics is defined else 32 }}"
+        >
+          0
+        </div>
+      </div>
+    </div>
+
+    <!-- Measures Metric -->
+    <div class="metric-card">
+      <div class="metric-icon">
+        <i class="fas fa-calculator"></i>
+      </div>
+      <div class="metric-info">
+        <div class="metric-title">Measures</div>
+        <div
+          class="metric-value"
+          data-value="{{ metrics.measure_count if metrics is defined else 78 }}"
+        >
+          0
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages Metric -->
+    <div class="metric-card">
+      <div class="metric-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <div class="metric-info">
+        <div class="metric-title">Pages</div>
+        <div
+          class="metric-value"
+          data-value="{{ metrics.page_count if metrics is defined else 5 }}"
+        >
+          0
+        </div>
+      </div>
+    </div>
+
+    <!-- Unused Measures Metric -->
+    <div class="metric-card">
+      <div class="metric-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="metric-info">
+        <div class="metric-title">Unused Measures</div>
+        <div
+          class="metric-value"
+          data-value="{{ metrics.unused_count if metrics is defined else 12 }}"
+        >
+          0
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Analysis Tools Section -->
+<section class="tools-section">
+  <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
+
+  <div class="tools-grid">
+    <!-- Visual Fields Table -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-table"></i>
+        </div>
+        <div class="tool-info">
+          <h3 class="tool-title">Visual Fields Table</h3>
+          <p class="tool-description">
+            Get a comprehensive view of all the fields used across visuals in
+            your report.
+          </p>
+        </div>
+      </div>
+      <div class="tool-card-footer">
+        <a href="/table-view" class="tool-button"
+          >Explore Fields <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+
+    <!-- Data Lineage Diagram -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="tool-info">
+          <h3 class="tool-title">Data Lineage Diagram</h3>
+          <p class="tool-description">
+            Visualize relationships between measures and columns to understand
+            dependencies.
+          </p>
+        </div>
+      </div>
+      <div class="tool-card-footer">
+        <a href="/lineage-view" class="tool-button"
+          >View Diagram <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+
+    <!-- DAX Explorer -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-code"></i>
+        </div>
+        <div class="tool-info">
+          <h3 class="tool-title">DAX Explorer</h3>
+          <p class="tool-description">
+            Browse and analyze DAX formulas with syntax highlighting and copy
+            functionality.
+          </p>
+        </div>
+      </div>
+      <div class="tool-card-footer">
+        <a href="/dax-expressions" class="tool-button"
+          >Browse DAX <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+
+    <!-- Source Explorer -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-database"></i>
+        </div>
+        <div class="tool-info">
+          <h3 class="tool-title">Source Explorer</h3>
+          <p class="tool-description">
+            Examine the M queries that form your report's data sources.
+          </p>
+        </div>
+      </div>
+      <div class="tool-card-footer">
+        <a href="/source-explorer" class="tool-button"
+          >Explore Sources <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+
+    <!-- Unused Measures -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-search-minus"></i>
+        </div>
+        <div class="tool-info">
+          <h3 class="tool-title">Unused Measures</h3>
+          <p class="tool-description">
+            Identify measures not used in any visuals for optimization.
+          </p>
+        </div>
+      </div>
+      <div class="tool-card-footer">
+        <a href="/unused-measures" class="tool-button"
+          >Find Unused Measures <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Insights Section -->
+<section class="insights-section">
+  <h2 class="section-title">
+    <i class="fas fa-lightbulb"></i> Report Insights
+  </h2>
+
+  <div class="insights-grid">
+    <!-- Performance Tips -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <div class="insight-icon">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <h3 class="insight-title">Performance Tips</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          Consider optimizing complex DAX expressions for better performance
+        </li>
+        <li>
+          Remove {{ metrics.unused_count if metrics is defined else '12' }}
+          unused measures to improve model size
+        </li>
+        <li>Check for circular dependencies in your measures</li>
+        <li>
+          Examine visuals with multiple fields for potential consolidation
+        </li>
+      </ul>
+    </div>
+
+    <!-- Report Structure -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <div class="insight-icon">
+          <i class="fas fa-sitemap"></i>
+        </div>
+        <h3 class="insight-title">Report Structure</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          This report contains {{ metrics.page_count if metrics is defined else
+          '5' }} pages
+        </li>
+        <li>
+          {{ metrics.visual_count if metrics is defined else '32' }} visuals are
+          distributed across the report
+        </li>
+        <li>
+          The most common visual type is {{ most_common_visual if
+          most_common_visual is defined else 'Table' }}
+        </li>
+        <li>Using the Visual Fields table can help identify reused metrics</li>
+      </ul>
+    </div>
+
+    <!-- Data Model -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <div class="insight-icon">
+          <i class="fas fa-cube"></i>
+        </div>
+        <h3 class="insight-title">Data Model</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          {{ metrics.measure_count if metrics is defined else '78' }} measures
+          defined in your model
+        </li>
+        <li>
+          Measures with high complexity may require additional documentation
+        </li>
+        <li>Consider using the DAX Explorer to analyze formula patterns</li>
+        <li>
+          Measures are widely used across {{ metrics.visual_count if metrics is
+          defined else '32' }} visuals
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Activity Section -->
+<section class="activity-section">
+  <h2 class="section-title"><i class="fas fa-history"></i> Recent Activity</h2>
+
+  <div class="activity-timeline">
+    <div class="activity-item">
+      <div class="activity-icon">
+        <i class="fas fa-file-upload"></i>
+      </div>
+      <div class="activity-content">
+        <div class="activity-title">Report Loaded</div>
+        <div class="activity-description">
+          {{ report_name if report_name else 'Current report' }} was loaded and
+          analyzed
+        </div>
+        <div class="activity-time">
+          {{ time_loaded if time_loaded else 'Just now' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Add more activity items as needed -->
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Show welcome notification on first visit
+    const firstVisit = !localStorage.getItem("visitedBefore");
+    if (firstVisit) {
+      setTimeout(() => {
+        if (window.PowerBIExplorer) {
+          window.PowerBIExplorer.showNotification(
+            "Welcome to the new Power BI Explorer interface!",
+            "info",
+            5000
+          );
+        }
+        localStorage.setItem("visitedBefore", "true");
+      }, 1000);
+    }
+  });
+</script>
+{% endblock %}
+>>>>>>> Stashed changes

@@ -1,0 +1,1484 @@
+<<<<<<< Updated upstream
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Explorer - Table View</title>
+    <!-- Include XLSX library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --accent-color: #10b981;
+            --dark-bg: #1e293b;
+            --light-text: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --gradient: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --border-radius-md: 8px;
+            --border-radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .nav-link {
+            color: var(--light-text);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background: var(--primary-color);
+        }
+
+        .container {
+            max-width: 95%;  /* Increased from 1800px */
+            margin: 80px auto 0;
+            padding: 0 var(--spacing-md);
+        }
+
+        .page-header {
+            margin: var(--spacing-xl) 0;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .page-header p {
+            color: var(--light-text);
+            opacity: 0.8;
+        }
+
+        .search-container {
+            margin: var(--spacing-md) 0;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-text);
+            opacity: 0.7;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-text);
+            opacity: 0.7;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: var(--spacing-sm);
+        }
+
+        .clear-search:hover {
+            opacity: 1;
+        }
+
+        #searchBox {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius-lg);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light-text);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #searchBox:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+           
+            justify-content: center;
+         margin-bottom: var(--spacing-sm);
+        }
+
+        .action-btn {
+            background: var(--gradient);
+            border: none;
+            color: var(--light-text);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            margin: var(--spacing-md) 0;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            position: relative;
+            height: calc(100vh - 280px); /* Increased from -350px to -280px */
+            overflow-x: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #visuals-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+            table-layout: fixed;  /* Fixed layout for better column control */
+        }
+
+        /* Column widths */
+        #visuals-table th:nth-child(1) { width: 12%; }  /* Page Name */
+        #visuals-table th:nth-child(2) { width: 10%; }  /* Visual Type */
+        #visuals-table th:nth-child(3) { width: 12%; }  /* Visual Name */
+        #visuals-table th:nth-child(4) { width: 18%; }  /* Select Fields */
+        #visuals-table th:nth-child(5) { width: 18%; }  /* Filter Fields */
+        #visuals-table th:nth-child(6) { width: 15%; }  /* VC Objects Fields */
+        #visuals-table th:nth-child(7) { width: 15%; }  /* Object Fields */
+
+        #visuals-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: var(--dark-bg);
+        }
+
+        #visuals-table th {
+            background: rgba(37, 99, 235, 0.2);
+            font-weight: 600;
+            padding: var(--spacing-md) var(--spacing-sm);
+            text-align: left;
+            color: var(--light-text);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        #visuals-table th i {
+            margin-left: var(--spacing-sm);
+        }
+
+        #visuals-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #visuals-table td {
+            padding: var(--spacing-md) var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: top;
+            position: relative; /* Add this for hover context */
+        }
+
+        .cell-content {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+            transition: all 0.2s ease;
+            padding: 2px 4px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .cell-content:hover {
+            position: relative; /* Changed from absolute */
+            z-index: 20;
+            background: var(--dark-bg);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            white-space: pre-wrap; /* Changed from normal for better formatting */
+            overflow: visible;
+            box-shadow: var(--shadow-md);
+            min-width: 200px;
+            word-wrap: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 4px;
+            transform: none; /* Remove transform */
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-50%) scale(0.95); }
+            to { opacity: 1; transform: translateY(-50%) scale(1); }
+        }
+
+        @media (max-width: 1400px) {
+            .container {
+                max-width: 98%;
+                padding: 0 var(--spacing-sm);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-container {
+                margin: var(--spacing-md) 0;
+            }
+
+            #visuals-table th,
+            #visuals-table td {
+                padding: var(--spacing-sm);
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-logo">Power BI Explorer</div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('table_view') }}" class="nav-link active">Visual Fields</a>
+                <a href="{{ url_for('lineage_view') }}" class="nav-link">Data Lineage</a>
+                <a href="{{ url_for('dax_expressions') }}" class="nav-link">DAX Explorer</a>
+                <a href="{{ url_for('m_queries') }}" class="nav-link">Source Explorer</a>
+                <a href="{{ url_for('unused_measures_view') }}" class="nav-link">Unused Measures</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Visual Fields Table</h1>
+            <p>Explore and analyze the fields used in your Power BI report visuals</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchBox" placeholder="Search visuals...">
+                <button class="clear-search" onclick="document.getElementById('searchBox').value=''; filterTable();">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                Export to Excel
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table id="visuals-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable(0)">
+                            <i class="fas fa-file-alt"></i> Page Name 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(1)">
+                            <i class="fas fa-chart-bar"></i> Visual Type 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(2)">
+                            <i class="fas fa-tag"></i> Visual Name 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(3)">
+                            <i class="fas fa-list"></i> Select Fields 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(4)">
+                            <i class="fas fa-filter"></i> Filter Fields 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(5)">
+                            <i class="fas fa-cube"></i> VC Objects Fields 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable(6)">
+                            <i class="fas fa-cubes"></i> Object Fields 
+                            <i class="fas fa-sort"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table_data %}
+                    <tr>
+                        <td><div class="cell-content">{{ row[0] }}</div></td>
+                        <td><div class="cell-content">{{ row[1] }}</div></td>
+                        <td><div class="cell-content">{{ row[2] }}</div></td>
+                        <td><div class="cell-content">{{ row[3] }}</div></td>
+                        <td><div class="cell-content">{{ row[4] }}</div></td>
+                        <td><div class="cell-content">{{ row[5] }}</div></td>
+                        <td><div class="cell-content">{{ row[6] }}</div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Table functionality script
+        let tableData = [];
+        let visibleColumns = new Set([0, 1, 2, 3, 4, 5, 6]);
+        let currentSortColumn = null;
+        let isAscending = true;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const table = document.getElementById("visuals-table");
+            if (table) {
+                const tbody = table.querySelector("tbody");
+                if (tbody) {
+                    tableData = Array.from(tbody.getElementsByTagName("tr"));
+                }
+
+                const searchBox = document.getElementById("searchBox");
+                if (searchBox) {
+                    searchBox.addEventListener("input", function() {
+                        filterTable();
+                    });
+                }
+            }
+        });
+
+        function filterTable() {
+            const searchBox = document.getElementById("searchBox");
+            if (!searchBox) return;
+            const searchTerm = searchBox.value.toLowerCase();
+            const tbody = document.querySelector("#visuals-table tbody");
+            tableData.forEach((row) => {
+                const text = Array.from(row.cells)
+                    .filter((_, index) => visibleColumns.has(index))
+                    .map((cell) => cell.textContent.toLowerCase())
+                    .join(" ");
+                if (text.includes(searchTerm)) {
+                    row.style.display = "";
+                    row.classList.remove("hidden");
+                } else {
+                    row.style.display = "none";
+                    row.classList.add("hidden");
+                }
+            });
+        }
+
+        function sortTable(columnIndex) {
+            isAscending = columnIndex === currentSortColumn ? !isAscending : true;
+            currentSortColumn = columnIndex;
+
+            const tbody = document.querySelector("#visuals-table tbody");
+            if (!tbody) return;
+            tableData.sort((a, b) => {
+                if (!a.cells[columnIndex] || !b.cells[columnIndex]) {
+                    return 0;
+                }
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+                const aNum = parseFloat(aValue);
+                const bNum = parseFloat(bValue);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAscending ? aNum - bNum : bNum - aNum;
+                }
+                return isAscending 
+                    ? aValue.localeCompare(bValue)
+                    : bValue.localeCompare(aValue);
+            });
+            tbody.innerHTML = '';
+            tableData.forEach(row => tbody.appendChild(row));
+
+            document.querySelectorAll("th.sortable i.fas")
+                .forEach(icon => {
+                    icon.className = "fas fa-sort";
+                });
+            const clickedHeader = document.querySelectorAll("th.sortable")[columnIndex];
+                        const sortIcon = clickedHeader?.querySelector("i.fas");
+                        if (sortIcon) {
+                            sortIcon.className = `fas fa-sort-${isAscending ? "up" : "down"}`;
+                        }
+                    }
+
+                    function exportToExcel() {
+                        const table = document.getElementById("visuals-table");
+                        if (!table) return;
+
+                        const ws = XLSX.utils.table_to_sheet(table);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, "Visual Data");
+                        XLSX.writeFile(wb, "power_bi_visuals.xlsx");
+                    }
+                </script>
+                <!-- Font Awesome for icons -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+            </body>
+            </html>
+=======
+{% extends "base.html" %} {% block title %}Visual Fields - Power BI Explorer{%
+endblock %} {% block head %}
+<!-- Add any page-specific head content here -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+{% endblock %} {% block breadcrumbs %}
+<li>
+  <a href="/table-view"
+    ><i class="fas fa-table"></i
+    ><span class="breadcrumb-text">Visual Fields</span></a
+  >
+</li>
+{% endblock %} {% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-table"></i> Visual Fields Table</h1>
+  <p class="page-description">
+    Explore all fields used across visuals in your Power BI report with advanced
+    filtering and search capabilities.
+  </p>
+</div>
+
+<!-- Control Panel -->
+<div class="control-panel">
+  <!-- Search Bar -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input
+        type="search"
+        id="searchBox"
+        placeholder="Search visuals, fields, or pages..."
+        aria-label="Search visual fields"
+      />
+      <button
+        id="clearSearch"
+        class="clear-search"
+        style="display: none"
+        aria-label="Clear search"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-count" aria-live="polite"></div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filter-section">
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label for="pageFilter" class="filter-label">Page:</label>
+        <div class="select-wrapper">
+          <select id="pageFilter" class="filter-select">
+            <option value="">All Pages</option>
+            <!-- Will be populated dynamically via JS -->
+          </select>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label for="visualTypeFilter" class="filter-label">Visual Type:</label>
+        <div class="select-wrapper">
+          <select id="visualTypeFilter" class="filter-select">
+            <option value="">All Visual Types</option>
+            <!-- Will be populated dynamically via JS -->
+          </select>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label for="fieldFilter" class="filter-label">Field Contains:</label>
+        <div class="select-wrapper">
+          <input
+            type="text"
+            id="fieldFilter"
+            class="filter-input"
+            placeholder="Enter field name..."
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button id="applyFilters" class="action-button primary">
+        <i class="fas fa-filter"></i> Apply Filters
+      </button>
+      <button id="resetFilters" class="action-button secondary">
+        <i class="fas fa-undo"></i> Reset
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Table Section -->
+<div class="table-section">
+  <div class="table-toolbar">
+    <div class="table-info">
+      <div class="results-count">
+        <span id="resultCount">0</span> visuals found
+      </div>
+    </div>
+    <div class="table-actions">
+      <button id="exportCSV" class="action-button outline">
+        <i class="fas fa-download"></i> Export CSV
+      </button>
+      <div class="view-toggle">
+        <button
+          id="tableView"
+          class="view-button active"
+          aria-label="Table view"
+        >
+          <i class="fas fa-table"></i>
+        </button>
+        <button id="cardView" class="view-button" aria-label="Card view">
+          <i class="fas fa-th-large"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <table id="visualsTable" class="data-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="page">
+            Page <i class="fas fa-sort"></i>
+          </th>
+          <th class="sortable" data-sort="type">
+            Visual Type <i class="fas fa-sort"></i>
+          </th>
+          <th class="sortable" data-sort="name">
+            Visual Name <i class="fas fa-sort"></i>
+          </th>
+          <th>Fields Used</th>
+          <th>Filter Fields</th>
+          <th>VC Objects</th>
+          <th>Visual Objects</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table_data %} {% if row[3] %}
+        <tr>
+          <td data-label="Page">{{ row[0] }}</td>
+          <td data-label="Visual Type" class="visual-type">
+            <span
+              class="visual-type-badge"
+              data-type="{{ row[1]|lower|replace(' ', '-') }}"
+            >
+              {% if row[1]|lower == 'table' %}
+              <i class="fas fa-table"></i>
+              {% elif row[1]|lower == 'column chart' or row[1]|lower == 'bar
+              chart' %}
+              <i class="fas fa-chart-bar"></i>
+              {% elif row[1]|lower == 'line chart' %}
+              <i class="fas fa-chart-line"></i>
+              {% elif row[1]|lower == 'pie chart' %}
+              <i class="fas fa-chart-pie"></i>
+              {% elif row[1]|lower == 'card' %}
+              <i class="fas fa-square"></i>
+              {% elif row[1]|lower == 'slicer' %}
+              <i class="fas fa-filter"></i>
+              {% else %}
+              <i class="fas fa-chart-area"></i>
+              {% endif %} {{ row[1] }}
+            </span>
+          </td>
+          <td data-label="Visual Name" class="visual-name">{{ row[2] }}</td>
+          <td data-label="Fields Used">
+            <div class="field-list">
+              {% for field in row[3].split('; ') %}
+              <span class="field-item">{{ field }}</span>
+              {% endfor %}
+            </div>
+          </td>
+          <td data-label="Filter Fields">
+            <div class="field-list">
+              {% if row[4] %} {% for field in row[4].split('; ') %}
+              <span class="field-item filter-field">{{ field }}</span>
+              {% endfor %} {% else %}
+              <span class="empty-value">—</span>
+              {% endif %}
+            </div>
+          </td>
+          <td data-label="VC Objects">
+            <div class="field-list">
+              {% if row[5] %} {% for field in row[5].split('; ') %}
+              <span class="field-item vc-object">{{ field }}</span>
+              {% endfor %} {% else %}
+              <span class="empty-value">—</span>
+              {% endif %}
+            </div>
+          </td>
+          <td data-label="Visual Objects">
+            <div class="field-list">
+              {% if row[6] %} {% for field in row[6].split('; ') %}
+              <span class="field-item visual-object">{{ field }}</span>
+              {% endfor %} {% else %}
+              <span class="empty-value">—</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endif %} {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Card View Container (Initially Hidden) -->
+  <div id="visualsCards" class="cards-container" style="display: none">
+    {% for row in table_data %} {% if row[3] %}
+    <div class="visual-card">
+      <div class="visual-card-header">
+        <div class="visual-card-icon">
+          {% if row[1]|lower == 'table' %}
+          <i class="fas fa-table"></i>
+          {% elif row[1]|lower == 'column chart' or row[1]|lower == 'bar chart'
+          %}
+          <i class="fas fa-chart-bar"></i>
+          {% elif row[1]|lower == 'line chart' %}
+          <i class="fas fa-chart-line"></i>
+          {% elif row[1]|lower == 'pie chart' %}
+          <i class="fas fa-chart-pie"></i>
+          {% elif row[1]|lower == 'card' %}
+          <i class="fas fa-square"></i>
+          {% elif row[1]|lower == 'slicer' %}
+          <i class="fas fa-filter"></i>
+          {% else %}
+          <i class="fas fa-chart-area"></i>
+          {% endif %}
+        </div>
+        <div class="visual-card-title">
+          <h3>{{ row[2] }}</h3>
+          <span
+            class="visual-type-badge"
+            data-type="{{ row[1]|lower|replace(' ', '-') }}"
+            >{{ row[1] }}</span
+          >
+        </div>
+      </div>
+      <div class="visual-card-content">
+        <div class="visual-card-detail">
+          <div class="detail-label">Page:</div>
+          <div class="detail-value">{{ row[0] }}</div>
+        </div>
+
+        <div class="visual-card-detail">
+          <div class="detail-label">Fields Used:</div>
+          <div class="detail-value field-list">
+            {% for field in row[3].split('; ') %}
+            <span class="field-item">{{ field }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if row[4] %}
+        <div class="visual-card-detail">
+          <div class="detail-label">Filter Fields:</div>
+          <div class="detail-value field-list">
+            {% for field in row[4].split('; ') %}
+            <span class="field-item filter-field">{{ field }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="visual-card-footer">
+        <button class="visual-card-expand" aria-label="Expand details">
+          <i class="fas fa-chevron-down"></i> More Details
+        </button>
+      </div>
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display: none">
+    <div class="empty-state-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3 class="empty-state-title">No matching visuals found</h3>
+    <p class="empty-state-message">
+      Try adjusting your filters or search criteria.
+    </p>
+    <button id="clearEmptyState" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear Filters
+    </button>
+  </div>
+</div>
+
+<!-- Pagination (if needed for large tables) -->
+<div class="pagination-container" id="pagination">
+  <div class="pagination-info">
+    Showing <span id="showingStart">1</span>-<span id="showingEnd">10</span> of
+    <span id="totalItems">0</span> items
+  </div>
+  <div class="pagination-controls">
+    <button id="prevPage" class="pagination-button" disabled>
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+    <div class="pagination-pages" id="paginationPages">
+      <!-- Will be populated via JS -->
+    </div>
+    <button id="nextPage" class="pagination-button">
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+  <div class="pagination-size">
+    <label for="pageSize">Show:</label>
+    <div class="select-wrapper small">
+      <select id="pageSize" class="filter-select">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Cache DOM elements
+    const searchBox = document.getElementById("searchBox");
+    const clearSearch = document.getElementById("clearSearch");
+    const visualsTable = document.getElementById("visualsTable");
+    const visualsCards = document.getElementById("visualsCards");
+    const tableRows = visualsTable.querySelectorAll("tbody tr");
+    const visualCards = visualsCards.querySelectorAll(".visual-card");
+    const emptyState = document.getElementById("emptyState");
+    const pageFilter = document.getElementById("pageFilter");
+    const visualTypeFilter = document.getElementById("visualTypeFilter");
+    const fieldFilter = document.getElementById("fieldFilter");
+    const applyFilters = document.getElementById("applyFilters");
+    const resetFilters = document.getElementById("resetFilters");
+    const clearEmptyState = document.getElementById("clearEmptyState");
+    const resultCount = document.getElementById("resultCount");
+    const exportCSV = document.getElementById("exportCSV");
+    const tableView = document.getElementById("tableView");
+    const cardView = document.getElementById("cardView");
+    const searchCount = document.querySelector(".search-count");
+
+    // Pagination elements
+    const pagination = document.getElementById("pagination");
+    const prevPage = document.getElementById("prevPage");
+    const nextPage = document.getElementById("nextPage");
+    const paginationPages = document.getElementById("paginationPages");
+    const showingStart = document.getElementById("showingStart");
+    const showingEnd = document.getElementById("showingEnd");
+    const totalItems = document.getElementById("totalItems");
+    const pageSize = document.getElementById("pageSize");
+
+    // Data tracking
+    let currentVisibleRows = 0;
+    const uniquePages = new Set();
+    const uniqueVisualTypes = new Set();
+
+    // Pagination state
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let totalPages = 1;
+
+    // Collect unique pages and visual types
+    tableRows.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      if (cells.length >= 3) {
+        const page = cells[0].textContent.trim();
+        const visualType = cells[1].textContent.trim();
+
+        if (page) uniquePages.add(page);
+        if (visualType) uniqueVisualTypes.add(visualType);
+      }
+    });
+
+    // Populate the filters
+    populateFilterDropdowns();
+
+    // Initialize the view
+    updateResultCount();
+    setupPagination();
+
+    // Set up event listeners
+    setupEventListeners();
+
+    /**
+     * Populate filter dropdowns with unique values
+     */
+    function populateFilterDropdowns() {
+      // Populate page filter dropdown
+      Array.from(uniquePages)
+        .sort()
+        .forEach((page) => {
+          const option = document.createElement("option");
+          option.value = page;
+          option.textContent = page;
+          pageFilter.appendChild(option);
+        });
+
+      // Populate visual type filter dropdown
+      Array.from(uniqueVisualTypes)
+        .sort()
+        .forEach((type) => {
+          const option = document.createElement("option");
+          option.value = type;
+          option.textContent = type;
+          visualTypeFilter.appendChild(option);
+        });
+    }
+
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Search box
+      if (searchBox) {
+        searchBox.addEventListener("input", function () {
+          clearSearch.style.display = this.value ? "block" : "none";
+          applyFiltersAndSearch();
+        });
+      }
+
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function () {
+          searchBox.value = "";
+          clearSearch.style.display = "none";
+          applyFiltersAndSearch();
+          searchBox.focus();
+        });
+      }
+
+      // Apply filters button
+      if (applyFilters) {
+        applyFilters.addEventListener("click", applyFiltersAndSearch);
+      }
+
+      // Reset filters button
+      if (resetFilters) {
+        resetFilters.addEventListener("click", resetAllFilters);
+      }
+
+      // Clear empty state button
+      if (clearEmptyState) {
+        clearEmptyState.addEventListener("click", resetAllFilters);
+      }
+
+      // View toggle buttons
+      if (tableView && cardView) {
+        tableView.addEventListener("click", function () {
+          setViewMode("table");
+        });
+
+        cardView.addEventListener("click", function () {
+          setViewMode("card");
+        });
+      }
+
+      // Export CSV button
+      if (exportCSV) {
+        exportCSV.addEventListener("click", exportTableToCSV);
+      }
+
+      // Pagination buttons
+      if (prevPage) {
+        prevPage.addEventListener("click", function () {
+          if (currentPage > 1) {
+            goToPage(currentPage - 1);
+          }
+        });
+      }
+
+      if (nextPage) {
+        nextPage.addEventListener("click", function () {
+          if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+          }
+        });
+      }
+
+      // Page size dropdown
+      if (pageSize) {
+        pageSize.addEventListener("change", function () {
+          itemsPerPage = parseInt(this.value, 10);
+          currentPage = 1; // Reset to first page
+          setupPagination();
+          applyPagination();
+        });
+      }
+
+      // Sortable column headers
+      const sortableHeaders = document.querySelectorAll("th.sortable");
+      sortableHeaders.forEach((header) => {
+        header.addEventListener("click", function () {
+          const column = this.getAttribute("data-sort");
+          sortTable(column);
+        });
+      });
+
+      // Card expand buttons
+      document.querySelectorAll(".visual-card-expand").forEach((button) => {
+        button.addEventListener("click", function () {
+          const card = this.closest(".visual-card");
+          card.classList.toggle("expanded");
+
+          if (card.classList.contains("expanded")) {
+            this.innerHTML = '<i class="fas fa-chevron-up"></i> Less Details';
+          } else {
+            this.innerHTML = '<i class="fas fa-chevron-down"></i> More Details';
+          }
+        });
+      });
+    }
+
+    /**
+     * Apply all filters and search
+     */
+    function applyFiltersAndSearch() {
+      const searchValue = searchBox ? searchBox.value.toLowerCase() : "";
+      const selectedPage = pageFilter ? pageFilter.value : "";
+      const selectedVisualType = visualTypeFilter ? visualTypeFilter.value : "";
+      const fieldText = fieldFilter ? fieldFilter.value.toLowerCase() : "";
+
+      let visibleItems = 0;
+
+      // Apply filters to table rows
+      tableRows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        const pageCell = cells[0].textContent.trim();
+        const visualTypeCell = cells[1].textContent.trim();
+        const fieldsCell = cells[3].textContent.toLowerCase();
+
+        const pageMatches = !selectedPage || pageCell === selectedPage;
+        const typeMatches =
+          !selectedVisualType || visualTypeCell.includes(selectedVisualType);
+        const fieldMatches = !fieldText || fieldsCell.includes(fieldText);
+
+        let searchMatches = true;
+        if (searchValue) {
+          searchMatches = false;
+          cells.forEach((cell) => {
+            if (cell.textContent.toLowerCase().includes(searchValue)) {
+              searchMatches = true;
+              highlightSearchTerm(cell, searchValue);
+            }
+          });
+        }
+
+        const isVisible =
+          pageMatches && typeMatches && fieldMatches && searchMatches;
+        row.classList.toggle("filtered-out", !isVisible);
+
+        if (isVisible) visibleItems++;
+      });
+
+      // Apply filters to cards
+      visualCards.forEach((card) => {
+        const page = card.querySelector(".detail-value").textContent.trim();
+        const visualType = card
+          .querySelector(".visual-type-badge")
+          .textContent.trim();
+        const fields = card.querySelectorAll(".field-item");
+        let fieldsText = "";
+        fields.forEach((field) => {
+          fieldsText += field.textContent.toLowerCase() + " ";
+        });
+
+        const pageMatches = !selectedPage || page === selectedPage;
+        const typeMatches =
+          !selectedVisualType || visualType.includes(selectedVisualType);
+        const fieldMatches = !fieldText || fieldsText.includes(fieldText);
+
+        let searchMatches = true;
+        if (searchValue) {
+          searchMatches = card.textContent.toLowerCase().includes(searchValue);
+        }
+
+        const isVisible =
+          pageMatches && typeMatches && fieldMatches && searchMatches;
+        card.classList.toggle("filtered-out", !isVisible);
+
+        // Card view doesn't change the count since we rely on table rows for counting
+      });
+
+      // Update UI
+      currentVisibleRows = visibleItems;
+      updateResultCount();
+      updateEmptyState();
+      setupPagination();
+      applyPagination();
+
+      // Update search count display
+      if (searchCount && searchValue) {
+        searchCount.textContent = `${visibleItems} matches`;
+      } else if (searchCount) {
+        searchCount.textContent = "";
+      }
+    }
+
+    /**
+     * Reset all filters and search
+     */
+    function resetAllFilters() {
+      if (searchBox) searchBox.value = "";
+      if (pageFilter) pageFilter.value = "";
+      if (visualTypeFilter) visualTypeFilter.value = "";
+      if (fieldFilter) fieldFilter.value = "";
+      if (clearSearch) clearSearch.style.display = "none";
+
+      // Clear highlights
+      document.querySelectorAll(".search-highlight").forEach((el) => {
+        const parent = el.parentNode;
+        parent.textContent = parent.textContent; // Remove highlight by replacing with text
+      });
+
+      // Show all rows and cards
+      tableRows.forEach((row) => {
+        row.classList.remove("filtered-out");
+      });
+
+      visualCards.forEach((card) => {
+        card.classList.remove("filtered-out");
+      });
+
+      // Reset to first page
+      currentPage = 1;
+
+      // Update UI
+      currentVisibleRows = tableRows.length;
+      updateResultCount();
+      updateEmptyState();
+      setupPagination();
+      applyPagination();
+
+      // Clear search count
+      if (searchCount) {
+        searchCount.textContent = "";
+      }
+    }
+
+    /**
+     * Highlight search term in a cell
+     * @param {HTMLElement} cell - Cell element containing text
+     * @param {string} term - Term to highlight
+     */
+    function highlightSearchTerm(cell, term) {
+      // Skip cells with complex HTML structure
+      if (cell.children.length > 0 && !cell.classList.contains("field-list")) {
+        return;
+      }
+
+      const originalText = cell.textContent;
+      const regex = new RegExp("(" + escapeRegExp(term) + ")", "gi");
+
+      // Only apply highlighting to simple text cells
+      if (cell.children.length === 0) {
+        cell.innerHTML = originalText.replace(
+          regex,
+          '<span class="search-highlight">$1</span>'
+        );
+      }
+    }
+
+    /**
+     * Escape special characters in a string for use in a regex
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    /**
+     * Update the result count display
+     */
+    function updateResultCount() {
+      if (resultCount) {
+        resultCount.textContent = currentVisibleRows;
+      }
+
+      if (totalItems) {
+        totalItems.textContent = currentVisibleRows;
+      }
+    }
+
+    /**
+     * Update empty state visibility
+     */
+    function updateEmptyState() {
+      if (emptyState) {
+        emptyState.style.display = currentVisibleRows === 0 ? "flex" : "none";
+      }
+    }
+
+    /**
+     * Set up pagination based on current visible items
+     */
+    function setupPagination() {
+      if (!pagination) return;
+
+      // Calculate total pages
+      totalPages = Math.ceil(currentVisibleRows / itemsPerPage);
+
+      // Adjust current page if needed
+      if (currentPage > totalPages) {
+        currentPage = Math.max(1, totalPages);
+      }
+
+      // Update pagination controls
+      if (prevPage) {
+        prevPage.disabled = currentPage <= 1;
+      }
+
+      if (nextPage) {
+        nextPage.disabled = currentPage >= totalPages;
+      }
+
+      // Generate page buttons
+      if (paginationPages) {
+        paginationPages.innerHTML = "";
+
+        // Determine page range to show
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        // Adjust if we're near the end
+        if (endPage - startPage < 4) {
+          startPage = Math.max(1, endPage - 4);
+        }
+
+        // First page button if not at the beginning
+        if (startPage > 1) {
+          addPageButton(1);
+
+          if (startPage > 2) {
+            // Add ellipsis
+            const ellipsis = document.createElement("span");
+            ellipsis.className = "pagination-ellipsis";
+            ellipsis.textContent = "...";
+            paginationPages.appendChild(ellipsis);
+          }
+        }
+
+        // Page buttons
+        for (let i = startPage; i <= endPage; i++) {
+          addPageButton(i);
+        }
+
+        // Last page button if not at the end
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) {
+            // Add ellipsis
+            const ellipsis = document.createElement("span");
+            ellipsis.className = "pagination-ellipsis";
+            ellipsis.textContent = "...";
+            paginationPages.appendChild(ellipsis);
+          }
+
+          addPageButton(totalPages);
+        }
+      }
+
+      // Update "showing" text
+      const start = (currentPage - 1) * itemsPerPage + 1;
+      const end = Math.min(start + itemsPerPage - 1, currentVisibleRows);
+
+      if (showingStart)
+        showingStart.textContent = currentVisibleRows > 0 ? start : 0;
+      if (showingEnd) showingEnd.textContent = end;
+
+      // Hide pagination if only one page
+      pagination.style.display = totalPages <= 1 ? "none" : "flex";
+    }
+
+    /**
+     * Add a page button to the pagination controls
+     * @param {number} pageNum - Page number
+     */
+    function addPageButton(pageNum) {
+      const button = document.createElement("button");
+      button.className = "pagination-page";
+      if (pageNum === currentPage) {
+        button.classList.add("active");
+      }
+      button.textContent = pageNum;
+      button.addEventListener("click", function () {
+        goToPage(pageNum);
+      });
+      paginationPages.appendChild(button);
+    }
+
+    /**
+     * Go to a specific page
+     * @param {number} pageNum - Page number to go to
+     */
+    function goToPage(pageNum) {
+      currentPage = pageNum;
+      setupPagination();
+      applyPagination();
+
+      // Scroll to top of table
+      visualsTable.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    /**
+     * Apply pagination to visible items
+     */
+    function applyPagination() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+
+      // Apply to table rows
+      let visibleIndex = 0;
+      tableRows.forEach((row) => {
+        if (!row.classList.contains("filtered-out")) {
+          const inPage = visibleIndex >= start && visibleIndex < end;
+          row.classList.toggle("pagination-hidden", !inPage);
+          visibleIndex++;
+        }
+      });
+
+      // Apply to cards
+      visibleIndex = 0;
+      visualCards.forEach((card) => {
+        if (!card.classList.contains("filtered-out")) {
+          const inPage = visibleIndex >= start && visibleIndex < end;
+          card.classList.toggle("pagination-hidden", !inPage);
+          visibleIndex++;
+        }
+      });
+    }
+
+    /**
+     * Set the current view mode (table or card)
+     * @param {string} mode - 'table' or 'card'
+     */
+    function setViewMode(mode) {
+      if (mode === "table") {
+        visualsTable.closest(".table-container").style.display = "";
+        visualsCards.style.display = "none";
+        tableView.classList.add("active");
+        cardView.classList.remove("active");
+      } else {
+        visualsTable.closest(".table-container").style.display = "none";
+        visualsCards.style.display = "grid";
+        tableView.classList.remove("active");
+        cardView.classList.add("active");
+      }
+    }
+
+    /**
+     * Sort the table by a specific column
+     * @param {string} column - Column to sort by ('page', 'type', or 'name')
+     */
+    function sortTable(column) {
+      const header = document.querySelector(`th[data-sort="${column}"]`);
+      const isAscending = !header.classList.contains("sort-asc");
+
+      // Update sort indicators on all headers
+      document.querySelectorAll("th.sortable").forEach((th) => {
+        th.classList.remove("sort-asc", "sort-desc");
+      });
+
+      // Add appropriate sort indicator to the current header
+      header.classList.add(isAscending ? "sort-asc" : "sort-desc");
+
+      // Get index of the column
+      const headerCells = Array.from(visualsTable.querySelectorAll("thead th"));
+      const columnIndex = headerCells.indexOf(header);
+
+      // Create array of rows for sorting
+      const rows = Array.from(tableRows);
+
+      // Sort rows
+      rows.sort((a, b) => {
+        const cellA = a.querySelectorAll("td")[columnIndex].textContent.trim();
+        const cellB = b.querySelectorAll("td")[columnIndex].textContent.trim();
+
+        return isAscending
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
+
+      // Reinsert rows in new order
+      const tbody = visualsTable.querySelector("tbody");
+      rows.forEach((row) => tbody.appendChild(row));
+
+      // Reset to first page and apply pagination
+      currentPage = 1;
+      setupPagination();
+      applyPagination();
+    }
+
+    /**
+     * Export the current visible data as CSV
+     */
+    function exportTableToCSV() {
+      // Get headers
+      const headers = Array.from(visualsTable.querySelectorAll("thead th")).map(
+        (th) => th.textContent.trim().replace(/[\n\r]+/g, " ")
+      );
+
+      // Prepare CSV rows
+      const csvRows = [];
+      csvRows.push(headers.join(","));
+
+      // Add visible data rows
+      tableRows.forEach((row) => {
+        if (!row.classList.contains("filtered-out")) {
+          const cells = row.querySelectorAll("td");
+          const values = Array.from(cells).map((cell) => {
+            // Get text and clean it for CSV
+            let text = cell.textContent.trim().replace(/[\n\r]+/g, " ");
+            // Escape quotes and wrap in quotes if contains comma
+            if (text.includes(",") || text.includes('"')) {
+              text = '"' + text.replace(/"/g, '""') + '"';
+            }
+            return text;
+          });
+          csvRows.push(values.join(","));
+        }
+      });
+
+      // Create CSV content
+      const csvContent = csvRows.join("\n");
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "power_bi_visuals.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      // Trigger download
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Show notification
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          "Data exported to CSV successfully",
+          "success"
+        );
+      }
+    }
+
+    // Initial setup - apply pagination
+    applyPagination();
+  });
+</script>
+{% endblock %}
+>>>>>>> Stashed changes

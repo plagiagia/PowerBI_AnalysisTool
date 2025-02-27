@@ -1,0 +1,772 @@
+<<<<<<< Updated upstream
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DAX Explorer - Power BI Assistant</title>
+
+        <!-- Stylesheets -->
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='base.css') }}"
+        />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='dax_expressions.css') }}"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-tomorrow.min.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="nav-logo">Power BI Explorer</div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link"
+                        ><i class="fas fa-home"></i> Home</a
+                    >
+                    <a href="/table-view" class="nav-link"
+                        ><i class="fas fa-table"></i> Visual Fields</a
+                    >
+                    <a href="/lineage-view" class="nav-link"
+                        ><i class="fas fa-project-diagram"></i> Data Lineage</a
+                    >
+                    <a href="/dax-expressions" class="nav-link active"
+                        ><i class="fas fa-code"></i> DAX Explorer</a
+                    >
+                    <a href="/source-explorer" class="nav-link"
+                        ><i class="fas fa-database"></i> Source Explorer</a
+                    >
+                    <a href="/unused-measures" class="nav-link"
+                        ><i class="fas fa-broom"></i> Unused Measures</a
+                    >
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="content-wrapper">
+                <!-- Header Section -->
+                <div class="page-header">
+                    <h1><i class="fas fa-code"></i> DAX Explorer</h1>
+                    <p>Browse, search, and manage your DAX expressions</p>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search expressions..."
+                        />
+                    </div>
+                </div>
+
+                <!-- Quick References -->
+                <div class="quick-ref-section">
+                    <div class="ref-cards">
+                        <a
+                            href="https://learn.microsoft.com/en-us/dax/"
+                            target="_blank"
+                            class="ref-card"
+                        >
+                            <i class="fas fa-book"></i>
+                            <span>Official DAX Guide</span>
+                        </a>
+                        <a
+                            href="https://dax.guide/"
+                            target="_blank"
+                            class="ref-card"
+                        >
+                            <i class="fas fa-compass"></i>
+                            <span>DAX Reference</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Expression Cards -->
+                <div class="expressions-grid">
+                    {% for measure_name, dax_formula in dax_expressions %}
+                    <div class="expression-card">
+                        <div class="card-header">
+                            <div class="header-content">
+                                <div class="complexity-donut">
+                                    <canvas class="donut-chart"></canvas>
+                                    <span class="complexity-score"></span>
+                                </div>
+                                <div class="measure-info">
+                                    <h3>{{ measure_name }}</h3>
+                                    <div class="complexity-details">
+                                        <span class="complexity-label"
+                                            >Complexity Score</span
+                                        >
+                                        <span
+                                            class="complexity-tip"
+                                            title="Based on length, nested functions, and dependencies"
+                                        >
+                                            <i class="fas fa-info-circle"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <button
+                                    class="action-btn"
+                                    onclick="copyExpression(this)"
+                                    title="Copy"
+                                >
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button
+                                    class="action-btn"
+                                    onclick="toggleExpand(this)"
+                                    title="Expand"
+                                >
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="expression-content">
+                            <pre><code class="language-dax">{{ dax_formula }}</code></pre>
+                        </div>
+                        <div class="expression-meta">
+                            <span class="tag">Measure</span>
+                            <span class="last-modified">DAX Expression</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="header-content">
+                        <div class="complexity-donut">
+                            <canvas class="modal-donut-chart"></canvas>
+                            <span class="complexity-score"></span>
+                        </div>
+                        <div class="measure-info">
+                            <h3 id="modal-title"></h3>
+                            <div class="complexity-details">
+                                <span class="complexity-label"
+                                    >Complexity Score</span
+                                >
+                                <span
+                                    class="complexity-tip"
+                                    title="Based on length (30%), function count (40%), and nesting level (30%)"
+                                >
+                                    <i class="fas fa-info-circle"></i>
+                                </span>
+                            </div>
+                            <div class="complexity-metrics">
+                                <span
+                                    >Length:
+                                    <span id="length-score">0</span>%</span
+                                >
+                                <span
+                                    >Functions:
+                                    <span id="function-score">0</span>%</span
+                                >
+                                <span
+                                    >Nesting:
+                                    <span id="nesting-score">0</span>%</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button
+                            class="action-btn"
+                            onclick="copyModalExpression()"
+                            title="Copy"
+                        >
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button
+                            class="action-btn"
+                            onclick="closeModal()"
+                            title="Close"
+                        >
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-dax.min.js"></script>
+        <script src="{{ url_for('static', filename='dax_explorer.js') }}"></script>
+    </body>
+</html>
+=======
+{% extends "base.html" %} {% block title %}DAX Explorer - Power BI Explorer{%
+endblock %} {% block head %}
+<!-- Include Prism.js CSS for syntax highlighting -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css"
+/>
+<!-- Include FontAwesome for icons -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+{% endblock %} {% block breadcrumbs %}
+<li>
+  <a href="/dax-expressions"
+    ><i class="fas fa-code"></i
+    ><span class="breadcrumb-text">DAX Explorer</span></a
+  >
+</li>
+{% endblock %} {% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-code"></i> DAX Explorer</h1>
+  <p class="page-description">
+    Browse and analyze DAX formulas used in your Power BI report.
+  </p>
+</div>
+
+<!-- Simple Search Bar -->
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <i class="fas fa-search"></i>
+    <input
+      type="search"
+      id="searchDax"
+      placeholder="Search DAX expressions..."
+      aria-label="Search DAX expressions"
+    />
+    <button
+      id="clearSearch"
+      class="clear-search"
+      style="display: none"
+      aria-label="Clear search"
+    >
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="search-count" aria-live="polite"></div>
+</div>
+
+<!-- DAX Measure Count -->
+<div class="dax-header">
+  <div class="dax-metrics">
+    <div class="metric-tag">
+      <i class="fas fa-code"></i>
+      <span id="expressionCount">{{ dax_expressions|length }}</span> Expressions
+    </div>
+    <div class="metric-tag" id="selectedTag" style="display: none">
+      <i class="fas fa-filter"></i>
+      <span id="selectedCount">0</span> Selected
+    </div>
+  </div>
+
+  <div class="dax-actions">
+    <button id="expandAll" class="action-button secondary">
+      <i class="fas fa-expand-alt"></i> Expand All
+    </button>
+    <button id="collapseAll" class="action-button secondary">
+      <i class="fas fa-compress-alt"></i> Collapse All
+    </button>
+    <button id="exportDax" class="action-button outline">
+      <i class="fas fa-download"></i> Export
+    </button>
+  </div>
+</div>
+
+<!-- DAX Expressions List -->
+<div class="dax-container">
+  <!-- Loading state -->
+  <div id="daxLoading" class="dax-loading" style="display: none">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading expressions...</div>
+  </div>
+
+  <!-- DAX expressions list -->
+  <div id="daxList" class="dax-list">
+    {% for label, expression in dax_expressions %}
+    <div class="dax-item" data-measure="{{ label }}">
+      <div class="dax-item-header">
+        <div class="dax-info">
+          <h3 class="dax-name">
+            <span class="measure-icon"><i class="fas fa-calculator"></i></span>
+            {{ label }}
+          </h3>
+        </div>
+        <div class="dax-actions">
+          <button
+            class="icon-button copy-name"
+            title="Copy measure name"
+            data-copy="{{ label }}"
+          >
+            <i class="fas fa-tag"></i>
+          </button>
+          <button class="icon-button toggle-expand" title="Expand/collapse">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="dax-item-content">
+        <div class="code-container">
+          <pre><code class="language-dax">{{ expression }}</code></pre>
+          <button class="copy-button" onclick="copyToClipboard(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display: none">
+    <div class="empty-state-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3 class="empty-state-title">No DAX expressions found</h3>
+    <p class="empty-state-message">Try adjusting your search terms.</p>
+    <button id="clearEmptyState" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear Search
+    </button>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<!-- Include Prism.js for syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+<!-- Include Prism.js DAX language component -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-dax.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // DOM Elements
+    const searchDax = document.getElementById("searchDax");
+    const clearSearch = document.getElementById("clearSearch");
+    const daxList = document.getElementById("daxList");
+    const daxItems = document.querySelectorAll(".dax-item");
+    const emptyState = document.getElementById("emptyState");
+    const clearEmptyState = document.getElementById("clearEmptyState");
+    const expressionCount = document.getElementById("expressionCount");
+    const selectedTag = document.getElementById("selectedTag");
+    const selectedCount = document.getElementById("selectedCount");
+    const expandAll = document.getElementById("expandAll");
+    const collapseAll = document.getElementById("collapseAll");
+    const exportDax = document.getElementById("exportDax");
+    const searchCount = document.querySelector(".search-count");
+    const daxLoading = document.getElementById("daxLoading");
+
+    // Function to copy text to clipboard
+    window.copyToClipboard = function (button) {
+      // Show loading indicator
+      const originalHTML = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      // Get code element
+      const codeElement = button
+        .closest(".code-container")
+        .querySelector("code");
+      const textToCopy = codeElement.textContent;
+
+      // Use Navigator Clipboard API if available
+      if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            button.innerHTML = '<i class="fas fa-check"></i> Copied';
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+            }, 2000);
+          })
+          .catch(() => {
+            // Fallback to older method if API fails
+            fallbackCopy(textToCopy, button, originalHTML);
+          });
+      } else {
+        // Fallback for browsers without clipboard API
+        fallbackCopy(textToCopy, button, originalHTML);
+      }
+    };
+
+    // Fallback copy method
+    function fallbackCopy(text, button, originalHTML) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand("copy");
+        button.innerHTML = '<i class="fas fa-check"></i> Copied';
+      } catch (err) {
+        button.innerHTML = '<i class="fas fa-times"></i> Failed';
+      }
+
+      document.body.removeChild(textArea);
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+      }, 2000);
+    }
+
+    // Set up event listeners
+    setupEventListeners();
+
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Search input
+      if (searchDax) {
+        searchDax.addEventListener("input", function () {
+          const searchTerm = this.value;
+
+          // Toggle clear button visibility
+          if (clearSearch) {
+            clearSearch.style.display = searchTerm ? "block" : "none";
+          }
+
+          // Debounce search
+          clearTimeout(this.debounceTimer);
+          this.debounceTimer = setTimeout(() => {
+            searchDaxExpressions(searchTerm);
+          }, 300);
+        });
+      }
+
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function () {
+          if (searchDax) {
+            searchDax.value = "";
+            clearSearch.style.display = "none";
+            searchDaxExpressions("");
+            searchDax.focus();
+          }
+        });
+      }
+
+      // Clear empty state button
+      if (clearEmptyState) {
+        clearEmptyState.addEventListener("click", function () {
+          if (searchDax) {
+            searchDax.value = "";
+            clearSearch.style.display = "none";
+            searchDaxExpressions("");
+          }
+        });
+      }
+
+      // Copy measure name buttons
+      document.querySelectorAll(".copy-name").forEach((button) => {
+        button.addEventListener("click", function () {
+          const measureName = this.getAttribute("data-copy");
+
+          // Show loading spinner
+          const originalHTML = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+          // Copy to clipboard
+          if (navigator.clipboard) {
+            navigator.clipboard
+              .writeText(measureName)
+              .then(() => {
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                  this.innerHTML = originalHTML;
+                }, 2000);
+              })
+              .catch(() => {
+                this.innerHTML = '<i class="fas fa-times"></i>';
+                setTimeout(() => {
+                  this.innerHTML = originalHTML;
+                }, 2000);
+              });
+          } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = measureName;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+              document.execCommand("copy");
+              this.innerHTML = '<i class="fas fa-check"></i>';
+            } catch (err) {
+              this.innerHTML = '<i class="fas fa-times"></i>';
+            }
+
+            document.body.removeChild(textArea);
+            setTimeout(() => {
+              this.innerHTML = originalHTML;
+            }, 2000);
+          }
+        });
+      });
+
+      // Toggle expand buttons
+      document.querySelectorAll(".toggle-expand").forEach((button) => {
+        button.addEventListener("click", function () {
+          const daxItem = this.closest(".dax-item");
+          toggleDaxItem(daxItem, this);
+        });
+      });
+
+      // Expand All button
+      if (expandAll) {
+        expandAll.addEventListener("click", function () {
+          daxItems.forEach((item) => {
+            const button = item.querySelector(".toggle-expand");
+            if (!item.classList.contains("expanded")) {
+              toggleDaxItem(item, button);
+            }
+          });
+        });
+      }
+
+      // Collapse All button
+      if (collapseAll) {
+        collapseAll.addEventListener("click", function () {
+          daxItems.forEach((item) => {
+            const button = item.querySelector(".toggle-expand");
+            if (item.classList.contains("expanded")) {
+              toggleDaxItem(item, button);
+            }
+          });
+        });
+      }
+
+      // Export DAX button
+      if (exportDax) {
+        exportDax.addEventListener("click", exportDaxExpressions);
+      }
+    }
+
+    /**
+     * Toggle a DAX item expanded state
+     * @param {HTMLElement} item - The DAX item element
+     * @param {HTMLElement} button - The toggle button
+     */
+    function toggleDaxItem(item, button) {
+      const isExpanded = item.classList.toggle("expanded");
+
+      // Update button icon
+      if (button) {
+        button.innerHTML = isExpanded
+          ? '<i class="fas fa-chevron-up"></i>'
+          : '<i class="fas fa-chevron-down"></i>';
+
+        button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
+      }
+    }
+
+    /**
+     * Search DAX expressions
+     * @param {string} searchTerm - Term to search for
+     */
+    function searchDaxExpressions(searchTerm) {
+      // Convert to lowercase for case-insensitive search
+      searchTerm = searchTerm.toLowerCase();
+
+      // Show loading indicator if many items
+      if (daxItems.length > 50 && daxLoading) {
+        daxLoading.style.display = "flex";
+      }
+
+      let visibleCount = 0;
+
+      // Clear previous search highlights
+      document.querySelectorAll(".search-highlight").forEach((el) => {
+        const text = el.textContent;
+        const parent = el.parentNode;
+
+        // Replace highlighted element with text
+        const textNode = document.createTextNode(text);
+        parent.replaceChild(textNode, el);
+
+        // Normalize the parent to combine adjacent text nodes
+        parent.normalize();
+      });
+
+      // Process DAX items
+      daxItems.forEach((item) => {
+        const measureNameElement = item.querySelector(".dax-name");
+        const measureName = measureNameElement.textContent.trim();
+        const codeElement = item.querySelector("code");
+        const daxExpression = codeElement.textContent.toLowerCase();
+
+        // Check if item matches search
+        const matches =
+          searchTerm === "" ||
+          measureName.toLowerCase().includes(searchTerm) ||
+          daxExpression.includes(searchTerm);
+
+        // Set item visibility
+        item.style.display = matches ? "" : "none";
+
+        if (matches) {
+          visibleCount++;
+
+          // Highlight matches in measure name if there's a search term
+          if (searchTerm && measureNameElement) {
+            const nameText = measureNameElement.textContent;
+            if (nameText.toLowerCase().includes(searchTerm)) {
+              const icon = measureNameElement.querySelector(".measure-icon");
+              const textWithoutIcon = nameText
+                .replace(icon.textContent, "")
+                .trim();
+
+              // Create highlighted version
+              const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
+              const highlightedText = textWithoutIcon.replace(
+                regex,
+                '<span class="search-highlight">$1</span>'
+              );
+
+              // Keep the icon, replace the text
+              measureNameElement.innerHTML = `<span class="measure-icon"><i class="fas fa-calculator"></i></span> ${highlightedText}`;
+            }
+          }
+        }
+      });
+
+      // Hide loading indicator
+      if (daxLoading) {
+        daxLoading.style.display = "none";
+      }
+
+      // Update counters
+      if (selectedTag && selectedCount) {
+        if (visibleCount < daxItems.length) {
+          selectedTag.style.display = "flex";
+          selectedCount.textContent = visibleCount;
+        } else {
+          selectedTag.style.display = "none";
+        }
+      }
+
+      if (searchCount && searchTerm) {
+        searchCount.textContent = `${visibleCount} matches`;
+      } else if (searchCount) {
+        searchCount.textContent = "";
+      }
+
+      // Show/hide empty state
+      if (emptyState) {
+        emptyState.style.display = visibleCount === 0 ? "flex" : "none";
+      }
+
+      if (daxList) {
+        daxList.style.display = visibleCount === 0 ? "none" : "";
+      }
+    }
+
+    /**
+     * Export DAX expressions
+     */
+    function exportDaxExpressions() {
+      // Show loading indicator
+      if (daxLoading) {
+        daxLoading.style.display = "flex";
+      }
+
+      // Prepare data for export
+      const data = [];
+
+      // Get visible DAX items
+      const visibleItems = Array.from(daxItems).filter(
+        (item) => item.style.display !== "none"
+      );
+
+      // Convert to array of objects
+      visibleItems.forEach((item) => {
+        const measureName = item.getAttribute("data-measure");
+        const daxExpression = item.querySelector("code").textContent;
+
+        data.push({
+          MeasureName: measureName,
+          DAXExpression: daxExpression,
+        });
+      });
+
+      // Create CSV content
+      const headers = ["MeasureName", "DAXExpression"];
+      const csvRows = [headers.join(",")];
+
+      data.forEach((row) => {
+        const values = headers.map((header) => {
+          const value = row[header] || "";
+          // Escape quotes and wrap in quotes if contains commas or quotes
+          return value.includes(",") || value.includes('"')
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        });
+        csvRows.push(values.join(","));
+      });
+
+      // Create CSV content
+      const csvContent = csvRows.join("\n");
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "dax_expressions.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Hide loading indicator
+      if (daxLoading) {
+        daxLoading.style.display = "none";
+      }
+
+      // Show success message
+      alert("DAX expressions exported to CSV");
+    }
+
+    /**
+     * Escape special regex characters in string
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+  });
+</script>
+{% endblock %}
+>>>>>>> Stashed changes

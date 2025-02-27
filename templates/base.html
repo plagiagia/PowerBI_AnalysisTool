@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Power BI Visuals Explorer - Analyze and explore your Power BI reports, measures, and dependencies"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+      type="image/x-icon"
+    />
+
+    <!-- DNS Prefetch for external domains -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Preconnect to critical domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+
+    <!-- Preload critical CSS -->
+    <link
+      rel="preload"
+      href="{{ url_for('static', filename='modern.css') }}"
+      as="style"
+    />
+
+    <!-- Google Fonts: Segoe UI (Microsoft's font) and fallback to Inter -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Main CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='modern.css') }}"
+    />
+
+    <title>{% block title %}Power BI Explorer{% endblock %}</title>
+
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Mobile menu toggle (hidden on desktop) -->
+    <button
+      class="mobile-menu-toggle"
+      aria-label="Toggle navigation menu"
+      aria-expanded="false"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <a href="/" class="logo-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>Power BI Explorer</span>
+          </a>
+        </div>
+        <button class="sidebar-close" aria-label="Close sidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Main Navigation">
+        <ul class="nav-list">
+          <li class="nav-item{% if request.path == '/' %} active{% endif %}">
+            <a
+              href="/"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/' else 'false' }}"
+            >
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li
+            class="nav-item{% if request.path == '/table-view' %} active{% endif %}"
+          >
+            <a
+              href="/table-view"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/table-view' else 'false' }}"
+            >
+              <i class="fas fa-table"></i>
+              <span>Visual Fields</span>
+            </a>
+          </li>
+          <li
+            class="nav-item{% if request.path == '/lineage-view' %} active{% endif %}"
+          >
+            <a
+              href="/lineage-view"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/lineage-view' else 'false' }}"
+            >
+              <i class="fas fa-project-diagram"></i>
+              <span>Data Lineage</span>
+            </a>
+          </li>
+          <li
+            class="nav-item{% if request.path == '/dax-expressions' %} active{% endif %}"
+          >
+            <a
+              href="/dax-expressions"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/dax-expressions' else 'false' }}"
+            >
+              <i class="fas fa-code"></i>
+              <span>DAX Explorer</span>
+            </a>
+          </li>
+          <li
+            class="nav-item{% if request.path == '/source-explorer' %} active{% endif %}"
+          >
+            <a
+              href="/source-explorer"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/source-explorer' else 'false' }}"
+            >
+              <i class="fas fa-database"></i>
+              <span>Sources</span>
+            </a>
+          </li>
+          <li
+            class="nav-item{% if request.path == '/unused-measures' %} active{% endif %}"
+          >
+            <a
+              href="/unused-measures"
+              class="nav-link"
+              aria-current="{{ 'page' if request.path == '/unused-measures' else 'false' }}"
+            >
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Unused Measures</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle" aria-label="Toggle dark mode">
+          <i class="fas fa-moon"></i>
+        </button>
+        <div class="app-version">v1.0.0</div>
+      </div>
+    </aside>
+
+    <!-- Main content wrapper -->
+    <div class="main-wrapper">
+      <!-- Top app bar -->
+      <header class="app-bar">
+        <div class="app-bar-start">
+          <button class="sidebar-toggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="breadcrumb">
+            <ol>
+              <li>
+                <a href="/"
+                  ><i class="fas fa-home"></i
+                  ><span class="breadcrumb-text">Home</span></a
+                >
+              </li>
+              {% block breadcrumbs %}{% endblock %}
+            </ol>
+          </div>
+        </div>
+
+        <div class="app-bar-end">
+          <div class="report-info">
+            <span class="report-name">
+              <i class="fas fa-file-powerpoint"></i> {{ report_name if
+              report_name else 'Current Report' }}
+            </span>
+          </div>
+          <button class="help-button" aria-label="Help">
+            <i class="fas fa-question-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main content area -->
+      <main id="main-content" role="main">
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <div class="footer-content">
+          <p>
+            &copy; {{ current_year or 2025 }} Power BI Visuals Explorer. All
+            rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Notification container (for JS generated notifications) -->
+    <div class="notification-container"></div>
+
+    <!-- Common JS -->
+    <script src="{{ url_for('static', filename='modern.js') }}"></script>
+
+    <!-- Page-specific scripts -->
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
