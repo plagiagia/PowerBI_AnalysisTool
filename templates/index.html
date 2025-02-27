@@ -251,30 +251,6 @@ endblock %} {% block breadcrumbs %}
   </div>
 </section>
 
-<!-- Recent Activity Section -->
-<section class="activity-section">
-  <h2 class="section-title"><i class="fas fa-history"></i> Recent Activity</h2>
-
-  <div class="activity-timeline">
-    <div class="activity-item">
-      <div class="activity-icon">
-        <i class="fas fa-file-upload"></i>
-      </div>
-      <div class="activity-content">
-        <div class="activity-title">Report Loaded</div>
-        <div class="activity-description">
-          {{ report_name if report_name else 'Current report' }} was loaded and
-          analyzed
-        </div>
-        <div class="activity-time">
-          {{ time_loaded if time_loaded else 'Just now' }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Add more activity items as needed -->
-  </div>
-</section>
 {% endblock %} {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
