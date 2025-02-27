@@ -246,16 +246,6 @@ def create_app(config_object: str = 'config.Config') -> Flask:
 
         return render_template('unused_measures.html', unused_measures=unused_measures)
 
-    @app.errorhandler(404)
-    def page_not_found(e):
-        """Handle 404 errors with a custom page."""
-        return render_template('errors/404.html'), 404
-
-    @app.errorhandler(500)
-    def server_error(e):
-        """Handle 500 errors with a custom page."""
-        return render_template('errors/500.html'), 500
-
     return app
 
 if __name__ == '__main__':
