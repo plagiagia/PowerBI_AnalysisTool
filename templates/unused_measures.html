@@ -1,75 +1,667 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %} 
+{% block title %}Unused Measures - Power BI Explorer{% endblock %} 
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unused Measures - Power BI Visuals Explorer</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Include FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
+{% block head %}
+<!-- Include Prism.js CSS for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
+{% endblock %} 
 
-<body>
-    <div class="container">
-        <a href="/"><button class="button-back">Back to Home</button></a>
-        <h1>Unused Measures</h1>
-        <p>Below is a list of measures that are not used in any visual components of your report, along with a C# script
-            to delete them in Tabular Editor.</p>
+{% block breadcrumbs %}
+<li>
+  <a href="/unused-measures"><i class="fas fa-exclamation-triangle"></i><span class="breadcrumb-text">Unused Measures</span></a>
+</li>
+{% endblock %} 
 
-        <!-- Check if unused measures list is empty -->
-        {% if unused_measures %}
-        <!-- List of Unused Measures -->
-        <div class="measures-list-container">
-            <ul id="unused-measures-list">
-                {% for measure in unused_measures %}
-                <li>{{ measure }}</li>
-                {% endfor %}
-            </ul>
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-exclamation-triangle"></i> Unused Measures</h1>
+  <p class="page-description">
+    Identify measures not used in any visuals for optimization and cleanup.
+  </p>
+</div>
+
+<!-- Metrics Section -->
+<section class="metrics-section">
+  <div class="metrics-grid">
+    <!-- Total Unused Measures Metric -->
+    <div class="metric-card">
+      <div class="metric-icon">
+        <i class="fas fa-calculator"></i>
+      </div>
+      <div class="metric-info">
+        <div class="metric-title">Unused Measures</div>
+        <div class="metric-value" data-value="{{ unused_measures|length }}">
+          {{ unused_measures|length }}
         </div>
-
-        <!-- C# Script Generation -->
-        <div class="script-generation-container">
-            <h2>Tabular Editor Deletion Script</h2>
-            <p>You can copy the following script and run it in Tabular Editor to delete the unused measures:</p>
-            <pre id="deletion-script">
-                // C# script for Tabular Editor
-                var unusedMeasures = new List&lt;string&gt; {
-                    {% for measure in unused_measures %}
-                    "{{ measure }}"{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                };
-                
-                foreach (var measureName in unusedMeasures)
-                {
-                    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-                    if (measure != null)
-                    {
-                        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
-                    }
-                }
-    </pre>
-            <button onclick="copyToClipboard()">Copy to Clipboard</button>
-        </div>
-        {% else %}
-        <!-- Display a message if no unused measures are found -->
-        <p>No unused measures found. Your report seems to be using all defined measures efficiently.</p>
-        {% endif %}
+      </div>
     </div>
-    <!-- Include FontAwesome for icons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-    <script>
-        function copyToClipboard() {
-            var script = document.getElementById('deletion-script').innerText;
-            var textArea = document.createElement('textarea');
-            textArea.value = script;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            alert('Script copied to clipboard!');
-        }
-    </script>
-</body>
+  </div>
+</section>
 
-</html>
+<!-- Control Panel -->
+<div class="control-panel">
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input
+        type="search"
+        id="searchMeasures"
+        placeholder="Search measures..."
+        aria-label="Search unused measures"
+      />
+      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-count" aria-live="polite"></div>
+  </div>
+  
+  <div class="filter-actions">
+    <button id="exportMeasures" class="action-button outline">
+      <i class="fas fa-download"></i> Export Measures
+    </button>
+    <button id="copyScript" class="action-button primary">
+      <i class="fas fa-copy"></i> Copy Script
+    </button>
+  </div>
+</div>
+
+{% if unused_measures %}
+<!-- Measures List Section -->
+<div class="table-section">
+  <div class="table-toolbar">
+    <div class="table-info">
+      <div class="results-count">
+        <span id="resultCount">{{ unused_measures|length }}</span> unused measures found
+      </div>
+    </div>
+    <div class="table-actions">
+      <div class="view-toggle">
+        <button id="listView" class="view-button active" aria-label="List view">
+          <i class="fas fa-list"></i>
+        </button>
+        <button id="gridView" class="view-button" aria-label="Grid view">
+          <i class="fas fa-th"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div id="listViewContainer" class="table-container">
+    <table id="measuresTable" class="data-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="name">
+            Measure Name <i class="fas fa-sort"></i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for measure in unused_measures %}
+        <tr>
+          <td data-label="Measure Name">{{ measure }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Grid View -->
+  <div id="gridViewContainer" class="cards-container" style="display: none">
+    {% for measure in unused_measures %}
+    <div class="measure-card">
+      <div class="measure-card-content">
+        <div class="measure-icon">
+          <i class="fas fa-calculator"></i>
+        </div>
+        <div class="measure-name">{{ measure }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty State for when search yields no results -->
+  <div id="emptyState" class="empty-state" style="display: none">
+    <div class="empty-state-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3 class="empty-state-title">No matching measures found</h3>
+    <p class="empty-state-message">Try adjusting your search term.</p>
+    <button id="clearEmptyState" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear Search
+    </button>
+  </div>
+</div>
+
+<!-- Tabular Editor Script Section -->
+<div class="script-section">
+  <h2 class="section-title"><i class="fas fa-code"></i> Tabular Editor Script</h2>
+  <p class="section-description">
+    You can use the following C# script in Tabular Editor to manage unused measures. Running this script will prepend a dot (.) to all unused measure names, making them easy to identify.
+  </p>
+  
+  <div class="code-container">
+    <pre><code class="language-csharp">// C# script for Tabular Editor
+var unusedMeasures = new List&lt;string&gt; {
+    {% for measure in unused_measures %}
+    "{{ measure }}"{% if not loop.last %}, {% endif %}
+    {% endfor %}
+};
+
+foreach (var measureName in unusedMeasures)
+{
+    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
+    if (measure != null)
+    {
+        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
+    }
+}</code></pre>
+    <button class="copy-button" id="copyCodeButton">
+      <i class="fas fa-copy"></i> Copy
+    </button>
+  </div>
+  
+  <div class="script-alert">
+    <i class="fas fa-info-circle"></i>
+    <p>After running the script, you can easily find all renamed measures and decide whether to keep or delete them.</p>
+  </div>
+</div>
+
+{% else %}
+<!-- No Unused Measures State -->
+<div class="empty-state">
+  <div class="empty-state-icon success">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <h3 class="empty-state-title">No unused measures found</h3>
+  <p class="empty-state-message">
+    Your report is efficiently using all defined measures. Great job!
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Prism.js for syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-csharp.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // DOM Elements
+    const searchMeasures = document.getElementById("searchMeasures");
+    const clearSearch = document.getElementById("clearSearch");
+    const resultCount = document.getElementById("resultCount");
+    const measuresTable = document.getElementById("measuresTable");
+    const emptyState = document.getElementById("emptyState");
+    const clearEmptyState = document.getElementById("clearEmptyState");
+    const copyScript = document.getElementById("copyScript");
+    const copyCodeButton = document.getElementById("copyCodeButton");
+    const exportMeasures = document.getElementById("exportMeasures");
+    const listView = document.getElementById("listView");
+    const gridView = document.getElementById("gridView");
+    const listViewContainer = document.getElementById("listViewContainer");
+    const gridViewContainer = document.getElementById("gridViewContainer");
+    const searchCount = document.querySelector(".search-count");
+    
+    // If we have table rows and cards
+    const tableRows = measuresTable ? measuresTable.querySelectorAll("tbody tr") : [];
+    const measureCards = document.querySelectorAll(".measure-card");
+    
+    let currentVisibleItems = tableRows.length;
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Search input
+      if (searchMeasures) {
+        searchMeasures.addEventListener("input", function() {
+          if (clearSearch) {
+            clearSearch.style.display = this.value ? "block" : "none";
+          }
+          performSearch();
+        });
+      }
+      
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function() {
+          if (searchMeasures) {
+            searchMeasures.value = "";
+            clearSearch.style.display = "none";
+            performSearch();
+            searchMeasures.focus();
+          }
+        });
+      }
+      
+      // Clear empty state button
+      if (clearEmptyState) {
+        clearEmptyState.addEventListener("click", function() {
+          if (searchMeasures) {
+            searchMeasures.value = "";
+            if (clearSearch) clearSearch.style.display = "none";
+            performSearch();
+          }
+        });
+      }
+      
+      // Copy script button
+      if (copyScript) {
+        copyScript.addEventListener("click", function() {
+          copyCode();
+        });
+      }
+      
+      // Copy code button
+      if (copyCodeButton) {
+        copyCodeButton.addEventListener("click", function() {
+          copyCode();
+        });
+      }
+      
+      // Export measures button
+      if (exportMeasures) {
+        exportMeasures.addEventListener("click", exportMeasuresToCSV);
+      }
+      
+      // View toggle
+      if (listView && gridView) {
+        listView.addEventListener("click", function() {
+          setViewMode("list");
+        });
+        
+        gridView.addEventListener("click", function() {
+          setViewMode("grid");
+        });
+      }
+      
+      // Sortable header
+      const sortableHeaders = document.querySelectorAll("th.sortable");
+      sortableHeaders.forEach(header => {
+        header.addEventListener("click", function() {
+          sortTable(this.getAttribute("data-sort"));
+        });
+      });
+    }
+    
+    /**
+     * Perform search on measures
+     */
+    function performSearch() {
+      if (!searchMeasures) return;
+      
+      const searchValue = searchMeasures.value.toLowerCase();
+      let visibleItems = 0;
+      
+      // Remove previous search highlights
+      document.querySelectorAll(".search-highlight").forEach(el => {
+        const text = el.textContent;
+        const parent = el.parentNode;
+        const textNode = document.createTextNode(text);
+        parent.replaceChild(textNode, el);
+        parent.normalize();
+      });
+      
+      // Filter table rows
+      if (tableRows) {
+        tableRows.forEach(row => {
+          const cell = row.querySelector("td");
+          const text = cell.textContent.toLowerCase();
+          
+          const isVisible = !searchValue || text.includes(searchValue);
+          row.style.display = isVisible ? "" : "none";
+          
+          if (isVisible) {
+            visibleItems++;
+            
+            // Highlight match if searching
+            if (searchValue) {
+              highlightSearchTerm(cell, searchValue);
+            }
+          }
+        });
+      }
+      
+      // Filter grid cards
+      if (measureCards) {
+        measureCards.forEach(card => {
+          const nameEl = card.querySelector(".measure-name");
+          const text = nameEl.textContent.toLowerCase();
+          
+          const isVisible = !searchValue || text.includes(searchValue);
+          card.style.display = isVisible ? "" : "none";
+          
+          // Highlight match if searching
+          if (isVisible && searchValue) {
+            highlightSearchTerm(nameEl, searchValue);
+          }
+        });
+      }
+      
+      // Update visible count
+      currentVisibleItems = visibleItems;
+      
+      // Update count display
+      if (resultCount) {
+        resultCount.textContent = visibleItems;
+      }
+      
+      // Update search count display
+      if (searchCount && searchValue) {
+        searchCount.textContent = `${visibleItems} matches`;
+      } else if (searchCount) {
+        searchCount.textContent = "";
+      }
+      
+      // Show/hide empty state
+      if (emptyState) {
+        emptyState.style.display = visibleItems === 0 ? "flex" : "none";
+      }
+    }
+    
+    /**
+     * Highlight search term in an element
+     * @param {HTMLElement} element - Element containing text
+     * @param {string} term - Term to highlight
+     */
+    function highlightSearchTerm(element, term) {
+      const originalText = element.textContent;
+      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+      element.innerHTML = originalText.replace(regex, '<span class="search-highlight">$1</span>');
+    }
+    
+    /**
+     * Escape special regex characters
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    /**
+     * Copy code to clipboard
+     */
+    function copyCode() {
+      const codeElement = document.querySelector("code");
+      if (!codeElement) return;
+      
+      const textToCopy = codeElement.textContent;
+      
+      // Show animation on both buttons
+      const buttons = [copyScript, copyCodeButton].filter(Boolean);
+      const originalHTML = buttons.map(button => button.innerHTML);
+      
+      buttons.forEach(button => {
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Copying...';
+      });
+      
+      // Try to use Clipboard API first
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            buttons.forEach(button => {
+              button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            });
+            
+            setTimeout(() => {
+              buttons.forEach((button, index) => {
+                button.innerHTML = originalHTML[index];
+              });
+            }, 2000);
+            
+            // Show notification if available
+            if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+              window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
+            }
+          })
+          .catch(err => {
+            fallbackCopy(textToCopy, buttons, originalHTML);
+          });
+      } else {
+        fallbackCopy(textToCopy, buttons, originalHTML);
+      }
+    }
+    
+    /**
+     * Fallback method for copying to clipboard
+     * @param {string} text - Text to copy
+     * @param {Array} buttons - Buttons to update
+     * @param {Array} originalHTML - Original HTML of buttons
+     */
+    function fallbackCopy(text, buttons, originalHTML) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      let success = false;
+      try {
+        success = document.execCommand("copy");
+      } catch (err) {
+        console.error("Could not copy text: ", err);
+      }
+      
+      document.body.removeChild(textArea);
+      
+      if (success) {
+        buttons.forEach(button => {
+          button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        });
+        
+        // Show notification if available
+        if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+          window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
+        }
+      } else {
+        buttons.forEach(button => {
+          button.innerHTML = '<i class="fas fa-times"></i> Failed';
+        });
+      }
+      
+      setTimeout(() => {
+        buttons.forEach((button, index) => {
+          button.innerHTML = originalHTML[index];
+        });
+      }, 2000);
+    }
+    
+    /**
+     * Export measures to CSV
+     */
+    function exportMeasuresToCSV() {
+      // Prepare data rows
+      const rows = ["Measure Name"];
+      
+      // Get visible measures
+      if (tableRows) {
+        tableRows.forEach(row => {
+          if (row.style.display !== "none") {
+            const measureName = row.querySelector("td").textContent.trim();
+            rows.push(measureName);
+          }
+        });
+      }
+      
+      // Create CSV content
+      const csvContent = rows.join("\n");
+      
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "unused_measures.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+      
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      // Show notification if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification("Measures exported to CSV", "success");
+      }
+    }
+    
+    /**
+     * Set view mode (list or grid)
+     * @param {string} mode - 'list' or 'grid'
+     */
+    function setViewMode(mode) {
+      if (!listView || !gridView || !listViewContainer || !gridViewContainer) return;
+      
+      if (mode === "list") {
+        listViewContainer.style.display = "";
+        gridViewContainer.style.display = "none";
+        listView.classList.add("active");
+        gridView.classList.remove("active");
+      } else {
+        listViewContainer.style.display = "none";
+        gridViewContainer.style.display = "grid";
+        listView.classList.remove("active");
+        gridView.classList.add("active");
+      }
+    }
+    
+    /**
+     * Sort the table by column
+     * @param {string} column - Column to sort by ('name')
+     */
+    function sortTable(column) {
+      if (!measuresTable) return;
+      
+      const header = document.querySelector(`th[data-sort="${column}"]`);
+      const isAscending = !header.classList.contains("sort-asc");
+      
+      // Update sort indicators
+      header.classList.remove("sort-asc", "sort-desc");
+      header.classList.add(isAscending ? "sort-asc" : "sort-desc");
+      
+      // Get table rows and sort
+      const tbody = measuresTable.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      
+      rows.sort((a, b) => {
+        const cellA = a.querySelector("td").textContent.toLowerCase();
+        const cellB = b.querySelector("td").textContent.toLowerCase();
+        
+        return isAscending
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
+      
+      // Re-append rows in sorted order
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  });
+</script>
+
+<style>
+/* Measure card styling */
+.measure-card {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  overflow: hidden;
+  padding: var(--space-3);
+}
+
+.measure-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.measure-card-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.measure-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.measure-name {
+  font-weight: var(--font-weight-medium);
+  word-break: break-word;
+}
+
+/* Code container */
+.script-section {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: var(--space-4);
+  margin-top: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: var(--space-2);
+  color: var(--primary);
+}
+
+.section-description {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.script-alert {
+  display: flex;
+  align-items: flex-start;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-top: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.script-alert i {
+  color: var(--primary);
+  margin-right: var(--space-2);
+  margin-top: 3px;
+}
+
+.script-alert p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  flex: 1;
+}
+
+.empty-state .success {
+  color: var(--success);
+}
+</style>
+{% endblock %}
