@@ -26,7 +26,7 @@ def create_app(config_object: str = 'config.Config') -> Flask:
     app.config.setdefault('MODEL_JSON_PATH', os.path.join(base_dir, 'data', 'model.json'))
 
     @app.teardown_appcontext
-    def teardown(exception: Exception) -> None:
+    def teardown(exception: Optional[BaseException] = None) -> None:
         """Clean up resources stored in g."""
         g.pop('data_processor', None)
         g.pop('lineage_view_processor', None)
