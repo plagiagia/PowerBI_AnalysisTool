@@ -105,12 +105,14 @@ def create_app(config_object: str = 'config.Config') -> Flask:
         dp = get_data_processor()
         lvp = get_lineage_view_processor()
         
-        # Extract visual types for analysis
+        # Extract visual types for analysis - FIXED to only count visuals with fields
+        visual_count = 0
         visual_types = []
         for row in dp.visuals_data:
-            if len(row) > 1 and row[1]:  # Check if visual type exists in the row
+            if len(row) > 3 and row[3] and len(row) > 1 and row[1]:  # Only count visuals with fields
                 visual_type = row[1]
                 if visual_type and visual_type != "Page Level Filters" and visual_type != "Global Level Filters":
+                    visual_count += 1
                     visual_types.append(visual_type)
         
         # Find most common visual type
@@ -125,17 +127,24 @@ def create_app(config_object: str = 'config.Config') -> Flask:
             if row and row[0]:  # Check if page name exists
                 unique_pages.add(row[0])
         
-        # Count measures and unused measures
+        # Get all measures for total count
         all_measures = lvp.get_all_measures()
+        
+        # Get used measures
         used_measures = dp.get_used_measures()
-        unused_measures = all_measures - used_measures
+        
+        # Get final measures (measures that don't have children)
+        final_measures = lvp.get_final_measures()
+        
+        # Calculate unused final measures - THIS IS THE KEY FIX
+        unused_final_measures = final_measures - used_measures
         
         # Create metrics dictionary
         metrics = {
-            "visual_count": len(visual_types),
+            "visual_count": visual_count,
             "page_count": len(unique_pages),
             "measure_count": len(all_measures),
-            "unused_count": len(unused_measures),
+            "unused_count": len(unused_final_measures),
             "most_common_visual": most_common_visual
         }
         

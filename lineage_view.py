@@ -69,6 +69,25 @@ class LineageView:
         return dax_expressions
 
     def get_all_measures(self):
+        """
+        Get all measures from the lineage data.
+        """
+        all_measures = set()
+        
+        with open(self.tsv_file_path, 'r', encoding='utf-8') as file:
+            reader = csv.reader(file, delimiter='\t')
+            next(reader)  # Skip the header row
+            
+            for measure in reader:
+                measure_name = measure[self.MEASURE_INDEX]
+                all_measures.add(measure_name)
+        
+        return all_measures
+
+    def get_final_measures(self):
+        """
+        Get only final measures (measures with no children).
+        """
         final_measures = set()
         parent_measures = set()
 
