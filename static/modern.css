@@ -160,20 +160,8 @@ img, svg {
   border-width: 0;
 }
 
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--primary);
-  color: white;
-  padding: var(--space-3) var(--space-4);
-  z-index: 1001;
-  transition: top var(--transition-fast);
-}
 
-.skip-link:focus {
-  top: 0;
-}
+
 
 /* ===== Layout ===== */
 body {
