@@ -1,69 +1,652 @@
-<!-- templates/source_explorer.html -->
-{% extends "base.html" %} {% block title %}Source Explorer{% endblock %} {%
-block head %}
-<!-- Include Prism.js CSS for syntax highlighting -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css"
-/>
-<!-- Include FontAwesome for icons -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-/>
-{% endblock %} {% block content %}
-<h1>Source Explorer</h1>
-<p>
-  Explore the M queries that form the foundation of your report's data sources.
-</p>
+{% extends "base.html" %} 
+{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %} 
 
-<!-- M Queries Table -->
-<div class="code-table-container">
-  <table class="code-table">
-    <thead>
-      <tr>
-        <th>Query Name</th>
-        <th>M Query</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for query in m_queries_info %}
-      <tr>
-        <td>{{ query.table_name }}</td>
-        <td>
-          <div class="code-container">
-            <pre><code class="language-powerquery">{{ query.m_query }}</code></pre>
-            <button class="copy-button" onclick="copyToClipboard(this)">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{% block head %}
+<!-- Include Prism.js CSS for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
+<!-- We're not using Prism's toolbar to avoid conflicts with our custom copy button -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/toolbar/prism-toolbar.min.css" /> -->
+{% endblock %} 
+
+{% block breadcrumbs %}
+<li>
+  <a href="/source-explorer"><i class="fas fa-database"></i><span class="breadcrumb-text">Source Explorer</span></a>
+</li>
+{% endblock %} 
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-database"></i> Source Explorer</h1>
+  <p class="page-description">
+    Examine the M queries that form your report's data sources.
+  </p>
 </div>
-{% endblock %} {% block scripts %}
+
+<!-- Control Panel -->
+<div class="control-panel">
+  <!-- Search Bar -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="searchQueries"
+        placeholder="Search in queries..."
+        aria-label="Search in M queries"
+      />
+      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-count" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- Queries Section -->
+<div id="queriesContainer" class="queries-section">
+  <div class="table-toolbar">
+    <div class="table-info">
+      <div class="results-count">
+        <span id="resultCount">{{ m_queries_info|length }}</span> queries found
+      </div>
+    </div>
+    <div class="table-actions">
+      <button id="exportQueries" class="action-button outline">
+        <i class="fas fa-download"></i> Export Queries
+      </button>
+      <div class="view-toggle">
+        <button id="expandAll" class="action-button secondary">
+          <i class="fas fa-expand-alt"></i> Expand All
+        </button>
+        <button id="collapseAll" class="action-button secondary">
+          <i class="fas fa-compress-alt"></i> Collapse All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Queries List -->
+  <div id="queriesList" class="queries-list">
+    {% for query in m_queries_info %}
+    <div class="query-item expanded" data-table="{{ query.table_name }}">
+      <div class="query-item-header">
+        <div class="query-info">
+          <h3 class="query-name">
+            <span class="table-icon"><i class="fas fa-table"></i></span>
+            {{ query.table_name }}
+          </h3>
+        </div>
+        <div class="query-actions">
+          <button class="icon-button copy-name" title="Copy table name" data-copy="{{ query.table_name }}">
+            <i class="fas fa-tag"></i>
+          </button>
+          <button class="icon-button toggle-expand" title="Collapse">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+        </div>
+      </div>
+      <div class="query-item-content">
+        <div class="code-container">
+          <pre><code class="language-powerquery">{{ query.m_query }}</code></pre>
+          <button class="copy-button" onclick="copyToClipboard(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display: none">
+    <div class="empty-state-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3 class="empty-state-title">No matching queries found</h3>
+    <p class="empty-state-message">Try adjusting your search.</p>
+    <button id="clearEmptyState" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear Search
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-<!-- Include Prism.js Power Query component -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-powerquery.min.js"></script>
-<!-- Include FontAwesome for icons -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-<!-- JavaScript function to copy M query to clipboard -->
+<!-- We're not using Prism's toolbar to avoid conflicts with our custom copy button -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/toolbar/prism-toolbar.min.js"></script> -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script> -->
+
 <script>
-  function copyToClipboard(button) {
-    var codeElement = button.parentElement.querySelector("code");
-    var textArea = document.createElement("textarea");
-    textArea.value = codeElement.textContent;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-    button.innerHTML = '<i class="fas fa-check"></i> Copied';
-    setTimeout(function () {
-      button.innerHTML = '<i class="fas fa-copy"></i> Copy';
-    }, 2000);
-  }
+  document.addEventListener("DOMContentLoaded", function() {
+    // DOM Elements
+    const searchQueries = document.getElementById("searchQueries");
+    const clearSearch = document.getElementById("clearSearch");
+    const resultCount = document.getElementById("resultCount");
+    const queriesList = document.getElementById("queriesList");
+    const queryItems = document.querySelectorAll(".query-item");
+    const emptyState = document.getElementById("emptyState");
+    const clearEmptyStateBtn = document.getElementById("clearEmptyState");
+    const expandAllBtn = document.getElementById("expandAll");
+    const collapseAllBtn = document.getElementById("collapseAll");
+    const exportQueriesBtn = document.getElementById("exportQueries");
+    const searchCount = document.querySelector(".search-count");
+    
+    // Variables for state
+    let currentVisibleItems = queryItems.length;
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Search box
+      if (searchQueries) {
+        searchQueries.addEventListener("input", function() {
+          if (clearSearch) {
+            clearSearch.style.display = this.value ? "block" : "none";
+          }
+          performSearch();
+        });
+      }
+      
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function() {
+          if (searchQueries) {
+            searchQueries.value = "";
+            clearSearch.style.display = "none";
+            performSearch();
+            searchQueries.focus();
+          }
+        });
+      }
+      
+      // Clear empty state button
+      if (clearEmptyStateBtn) {
+        clearEmptyStateBtn.addEventListener("click", function() {
+          if (searchQueries) {
+            searchQueries.value = "";
+            if (clearSearch) clearSearch.style.display = "none";
+            performSearch();
+            searchQueries.focus();
+          }
+        });
+      }
+      
+      // Expand all button
+      if (expandAllBtn) {
+        expandAllBtn.addEventListener("click", function() {
+          queryItems.forEach(item => {
+            const button = item.querySelector(".toggle-expand");
+            if (!item.classList.contains("expanded")) {
+              toggleQueryItem(item, button);
+            }
+          });
+        });
+      }
+      
+      // Collapse all button
+      if (collapseAllBtn) {
+        collapseAllBtn.addEventListener("click", function() {
+          queryItems.forEach(item => {
+            const button = item.querySelector(".toggle-expand");
+            if (item.classList.contains("expanded")) {
+              toggleQueryItem(item, button);
+            }
+          });
+        });
+      }
+      
+      // Export queries button
+      if (exportQueriesBtn) {
+        exportQueriesBtn.addEventListener("click", exportAllQueries);
+      }
+      
+      // Toggle expand buttons for each query
+      document.querySelectorAll(".toggle-expand").forEach(button => {
+        button.addEventListener("click", function() {
+          const item = this.closest(".query-item");
+          toggleQueryItem(item, this);
+        });
+      });
+      
+      // Copy table name buttons
+      document.querySelectorAll(".copy-name").forEach(button => {
+        button.addEventListener("click", function() {
+          const tableName = this.getAttribute("data-copy");
+          copyToClipboardWithAnimation(this, tableName);
+        });
+      });
+    }
+    
+    /**
+     * Toggle expansion state of a query item
+     * @param {HTMLElement} item - The query item element
+     * @param {HTMLElement} button - The toggle button element
+     */
+    function toggleQueryItem(item, button) {
+      if (!item || !button) return;
+      
+      const isExpanded = item.classList.toggle("expanded");
+      
+      // Update button icon
+      button.innerHTML = isExpanded ? 
+        '<i class="fas fa-chevron-up"></i>' : 
+        '<i class="fas fa-chevron-down"></i>';
+      
+      button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
+    }
+    
+    /**
+     * Search queries based on input
+     */
+    function performSearch() {
+      const searchValue = searchQueries.value.toLowerCase();
+      
+      let visibleItems = 0;
+      
+      // Remove previous search highlights
+      document.querySelectorAll(".search-highlight").forEach(el => {
+        const text = el.textContent;
+        const parent = el.parentNode;
+        const textNode = document.createTextNode(text);
+        parent.replaceChild(textNode, el);
+        parent.normalize();
+      });
+      
+      // Filter query items
+      queryItems.forEach(item => {
+        const tableName = item.getAttribute("data-table");
+        const queryText = item.querySelector("code").textContent.toLowerCase();
+        
+        let matches = true;
+        if (searchValue) {
+          matches = tableName.toLowerCase().includes(searchValue) || 
+                   queryText.includes(searchValue);
+          
+          // Highlight matches in table name
+          if (tableName.toLowerCase().includes(searchValue)) {
+            highlightSearchTerm(item.querySelector(".query-name"), searchValue);
+          }
+        }
+        
+        item.style.display = matches ? "" : "none";
+        
+        if (matches) visibleItems++;
+      });
+      
+      // Update count and empty state
+      currentVisibleItems = visibleItems;
+      updateResultCount();
+      updateEmptyState();
+      
+      // Update search count display
+      if (searchCount && searchValue) {
+        searchCount.textContent = `${visibleItems} matches`;
+      } else if (searchCount) {
+        searchCount.textContent = "";
+      }
+    }
+    
+    /**
+     * Highlight search term in an element
+     * @param {HTMLElement} element - Element containing text
+     * @param {string} term - Term to highlight
+     */
+    function highlightSearchTerm(element, term) {
+      if (!element) return;
+      
+      const icon = element.querySelector(".table-icon");
+      let text = element.textContent;
+      
+      if (icon) {
+        text = text.replace(icon.textContent, "").trim();
+      }
+      
+      // Create highlighted version
+      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+      const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
+      
+      // Update element content
+      if (icon) {
+        element.innerHTML = icon.outerHTML + " " + highlightedText;
+      } else {
+        element.innerHTML = highlightedText;
+      }
+    }
+    
+    /**
+     * Update the result count display
+     */
+    function updateResultCount() {
+      if (resultCount) {
+        resultCount.textContent = currentVisibleItems;
+      }
+    }
+    
+    /**
+     * Update empty state visibility
+     */
+    function updateEmptyState() {
+      if (emptyState) {
+        emptyState.style.display = currentVisibleItems === 0 ? "flex" : "none";
+      }
+      
+      if (queriesList) {
+        queriesList.style.display = currentVisibleItems === 0 ? "none" : "";
+      }
+    }
+    
+    /**
+     * Export all visible queries to a file
+     */
+    function exportAllQueries() {
+      const visibleQueries = Array.from(queryItems).filter(
+        item => item.style.display !== "none"
+      );
+      
+      if (visibleQueries.length === 0) return;
+      
+      const content = visibleQueries.map(item => {
+        const tableName = item.getAttribute("data-table");
+        const query = item.querySelector("code").textContent;
+        return `-- Table: ${tableName}\r\n${query}\r\n\r\n`;
+      }).join('');
+      
+      // Create and download file
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "m_queries.txt");
+      link.style.display = "none";
+      document.body.appendChild(link);
+      
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      // Show notification if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          "M queries exported successfully", 
+          "success"
+        );
+      }
+    }
+    
+    /**
+     * Copy text to clipboard with animation
+     * @param {HTMLElement} button - The button that was clicked
+     * @param {string} text - The text to copy
+     */
+    function copyToClipboardWithAnimation(button, text) {
+      if (!button) return;
+      
+      // Store original button HTML
+      const originalHTML = button.innerHTML;
+      
+      // Show loading spinner
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      
+      // Try to use Clipboard API
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+            }, 2000);
+          })
+          .catch(() => {
+            fallbackCopy(text, button, originalHTML);
+          });
+      } else {
+        fallbackCopy(text, button, originalHTML);
+      }
+    }
+    
+    /**
+     * Fallback copy method for browsers without clipboard API
+     * @param {string} text - Text to copy
+     * @param {HTMLElement} button - Button element
+     * @param {string} originalHTML - Original button HTML
+     */
+    function fallbackCopy(text, button, originalHTML) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        if (document.execCommand("copy")) {
+          button.innerHTML = '<i class="fas fa-check"></i>';
+        } else {
+          button.innerHTML = '<i class="fas fa-times"></i>';
+        }
+        
+        document.body.removeChild(textArea);
+      } catch (err) {
+        button.innerHTML = '<i class="fas fa-times"></i>';
+      }
+      
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+      }, 2000);
+    }
+    
+    /**
+     * Escape special characters in string for regex
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+    
+    /**
+     * Function to copy code to clipboard
+     * @param {HTMLElement} button - The copy button element
+     */
+    window.copyToClipboard = function(button) {
+      const codeElement = button.closest(".code-container").querySelector("code");
+      copyToClipboardWithAnimation(button, codeElement.textContent);
+    };
+  });
 </script>
+
+<style>
+/* Query Items */
+.queries-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.query-item {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.query-item:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+}
+
+.query-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.query-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.query-name {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  margin-right: var(--space-2);
+}
+
+.query-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-tertiary);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.query-item-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal), padding var(--transition-normal);
+}
+
+.query-item.expanded .query-item-content {
+  max-height: 2000px;
+  padding: var(--space-4);
+}
+
+.code-container {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.code-container pre {
+  margin: 0;
+  padding: var(--space-3);
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  max-height: 400px;
+  overflow: auto;
+}
+
+.copy-button {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  z-index: 10; /* Ensure our button is on top */
+}
+
+/* Hide any Prism copy buttons if they appear */
+.code-toolbar > .toolbar {
+  display: none !important;
+}
+
+.copy-button:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Search highlight */
+.search-highlight {
+  background-color: rgba(255, 193, 7, 0.3);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-4);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-message {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+  max-width: 400px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .query-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .query-actions {
+    margin-top: var(--space-2);
+    align-self: flex-end;
+  }
+}
+</style>
 {% endblock %}
