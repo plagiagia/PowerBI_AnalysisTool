@@ -1,9 +1,13 @@
-{% extends "base.html" %} {% block title %}Dashboard - Power BI Explorer{%
-endblock %} {% block breadcrumbs %}
+{% extends "base.html" %} 
+{% block title %}Dashboard - Power BI Explorer{% endblock %} 
+
+{% block breadcrumbs %}
 <li>
   <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Dashboard</span></a>
 </li>
-{% endblock %} {% block content %}
+{% endblock %} 
+
+{% block content %}
 <!-- Dashboard Header -->
 <section class="dashboard-header">
   <h1 class="dashboard-title">Power BI Visuals Explorer</h1>
@@ -13,7 +17,7 @@ endblock %} {% block breadcrumbs %}
   </p>
 </section>
 
-<!-- Metrics Section -->
+<!-- Metrics Section with improved layout -->
 <section class="metrics-section">
   <div class="metrics-grid">
     <!-- Total Visuals Metric -->
@@ -70,11 +74,11 @@ endblock %} {% block breadcrumbs %}
   </div>
 </section>
 
-<!-- Analysis Tools Section -->
+<!-- Analysis Tools Section with improved layout -->
 <section class="tools-section">
   <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
 
-  <div class="tools-grid">
+  <div class="tools-grid improved-layout">
     <!-- Visual Fields Table -->
     <div class="tool-card">
       <div class="tool-card-header">
@@ -169,89 +173,9 @@ endblock %} {% block breadcrumbs %}
     </div>
   </div>
 </section>
+{% endblock %} 
 
-<!-- Insights Section -->
-<section class="insights-section">
-  <h2 class="section-title">
-    <i class="fas fa-lightbulb"></i> Report Insights
-  </h2>
-
-  <div class="insights-grid">
-    <!-- Performance Tips -->
-    <div class="insight-card">
-      <div class="insight-header">
-        <div class="insight-icon">
-          <i class="fas fa-tachometer-alt"></i>
-        </div>
-        <h3 class="insight-title">Performance Tips</h3>
-      </div>
-      <ul class="insight-list">
-        <li>
-          Consider optimizing complex DAX expressions for better performance
-        </li>
-        <li>
-          Remove {{ metrics.unused_count if metrics is defined else '12' }}
-          unused measures to improve model size
-        </li>
-        <li>Check for circular dependencies in your measures</li>
-        <li>
-          Examine visuals with multiple fields for potential consolidation
-        </li>
-      </ul>
-    </div>
-
-    <!-- Report Structure -->
-    <div class="insight-card">
-      <div class="insight-header">
-        <div class="insight-icon">
-          <i class="fas fa-sitemap"></i>
-        </div>
-        <h3 class="insight-title">Report Structure</h3>
-      </div>
-      <ul class="insight-list">
-        <li>
-          This report contains {{ metrics.page_count if metrics is defined else
-          '5' }} pages
-        </li>
-        <li>
-          {{ metrics.visual_count if metrics is defined else '32' }} visuals are
-          distributed across the report
-        </li>
-        <li>
-          The most common visual type is {{ most_common_visual if
-          most_common_visual is defined else 'Table' }}
-        </li>
-        <li>Using the Visual Fields table can help identify reused metrics</li>
-      </ul>
-    </div>
-
-    <!-- Data Model -->
-    <div class="insight-card">
-      <div class="insight-header">
-        <div class="insight-icon">
-          <i class="fas fa-cube"></i>
-        </div>
-        <h3 class="insight-title">Data Model</h3>
-      </div>
-      <ul class="insight-list">
-        <li>
-          {{ metrics.measure_count if metrics is defined else '78' }} measures
-          defined in your model
-        </li>
-        <li>
-          Measures with high complexity may require additional documentation
-        </li>
-        <li>Consider using the DAX Explorer to analyze formula patterns</li>
-        <li>
-          Measures are widely used across {{ metrics.visual_count if metrics is
-          defined else '32' }} visuals
-        </li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-{% endblock %} {% block scripts %}
+{% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Show welcome notification on first visit
@@ -270,4 +194,61 @@ endblock %} {% block breadcrumbs %}
     }
   });
 </script>
+
+<!-- Add inline styles for improved layout -->
+<style>
+  /* Improved layout for tools grid */
+  .tools-grid.improved-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+  
+  /* Make the last card centered if total cards are odd */
+  .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
+    grid-column: 2;
+  }
+  
+  /* Add some elevation and transition effects */
+  .tool-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .tool-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .tools-grid.improved-layout {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .tools-grid.improved-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Enhance metric cards */
+  .metrics-grid {
+    gap: var(--space-5);
+  }
+  
+  .metric-card {
+    padding: var(--space-5);
+  }
+  
+  .metric-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.75rem;
+  }
+</style>
 {% endblock %}
