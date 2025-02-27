@@ -240,11 +240,23 @@ def create_app(config_object: str = 'config.Config') -> Flask:
         dp = get_data_processor()
         lvp = get_lineage_view_processor()
 
+        # Get all measures for total count
+        all_measures = lvp.get_all_measures()
+        
+        # Get used measures
+        used_measures = dp.get_used_measures()
+        
+        # Get final measures (measures that don't have children)
+        final_measures = lvp.get_final_measures()
+        
+        # Calculate unused final measures - THIS IS THE KEY FIX
+        unused_final_measures = final_measures - used_measures
+
         used_measures = dp.get_used_measures()
         all_measures = lvp.get_all_measures()
         unused_measures = sorted(list(all_measures - used_measures))
 
-        return render_template('unused_measures.html', unused_measures=unused_measures)
+        return render_template('unused_measures.html', unused_measures=unused_final_measures)
 
     return app
 

@@ -1,616 +1,1049 @@
-{% extends "base.html" %} {% block title %}DAX Explorer - Power BI Explorer{%
-  endblock %} {% block head %}
-  <!-- Include Prism.js CSS for syntax highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
-  <!-- Include FontAwesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  {% endblock %} {% block breadcrumbs %}
-  <li>
-    <a href="/dax-expressions"><i class="fas fa-code"></i><span class="breadcrumb-text">DAX Explorer</span></a>
-  </li>
-  {% endblock %} {% block content %}
-  <!-- Page Header -->
-  <div class="page-header">
-    <h1 class="page-title"><i class="fas fa-code"></i> DAX Explorer</h1>
-    <p class="page-description">
-      Browse and analyze DAX formulas used in your Power BI report.
-    </p>
+{% extends "base.html" %} 
+{% block title %}DAX Explorer - Power BI Explorer{% endblock %} 
+
+{% block head %}
+<!-- Include Prism.js CSS for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
+<!-- Include FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+{% endblock %} 
+
+{% block breadcrumbs %}
+<li>
+  <a href="/dax-expressions"><i class="fas fa-code"></i><span class="breadcrumb-text">DAX Explorer</span></a>
+</li>
+{% endblock %} 
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-code"></i> DAX Explorer</h1>
+  <p class="page-description">
+    Browse and analyze DAX formulas used in your Power BI report.
+  </p>
+</div>
+
+<!-- Simple Search Bar -->
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <i class="fas fa-search"></i>
+    <input type="search" id="searchDax" placeholder="Search DAX expressions..." aria-label="Search DAX expressions" />
+    <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
-  
-  <!-- Simple Search Bar -->
-  <div class="search-container">
-    <div class="search-input-wrapper">
+  <div class="search-count" aria-live="polite"></div>
+</div>
+
+<!-- DAX Measure Count -->
+<div class="table-toolbar">
+  <div class="table-info">
+    <div class="results-count">
+      <span id="expressionCount">{{ dax_expressions|length }}</span> expressions found
+    </div>
+  </div>
+  <div class="table-actions">
+    <button id="analyzeSimilarity" class="action-button secondary">
+      <i class="fas fa-fingerprint"></i> Analyze Similarity
+    </button>
+    <button id="expandAll" class="action-button secondary">
+      <i class="fas fa-expand-alt"></i> Expand All
+    </button>
+    <button id="collapseAll" class="action-button secondary">
+      <i class="fas fa-compress-alt"></i> Collapse All
+    </button>
+    <button id="exportDax" class="action-button outline">
+      <i class="fas fa-download"></i> Export
+    </button>
+  </div>
+</div>
+
+<!-- DAX Expressions List -->
+<div id="queriesContainer" class="queries-section">
+  <!-- DAX List -->
+  <div id="daxList" class="queries-list">
+    {% for label, expression in dax_expressions %}
+    <div class="query-item" data-measure="{{ label }}">
+      <div class="query-item-header">
+        <div class="query-info">
+          <h3 class="query-name">
+            <span class="measure-icon"><i class="fas fa-calculator"></i></span>
+            {{ label }}
+          </h3>
+        </div>
+        <div class="query-actions">
+          <button class="icon-button copy-name" title="Copy measure name" data-copy="{{ label }}">
+            <i class="fas fa-tag"></i>
+          </button>
+          <button class="icon-button toggle-expand" title="Expand/collapse">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+      </div>
+      <div class="query-item-content">
+        <div class="code-container">
+          <pre><code class="language-dax">{{ expression }}</code></pre>
+          <button class="copy-button" onclick="copyToClipboard(this)">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display: none">
+    <div class="empty-state-icon">
       <i class="fas fa-search"></i>
-      <input type="text" id="searchDax" placeholder="Search DAX expressions..." aria-label="Search DAX expressions" />
-      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
-        <i class="fas fa-times"></i>
-      </button>
     </div>
-    <div class="search-count" aria-live="polite"></div>
+    <h3 class="empty-state-title">No DAX expressions found</h3>
+    <p class="empty-state-message">Try adjusting your search terms.</p>
+    <button id="clearEmptyState" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear Search
+    </button>
+  </div>
+</div>
+
+<!-- Similarity Analysis Section -->
+<div id="similaritySection" class="similarity-section" style="display: none;">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-project-diagram"></i> Measure Similarity Analysis</h2>
+    <button id="closeSimilarity" class="action-button secondary">
+      <i class="fas fa-times"></i> Close Analysis
+    </button>
   </div>
   
-  <!-- DAX Measure Count -->
-  <div class="dax-header">
-    <div class="dax-metrics">
-      <div class="metric-tag">
-        <i class="fas fa-code"></i>
-        <span id="expressionCount">{{ dax_expressions|length }}</span> Expressions
-      </div>
-      <div class="metric-tag" id="selectedTag" style="display: none">
-        <i class="fas fa-filter"></i>
-        <span id="selectedCount">0</span> Selected
-      </div>
+  <div class="control-panel">
+    <div class="filter-group">
+      <label for="similarityThreshold" class="filter-label">Similarity Threshold:</label>
+      <input type="range" id="similarityThreshold" min="0.5" max="0.95" step="0.05" value="0.7" class="slider">
+      <span id="thresholdValue">70%</span>
     </div>
-  
-    <div class="dax-actions">
-      <button id="expandAll" class="action-button secondary">
-        <i class="fas fa-expand-alt"></i> Expand All
-      </button>
-      <button id="collapseAll" class="action-button secondary">
-        <i class="fas fa-compress-alt"></i> Collapse All
-      </button>
-      <button id="exportDax" class="action-button outline">
-        <i class="fas fa-download"></i> Export
-      </button>
+    
+    <div class="analysis-stats">
+      <div class="stat-item">
+        <div class="stat-value" id="similarPairsCount">0</div>
+        <div class="stat-label">Similar Pairs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="highestSimilarity">0%</div>
+        <div class="stat-label">Highest Similarity</div>
+      </div>
     </div>
   </div>
   
-  <!-- DAX Expressions List -->
-  <div id="queriesContainer" class="queries-section">
-    <div id="daxLoading" class="loading-spinner" style="display: none;">
-      <i class="fas fa-circle-notch fa-spin"></i>
-      <span>Loading...</span>
+  <div class="similarity-results">
+    <div class="similarity-table-container">
+      <table id="similarityTable" class="data-table">
+        <thead>
+          <tr>
+            <th>Measure 1</th>
+            <th>Measure 2</th>
+            <th>Similarity</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
     </div>
-  
-    <!-- DAX Expressions List -->
-    <div id="daxList" class="queries-list">
-      {% for label, expression in dax_expressions %}
-      <div class="query-item dax-item" data-measure="{{ label }}">
-        <div class="query-item-header">
-          <div class="query-info">
-            <h3 class="query-name dax-name">
-              <span class="measure-icon"><i class="fas fa-calculator"></i></span>
-              {{ label }}
-            </h3>
-          </div>
-          <div class="query-actions">
-            <button class="icon-button copy-name" title="Copy measure name" data-copy="{{ label }}">
-              <i class="fas fa-tag"></i>
-            </button>
-            <button class="icon-button toggle-expand" title="Expand/collapse">
-              <i class="fas fa-chevron-down"></i>
-            </button>
-          </div>
+    
+    <div id="comparisonView" class="comparison-view" style="display: none;">
+      <div class="comparison-header">
+        <h3>Comparing Measures</h3>
+        <button id="closeComparison" class="icon-button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="comparison-content">
+        <div class="comparison-item">
+          <h4 id="measure1Name"></h4>
+          <pre><code id="measure1Code" class="language-dax"></code></pre>
         </div>
-        <div class="query-item-content">
-          <div class="code-container">
-            <pre><code class="language-dax">{{ expression }}</code></pre>
-            <button class="copy-button" onclick="copyToClipboard(this)">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
+        <div class="comparison-item">
+          <h4 id="measure2Name"></h4>
+          <pre><code id="measure2Code" class="language-dax"></code></pre>
         </div>
       </div>
-      {% endfor %}
-    </div>
-  
-    <!-- Empty State -->
-    <div id="emptyState" class="empty-state" style="display: none">
-      <div class="empty-state-icon">
-        <i class="fas fa-search"></i>
-      </div>
-      <h3 class="empty-state-title">No DAX expressions found</h3>
-      <p class="empty-state-message">Try adjusting your search terms.</p>
-      <button id="clearEmptyState" class="action-button primary">
-        <i class="fas fa-undo"></i> Clear Search
-      </button>
     </div>
   </div>
-  {% endblock %} {% block scripts %}
-  <!-- Include Prism.js for syntax highlighting -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-  <!-- Include Prism.js DAX language component -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-dax.min.js"></script>
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // DOM Elements
-      const searchDax = document.getElementById("searchDax");
-      const clearSearch = document.getElementById("clearSearch");
-      const daxList = document.getElementById("daxList");
-      const daxItems = document.querySelectorAll(".dax-item");
-      const emptyState = document.getElementById("emptyState");
-      const clearEmptyState = document.getElementById("clearEmptyState");
-      const expressionCount = document.getElementById("expressionCount");
-      const selectedTag = document.getElementById("selectedTag");
-      const selectedCount = document.getElementById("selectedCount");
-      const expandAll = document.getElementById("expandAll");
-      const collapseAll = document.getElementById("collapseAll");
-      const exportDax = document.getElementById("exportDax");
-      const searchCount = document.querySelector(".search-count");
-      const daxLoading = document.getElementById("daxLoading");
-  
-      // Function to copy text to clipboard
-      window.copyToClipboard = function (button) {
-        // Show loading indicator
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-  
-        // Get code element
-        const codeElement = button
-          .closest(".code-container")
-          .querySelector("code");
-        const textToCopy = codeElement.textContent;
-  
-        // Use Navigator Clipboard API if available
-        if (navigator.clipboard) {
-          navigator.clipboard
-            .writeText(textToCopy)
-            .then(() => {
-              button.innerHTML = '<i class="fas fa-check"></i> Copied';
-              setTimeout(() => {
-                button.innerHTML = originalHTML;
-              }, 2000);
-            })
-            .catch(() => {
-              // Fallback to older method if API fails
-              fallbackCopy(textToCopy, button, originalHTML);
-            });
-        } else {
-          // Fallback for browsers without clipboard API
-          fallbackCopy(textToCopy, button, originalHTML);
-        }
-      };
-  
-      // Fallback copy method
-      function fallbackCopy(text, button, originalHTML) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-  
-        try {
-          document.execCommand("copy");
-          button.innerHTML = '<i class="fas fa-check"></i> Copied';
-        } catch (err) {
-          button.innerHTML = '<i class="fas fa-times"></i> Failed';
-        }
-  
-        document.body.removeChild(textArea);
-        setTimeout(() => {
-          button.innerHTML = originalHTML;
-        }, 2000);
-      }
-  
-      /**
-       * Toggle a DAX item expanded state
-       * @param {HTMLElement} item - The DAX item element
-       * @param {HTMLElement} button - The toggle button
-       */
-      function toggleDaxItem(item, button) {
-        const isExpanded = item.classList.toggle("expanded");
-  
-        // Update button icon
-        if (button) {
-          button.innerHTML = isExpanded
-            ? '<i class="fas fa-chevron-up"></i>'
-            : '<i class="fas fa-chevron-down"></i>';
-  
-          button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
-        }
-      }
-  
-      // Set up event listeners
-      setupEventListeners();
-  
-      /**
-       * Set up event listeners for interactive elements
-       */
-      function setupEventListeners() {
-        // Search input
-        if (searchDax) {
-          searchDax.addEventListener("input", function () {
-            const searchTerm = this.value;
-  
-            // Toggle clear button visibility
-            if (clearSearch) {
-              clearSearch.style.display = searchTerm ? "block" : "none";
-            }
-  
-            // Debounce search
-            clearTimeout(this.debounceTimer);
-            this.debounceTimer = setTimeout(() => {
-              searchDaxExpressions(searchTerm);
-            }, 300);
-          });
-        }
-  
-        // Clear search button
-        if (clearSearch) {
-          clearSearch.addEventListener("click", function () {
-            if (searchDax) {
-              searchDax.value = "";
-              clearSearch.style.display = "none";
-              searchDaxExpressions("");
-              searchDax.focus();
-            }
-          });
-        }
-  
-        // Clear empty state button
-        if (clearEmptyState) {
-          clearEmptyState.addEventListener("click", function () {
-            if (searchDax) {
-              searchDax.value = "";
-              clearSearch.style.display = "none";
-              searchDaxExpressions("");
-            }
-          });
-        }
-  
-        // Copy measure name buttons
-        document.querySelectorAll(".copy-name").forEach((button) => {
-          button.addEventListener("click", function () {
-            const measureName = this.getAttribute("data-copy");
-  
-            // Show loading spinner
-            const originalHTML = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-  
-            // Copy to clipboard
-            if (navigator.clipboard) {
-              navigator.clipboard
-                .writeText(measureName)
-                .then(() => {
-                  this.innerHTML = '<i class="fas fa-check"></i>';
-                  setTimeout(() => {
-                    this.innerHTML = originalHTML;
-                  }, 2000);
-                })
-                .catch(() => {
-                  this.innerHTML = '<i class="fas fa-times"></i>';
-                  setTimeout(() => {
-                    this.innerHTML = originalHTML;
-                  }, 2000);
-                });
-            } else {
-              const textArea = document.createElement("textarea");
-              textArea.value = measureName;
-              textArea.style.position = "fixed";
-              document.body.appendChild(textArea);
-              textArea.focus();
-              textArea.select();
-  
-              try {
-                document.execCommand("copy");
-                this.innerHTML = '<i class="fas fa-check"></i>';
-              } catch (err) {
-                this.innerHTML = '<i class="fas fa-times"></i>';
-              }
-  
-              document.body.removeChild(textArea);
-              setTimeout(() => {
-                this.innerHTML = originalHTML;
-              }, 2000);
-            }
-          });
+</div>
+{% endblock %} 
+
+{% block scripts %}
+<!-- Include Prism.js for syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+<!-- Include Prism.js DAX language component -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-dax.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // DOM Elements
+    const searchDax = document.getElementById("searchDax");
+    const clearSearch = document.getElementById("clearSearch");
+    const daxList = document.getElementById("daxList");
+    const queryItems = document.querySelectorAll(".query-item");
+    const emptyState = document.getElementById("emptyState");
+    const clearEmptyState = document.getElementById("clearEmptyState");
+    const expressionCount = document.getElementById("expressionCount");
+    const expandAll = document.getElementById("expandAll");
+    const collapseAll = document.getElementById("collapseAll");
+    const exportDax = document.getElementById("exportDax");
+    const searchCount = document.querySelector(".search-count");
+    const daxLoading = document.getElementById("daxLoading");
+    const analyzeSimilarityBtn = document.getElementById("analyzeSimilarity");
+    const closeSimilarityBtn = document.getElementById("closeSimilarity");
+    const similaritySection = document.getElementById("similaritySection");
+    const similarityThreshold = document.getElementById("similarityThreshold");
+    const thresholdValue = document.getElementById("thresholdValue");
+    const closeComparisonBtn = document.getElementById("closeComparison");
+    const comparisonView = document.getElementById("comparisonView");
+
+    // Set up event listeners
+    setupEventListeners();
+
+    /**
+     * Set up event listeners for interactive elements
+     */
+    function setupEventListeners() {
+      // Search input
+      if (searchDax) {
+        searchDax.addEventListener("input", function () {
+          const searchTerm = this.value;
+
+          // Toggle clear button visibility
+          if (clearSearch) {
+            clearSearch.style.display = searchTerm ? "block" : "none";
+          }
+
+          // Debounce search
+          clearTimeout(this.debounceTimer);
+          this.debounceTimer = setTimeout(() => {
+            searchDaxExpressions(searchTerm);
+          }, 300);
         });
-  
-        // Toggle expand buttons
-        document.querySelectorAll(".toggle-expand").forEach((button) => {
-          button.addEventListener("click", function () {
-            const item = this.closest(".query-item");
-            toggleDaxItem(item, this);
-          });
-        });
-  
-        // Expand All button
-        if (expandAll) {
-          expandAll.addEventListener("click", function () {
-            document.querySelectorAll(".query-item").forEach(item => {
-              const button = item.querySelector(".toggle-expand");
-              if (!item.classList.contains("expanded")) {
-                toggleDaxItem(item, button);
-              }
-            });
-          });
-        }
-  
-        // Collapse All button
-        if (collapseAll) {
-          collapseAll.addEventListener("click", function () {
-            document.querySelectorAll(".query-item").forEach(item => {
-              const button = item.querySelector(".toggle-expand");
-              if (item.classList.contains("expanded")) {
-                toggleDaxItem(item, button);
-              }
-            });
-          });
-        }
-  
-        // Export DAX button
-        if (exportDax) {
-          exportDax.addEventListener("click", exportDaxExpressions);
-        }
       }
-  
-      /**
-       * Search DAX expressions
-       * @param {string} searchTerm - Term to search for
-       */
-      function searchDaxExpressions(searchTerm) {
-        // Convert to lowercase for case-insensitive search
-        searchTerm = searchTerm.toLowerCase();
-  
-        // Show loading indicator if many items
-        if (daxItems.length > 50 && daxLoading) {
-          daxLoading.style.display = "flex";
-        }
-  
-        let visibleCount = 0;
-  
-        // Clear previous search highlights
-        document.querySelectorAll(".search-highlight").forEach((el) => {
-          const text = el.textContent;
-          const parent = el.parentNode;
-  
-          // Replace highlighted element with text
-          const textNode = document.createTextNode(text);
-          parent.replaceChild(textNode, el);
-  
-          // Normalize the parent to combine adjacent text nodes
-          parent.normalize();
-        });
-  
-        // Process DAX items
-        daxItems.forEach((item) => {
-          const measureNameElement = item.querySelector(".dax-name");
-          const measureName = measureNameElement.textContent.trim();
-          const codeElement = item.querySelector("code");
-          const daxExpression = codeElement.textContent.toLowerCase();
-  
-          // Check if item matches search
-          const matches =
-            searchTerm === "" ||
-            measureName.toLowerCase().includes(searchTerm) ||
-            daxExpression.includes(searchTerm);
-  
-          // Set item visibility
-          item.style.display = matches ? "" : "none";
-  
-          if (matches) {
-            visibleCount++;
-  
-            // Highlight matches in measure name if there's a search term
-            if (searchTerm && measureNameElement) {
-              const nameText = measureNameElement.textContent;
-              if (nameText.toLowerCase().includes(searchTerm)) {
-                const icon = measureNameElement.querySelector(".measure-icon");
-                const textWithoutIcon = nameText
-                  .replace(icon ? icon.textContent : "", "")
-                  .trim();
-  
-                // Create highlighted version
-                const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
-                const highlightedText = textWithoutIcon.replace(
-                  regex,
-                  '<span class="search-highlight">$1</span>'
-                );
-  
-                // Keep the icon, replace the text
-                measureNameElement.innerHTML = `<span class="measure-icon"><i class="fas fa-calculator"></i></span> ${highlightedText}`;
-              }
-            }
+
+      // Clear search button
+      if (clearSearch) {
+        clearSearch.addEventListener("click", function () {
+          if (searchDax) {
+            searchDax.value = "";
+            clearSearch.style.display = "none";
+            searchDaxExpressions("");
+            searchDax.focus();
           }
         });
-  
-        // Hide loading indicator
-        if (daxLoading) {
-          daxLoading.style.display = "none";
-        }
-  
-        // Update counters
-        if (selectedTag && selectedCount) {
-          if (visibleCount < daxItems.length) {
-            selectedTag.style.display = "flex";
-            selectedCount.textContent = visibleCount;
-          } else {
-            selectedTag.style.display = "none";
+      }
+
+      // Clear empty state button
+      if (clearEmptyState) {
+        clearEmptyState.addEventListener("click", function () {
+          if (searchDax) {
+            searchDax.value = "";
+            clearSearch.style.display = "none";
+            searchDaxExpressions("");
+          }
+        });
+      }
+
+      // Copy measure name buttons
+      document.querySelectorAll(".copy-name").forEach((button) => {
+        button.addEventListener("click", function () {
+          const measureName = this.getAttribute("data-copy");
+          copyToClipboardWithAnimation(this, measureName);
+        });
+      });
+
+      // Toggle expand buttons
+      document.querySelectorAll(".toggle-expand").forEach((button) => {
+        button.addEventListener("click", function () {
+          const item = this.closest(".query-item");
+          toggleItem(item, this);
+        });
+      });
+
+      // Expand All button
+      if (expandAll) {
+        expandAll.addEventListener("click", function () {
+          queryItems.forEach((item) => {
+            const button = item.querySelector(".toggle-expand");
+            if (!item.classList.contains("expanded")) {
+              toggleItem(item, button);
+            }
+          });
+        });
+      }
+
+      // Collapse All button
+      if (collapseAll) {
+        collapseAll.addEventListener("click", function () {
+          queryItems.forEach((item) => {
+            const button = item.querySelector(".toggle-expand");
+            if (item.classList.contains("expanded")) {
+              toggleItem(item, button);
+            }
+          });
+        });
+      }
+
+      // Export DAX button
+      if (exportDax) {
+        exportDax.addEventListener("click", exportDaxExpressions);
+      }
+      
+      // Analyze similarity button
+      if (analyzeSimilarityBtn) {
+        analyzeSimilarityBtn.addEventListener("click", analyzeSimilarity);
+      }
+      
+      // Close similarity analysis button
+      if (closeSimilarityBtn) {
+        closeSimilarityBtn.addEventListener("click", function() {
+          similaritySection.style.display = "none";
+          daxList.style.display = "flex";
+        });
+      }
+      
+      // Similarity threshold slider
+      if (similarityThreshold) {
+        similarityThreshold.addEventListener("input", function() {
+          const threshold = parseFloat(this.value);
+          thresholdValue.textContent = `${Math.round(threshold * 100)}%`;
+          updateSimilarityTable(threshold);
+        });
+      }
+      
+      // Close comparison view button
+      if (closeComparisonBtn) {
+        closeComparisonBtn.addEventListener("click", function() {
+          comparisonView.style.display = "none";
+        });
+      }
+    }
+
+    /**
+     * Toggle expansion state of an item
+     * @param {HTMLElement} item - The item element to toggle
+     * @param {HTMLElement} button - The toggle button
+     */
+    function toggleItem(item, button) {
+      const isExpanded = item.classList.toggle("expanded");
+
+      // Update button icon
+      if (button) {
+        button.innerHTML = isExpanded
+          ? '<i class="fas fa-chevron-up"></i>'
+          : '<i class="fas fa-chevron-down"></i>';
+
+        button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
+      }
+    }
+
+    /**
+     * Search DAX expressions
+     * @param {string} searchTerm - Term to search for
+     */
+    function searchDaxExpressions(searchTerm) {
+      // Convert to lowercase for case-insensitive search
+      searchTerm = searchTerm.toLowerCase();
+
+      let visibleCount = 0;
+
+      // Clear previous search highlights
+      document.querySelectorAll(".search-highlight").forEach((el) => {
+        const text = el.textContent;
+        const parent = el.parentNode;
+
+        // Replace highlighted element with text
+        const textNode = document.createTextNode(text);
+        parent.replaceChild(textNode, el);
+
+        // Normalize the parent to combine adjacent text nodes
+        parent.normalize();
+      });
+
+      // Process DAX items
+      queryItems.forEach((item) => {
+        const measureNameElement = item.querySelector(".query-name");
+        const measureName = measureNameElement.textContent.trim();
+        const codeElement = item.querySelector("code");
+        const daxExpression = codeElement.textContent.toLowerCase();
+
+        // Check if item matches search
+        const matches =
+          searchTerm === "" ||
+          measureName.toLowerCase().includes(searchTerm) ||
+          daxExpression.includes(searchTerm);
+
+        // Set item visibility
+        item.style.display = matches ? "" : "none";
+
+        if (matches) {
+          visibleCount++;
+
+          // Highlight matches in measure name if there's a search term
+          if (searchTerm && measureNameElement) {
+            const nameText = measureNameElement.textContent;
+            if (nameText.toLowerCase().includes(searchTerm)) {
+              const icon = measureNameElement.querySelector(".measure-icon");
+              const textWithoutIcon = nameText
+                .replace(icon.textContent, "")
+                .trim();
+
+              // Create highlighted version
+              const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
+              const highlightedText = textWithoutIcon.replace(
+                regex,
+                '<span class="search-highlight">$1</span>'
+              );
+
+              // Keep the icon, replace the text
+              measureNameElement.innerHTML = `<span class="measure-icon"><i class="fas fa-calculator"></i></span> ${highlightedText}`;
+            }
           }
         }
-  
-        if (searchCount && searchTerm) {
-          searchCount.textContent = `${visibleCount} matches`;
-        } else if (searchCount) {
-          searchCount.textContent = "";
-        }
-  
-        // Show/hide empty state
-        if (emptyState) {
-          emptyState.style.display = visibleCount === 0 ? "flex" : "none";
-        }
-  
-        if (daxList) {
-          daxList.style.display = visibleCount === 0 ? "none" : "";
-        }
+      });
+
+      // Update counters
+      if (expressionCount) {
+        expressionCount.textContent = visibleCount;
       }
-  
-      /**
-       * Export DAX expressions
-       */
-      function exportDaxExpressions() {
-        // Show loading indicator
-        if (daxLoading) {
-          daxLoading.style.display = "flex";
-        }
-  
-        // Prepare data for export
-        const data = [];
-  
-        // Get visible DAX items
-        const visibleItems = Array.from(daxItems).filter(
-          (item) => item.style.display !== "none"
+
+      if (searchCount && searchTerm) {
+        searchCount.textContent = `${visibleCount} matches`;
+      } else if (searchCount) {
+        searchCount.textContent = "";
+      }
+
+      // Show/hide empty state
+      if (emptyState) {
+        emptyState.style.display = visibleCount === 0 ? "flex" : "none";
+      }
+
+      if (daxList) {
+        daxList.style.display = visibleCount === 0 ? "none" : "";
+      }
+    }
+
+    /**
+     * Export DAX expressions
+     */
+    function exportDaxExpressions() {
+      // Prepare data for export
+      const data = [];
+
+      // Get visible DAX items
+      const visibleItems = Array.from(queryItems).filter(
+        (item) => item.style.display !== "none"
+      );
+
+      // Convert to array of objects
+      visibleItems.forEach((item) => {
+        const measureName = item.getAttribute("data-measure");
+        const daxExpression = item.querySelector("code").textContent;
+
+        data.push({
+          MeasureName: measureName,
+          DAXExpression: daxExpression,
+        });
+      });
+
+      // Create CSV content
+      const headers = ["MeasureName", "DAXExpression"];
+      const csvRows = [headers.join(",")];
+
+      data.forEach((row) => {
+        const values = headers.map((header) => {
+          const value = row[header] || "";
+          // Escape quotes and wrap in quotes if contains commas or quotes
+          return value.includes(",") || value.includes('"')
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        });
+        csvRows.push(values.join(","));
+      });
+
+      // Create CSV content
+      const csvContent = csvRows.join("\n");
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "dax_expressions.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Show notification if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          "DAX expressions exported to CSV",
+          "success"
         );
-  
-        // Convert to array of objects
-        visibleItems.forEach((item) => {
-          const measureName = item.getAttribute("data-measure");
-          const daxExpression = item.querySelector("code").textContent;
-  
-          data.push({
-            MeasureName: measureName,
-            DAXExpression: daxExpression,
+      }
+    }
+    
+    /**
+     * Copy text to clipboard with animation
+     * @param {HTMLElement} button - Button element
+     * @param {string} text - Text to copy
+     */
+    function copyToClipboardWithAnimation(button, text) {
+      const originalHTML = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+            }, 2000);
+          })
+          .catch(() => {
+            fallbackCopy(text, button, originalHTML);
           });
-        });
-  
-        // Create CSV content
-        const headers = ["MeasureName", "DAXExpression"];
-        const csvRows = [headers.join(",")];
-  
-        data.forEach((row) => {
-          const values = headers.map((header) => {
-            const value = row[header] || "";
-            // Escape quotes and wrap in quotes if contains commas or quotes
-            return value.includes(",") || value.includes('"')
-              ? `"${value.replace(/"/g, '""')}"`
-              : value;
+      } else {
+        fallbackCopy(text, button, originalHTML);
+      }
+    }
+
+    /**
+     * Fallback method for copying text
+     */
+    function fallbackCopy(text, button, originalHTML) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand("copy");
+        button.innerHTML = '<i class="fas fa-check"></i>';
+      } catch (err) {
+        button.innerHTML = '<i class="fas fa-times"></i>';
+      }
+
+      document.body.removeChild(textArea);
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+      }, 2000);
+    }
+
+    /**
+     * Function to copy code to clipboard
+     */
+    window.copyToClipboard = function (button) {
+      const codeElement = button.closest(".code-container").querySelector("code");
+      copyToClipboardWithAnimation(button, codeElement.textContent);
+    };
+
+    /**
+     * Escape special characters in string for regex
+     * @param {string} string - String to escape
+     * @returns {string} Escaped string
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+    
+    /**
+     * Calculate similarity between DAX expressions
+     * @param {string} dax1 - First DAX expression
+     * @param {string} dax2 - Second DAX expression
+     * @returns {number} Similarity score between 0 and 1
+     */
+    function calculateSimilarity(dax1, dax2) {
+      // Normalize expressions (remove extra whitespace, comments, etc.)
+      const normalize = (dax) => {
+        return dax
+          .replace(/--.*$/gm, '') // Remove single-line comments
+          .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim()
+          .toLowerCase();
+      };
+
+      const normalized1 = normalize(dax1);
+      const normalized2 = normalize(dax2);
+      
+      // For very different length expressions, use early return
+      const lengthRatio = Math.min(normalized1.length, normalized2.length) / 
+                          Math.max(normalized1.length, normalized2.length);
+      if (lengthRatio < 0.5) return lengthRatio * 0.5; // Low similarity for very different lengths
+      
+      // Token-based similarity
+      const tokens1 = normalized1.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
+      const tokens2 = normalized2.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
+      
+      // Calculate Jaccard similarity coefficient
+      const set1 = new Set(tokens1);
+      const set2 = new Set(tokens2);
+      
+      const intersection = new Set([...set1].filter(x => set2.has(x)));
+      const union = new Set([...set1, ...set2]);
+      
+      const jaccardSimilarity = intersection.size / union.size;
+      
+      // Calculate token sequence similarity (for detecting similar structure)
+      let sequenceSimilarity = 0;
+      const minLength = Math.min(tokens1.length, tokens2.length);
+      let matches = 0;
+      
+      for (let i = 0; i < minLength; i++) {
+        if (tokens1[i] === tokens2[i]) matches++;
+      }
+      
+      if (minLength > 0) {
+        sequenceSimilarity = matches / minLength;
+      }
+      
+      // Combine different similarity metrics
+      return (jaccardSimilarity * 0.6) + (sequenceSimilarity * 0.4);
+    }
+    
+    /**
+     * Analyze similarity between all DAX expressions
+     */
+    function analyzeSimilarity() {
+      const measures = [];
+      
+      // Collect all measures and their expressions
+      queryItems.forEach(item => {
+        if (item.style.display !== "none") { // Only include visible items
+          const name = item.getAttribute("data-measure");
+          const expression = item.querySelector("code").textContent;
+          
+          measures.push({
+            name: name,
+            expression: expression
           });
-          csvRows.push(values.join(","));
-        });
-  
-        // Create CSV content
-        const csvContent = csvRows.join("\n");
-  
-        // Create and trigger download
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "dax_expressions.csv");
-        link.style.display = "none";
-        document.body.appendChild(link);
-  
-        link.click();
-  
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-  
-        // Hide loading indicator
-        if (daxLoading) {
-          daxLoading.style.display = "none";
         }
-  
-        // Show success message
-        alert("DAX expressions exported to CSV");
+      });
+      
+      // Show loading notification if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          "Analyzing measure similarities...",
+          "info"
+        );
       }
-  
-      /**
-       * Escape special regex characters in string
-       * @param {string} string - String to escape
-       * @returns {string} Escaped string
-       */
-      function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      
+      // Calculate similarity for all pairs
+      const similarityResults = [];
+      
+      for (let i = 0; i < measures.length; i++) {
+        for (let j = i + 1; j < measures.length; j++) {
+          const measure1 = measures[i];
+          const measure2 = measures[j];
+          
+          const similarity = calculateSimilarity(measure1.expression, measure2.expression);
+          
+          // Store result if similarity is above minimum threshold (0.5)
+          if (similarity > 0.5) {
+            similarityResults.push({
+              measure1: measure1.name,
+              measure2: measure2.name,
+              expression1: measure1.expression,
+              expression2: measure2.expression,
+              similarity: similarity
+            });
+          }
+        }
       }
-    });
-  </script>
+      
+      // Sort by similarity (highest first)
+      similarityResults.sort((a, b) => b.similarity - a.similarity);
+      
+      // Store results for later use
+      window.similarityResults = similarityResults;
+      
+      // Show similarity section
+      daxList.style.display = "none";
+      similaritySection.style.display = "block";
+      
+      // Update UI with initial threshold of 70%
+      updateSimilarityTable(0.7);
+      
+      // Show completion notification if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(
+          `Analysis complete: Found ${similarityResults.length} similar measure pairs`,
+          "success"
+        );
+      }
+    }
+    
+    /**
+     * Update similarity table based on threshold
+     * @param {number} threshold - Similarity threshold (0-1)
+     */
+    function updateSimilarityTable(threshold) {
+      const similarityTable = document.getElementById("similarityTable").querySelector("tbody");
+      similarityTable.innerHTML = "";
+      
+      const filteredResults = window.similarityResults.filter(result => result.similarity >= threshold);
+      
+      // Update stats
+      document.getElementById("similarPairsCount").textContent = filteredResults.length;
+      
+      if (window.similarityResults.length > 0) {
+        const highest = Math.round(window.similarityResults[0].similarity * 100);
+        document.getElementById("highestSimilarity").textContent = `${highest}%`;
+      } else {
+        document.getElementById("highestSimilarity").textContent = "0%";
+      }
+      
+      // Populate table
+      filteredResults.forEach((result, index) => {
+        const row = document.createElement("tr");
+        
+        // Determine similarity class
+        let similarityClass = "low-similarity";
+        if (result.similarity > 0.85) {
+          similarityClass = "high-similarity";
+        } else if (result.similarity > 0.7) {
+          similarityClass = "medium-similarity";
+        }
+        
+        row.innerHTML = `
+          <td>${result.measure1}</td>
+          <td>${result.measure2}</td>
+          <td><span class="similarity-score ${similarityClass}">${Math.round(result.similarity * 100)}%</span></td>
+          <td>
+            <button class="action-button outline compare-btn" data-index="${index}">
+              <i class="fas fa-code"></i> Compare
+            </button>
+          </td>
+        `;
+        
+        similarityTable.appendChild(row);
+      });
+      
+      // Add event listeners to compare buttons
+      document.querySelectorAll(".compare-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const index = parseInt(this.getAttribute("data-index"));
+          showComparison(filteredResults[index]);
+        });
+      });
+      
+      // Show empty message if no results
+      if (filteredResults.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td colspan="4" class="empty-message">
+            No similar measures found above the current threshold.
+          </td>
+        `;
+        similarityTable.appendChild(row);
+      }
+    }
+    
+    /**
+     * Show comparison view for two measures
+     * @param {Object} comparisonData - Data for the two measures to compare
+     */
+    function showComparison(comparisonData) {
+      comparisonView.style.display = "block";
+      
+      // Set measure names
+      document.getElementById("measure1Name").textContent = comparisonData.measure1;
+      document.getElementById("measure2Name").textContent = comparisonData.measure2;
+      
+      // Set code
+      document.getElementById("measure1Code").textContent = comparisonData.expression1;
+      document.getElementById("measure2Code").textContent = comparisonData.expression2;
+      
+      // Highlight code with Prism
+      Prism.highlightElement(document.getElementById("measure1Code"));
+      Prism.highlightElement(document.getElementById("measure2Code"));
+      
+      // Scroll to comparison view
+      comparisonView.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+</script>
+
+<style>
+  /* DAX Explorer base styles */
+  .dax-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
   
-  <style>
-    /* Query Items styling for DAX explorer (copied from source explorer) */
-    .queries-list {
-      display: flex;
+  /* Query Items styling */
+  .queries-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .query-item {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .query-item:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+  }
+
+  .query-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .query-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .query-name {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .measure-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    margin-right: var(--space-2);
+  }
+
+  .query-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-tertiary);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+  }
+
+  .query-item-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-normal), padding var(--transition-normal);
+  }
+
+  .query-item.expanded .query-item-content {
+    max-height: 2000px;
+    padding: var(--space-4);
+  }
+
+  /* Code container */
+  .code-container {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .code-container pre {
+    margin: 0;
+    padding: var(--space-3);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    max-height: 400px;
+    overflow: auto;
+  }
+
+  .copy-button {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    z-index: 10;
+  }
+
+  .copy-button:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  /* Search highlight */
+  .search-highlight {
+    background-color: rgba(255, 193, 7, 0.3);
+    padding: 0 2px;
+    margin: 0 -2px;
+  }
+  
+  /* Similarity Analysis Styles */
+  .similarity-section {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: var(--space-4);
+    margin-top: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
+  .slider {
+    width: 200px;
+    margin: 0 var(--space-2);
+  }
+
+  .analysis-stats {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+
+  .stat-item {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary);
+  }
+
+  .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+  }
+
+  .similarity-table-container {
+    margin-top: var(--space-4);
+    overflow-x: auto;
+  }
+
+  .similarity-score {
+    font-weight: var(--font-weight-bold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+  }
+
+  .high-similarity {
+    background-color: rgba(255, 0, 0, 0.2);
+    color: #d32f2f;
+  }
+
+  .medium-similarity {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #f57c00;
+  }
+
+  .low-similarity {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #388e3c;
+  }
+
+  .comparison-view {
+    margin-top: var(--space-4);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  .comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .comparison-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .comparison-item {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    overflow: auto;
+  }
+
+  .comparison-item pre {
+    margin: 0;
+    max-height: 400px;
+    overflow: auto;
+  }
+  
+  .empty-message {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .comparison-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .analysis-stats {
       flex-direction: column;
-      gap: var(--space-4);
-      margin-bottom: var(--space-6);
     }
-  
-    .query-item {
-      background-color: var(--bg-primary);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-    }
-  
-    .query-item:hover {
-      box-shadow: var(--shadow-sm);
-      border-color: var(--primary);
-    }
-  
-    .query-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-3) var(--space-4);
-      background-color: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border);
-    }
-  
-    .query-info {
-      flex: 1;
-      min-width: 0;
-    }
-  
-    .query-name {
-      margin: 0;
-      font-size: var(--font-size-md);
-      font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  
-    .measure-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background-color: var(--primary);
-      color: white;
-      margin-right: var(--space-2);
-    }
-  
-    .query-actions {
-      display: flex;
-      gap: var(--space-2);
-    }
-  
-    .query-item-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height var(--transition-normal), padding var(--transition-normal);
-    }
-  
-    .query-item.expanded .query-item-content {
-      max-height: 2000px;
-      padding: var(--space-4);
-    }
-  
-    /* Loading spinner */
-    .loading-spinner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-2);
-      padding: var(--space-4);
-      color: var(--text-secondary);
-    }
-  
-    /* Search highlight */
-    .search-highlight {
-      background-color: rgba(var(--primary-rgb), 0.2);
-      color: var(--primary);
-      font-weight: var(--font-weight-medium);
-      border-radius: var(--radius-sm);
-      padding: 0 var(--space-1);
-    }
-  </style>
-  {% endblock %}
+  }
+</style>
+{% endblock %}
