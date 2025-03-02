@@ -1,12 +1,5 @@
 {% extends "base.html" %} 
-{% block title %}Enhanced Unused Measures - Power BI Explorer{% endblock %} 
-
-{% block head %}
-<!-- Include Prism.js CSS for syntax highlighting -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
-<!-- Include Vis.js for network visualization -->
-<link rel="stylesheet" href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" />
-{% endblock %} 
+{% block title %}Unused Measures - Power BI Explorer{% endblock %} 
 
 {% block breadcrumbs %}
 <li>
@@ -17,9 +10,9 @@
 {% block content %}
 <!-- Page Header -->
 <div class="page-header">
-  <h1 class="page-title"><i class="fas fa-exclamation-triangle"></i> Enhanced Unused Measures</h1>
+  <h1 class="page-title"><i class="fas fa-exclamation-triangle"></i> Unused Measures</h1>
   <p class="page-description">
-    Identify unused measures and their dependency chains for optimizing your model.
+    Identify measures not used in any visuals to optimize your Power BI model.
   </p>
 </div>
 
@@ -42,9 +35,6 @@
   </div>
   
   <div class="filter-actions">
-    <button id="showDependencyView" class="action-button secondary">
-      <i class="fas fa-project-diagram"></i> Show Dependencies
-    </button>
     <button id="exportMeasures" class="action-button outline">
       <i class="fas fa-download"></i> Export Measures
     </button>
@@ -63,102 +53,60 @@
         <i class="fas fa-calculator"></i>
       </div>
       <div class="metric-info">
-        <div class="metric-title">Directly Unused Measures</div>
+        <div class="metric-title">Unused Measures</div>
         <div class="metric-value" data-value="{{ unused_measures|length }}">
           {{ unused_measures|length }}
         </div>
       </div>
     </div>
-    <!-- Potentially Unused Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon" style="background-color: rgba(244, 67, 54, 0.1); color: #d32f2f;">
-        <i class="fas fa-trash-alt"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Potentially Removable Chain</div>
-        <div class="metric-value" id="potentialUnusedCount">0</div>
-      </div>
-    </div>
-    <!-- Impact Estimate -->
-    <div class="metric-card">
-      <div class="metric-icon" style="background-color: rgba(33, 150, 243, 0.1); color: #1976d2;">
-        <i class="fas fa-chart-line"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Potential Impact Score</div>
-        <div class="metric-value" id="impactScore">0</div>
-      </div>
-    </div>
   </div>
 </section>
 
-<!-- Analysis Tabs -->
-<div class="analysis-tabs">
-  <button id="listViewTab" class="tab-button active">
-    <i class="fas fa-list"></i> List View
-  </button>
-  <button id="dependencyViewTab" class="tab-button">
-    <i class="fas fa-project-diagram"></i> Dependency View
-  </button>
-  <button id="chainViewTab" class="tab-button">
-    <i class="fas fa-sitemap"></i> Deletion Chain
-  </button>
-</div>
-
-<!-- List View -->
-<div id="listViewPanel" class="panel-content active">
+<!-- Measures List -->
+<div id="measuresContainer" class="measures-section">
   <div class="table-toolbar">
     <div class="table-info">
       <div class="results-count">
         <span id="resultCount">{{ unused_measures|length }}</span> unused measures found
       </div>
     </div>
+    <div class="table-actions">
+      <button id="selectAll" class="action-button secondary">
+        <i class="fas fa-check-square"></i> Select All
+      </button>
+      <button id="unselectAll" class="action-button secondary">
+        <i class="fas fa-square"></i> Unselect All
+      </button>
+    </div>
   </div>
 
-  <!-- Enhanced Table with Dependency Info -->
+  <!-- Measures Table -->
   <div class="table-container">
     <table id="measuresTable" class="data-table">
       <thead>
         <tr>
+          <th style="width: 50px;"></th>
           <th class="sortable" data-sort="name">
             Measure Name <i class="fas fa-sort"></i>
           </th>
-          <th class="sortable" data-sort="type">
-            Type <i class="fas fa-sort"></i>
-          </th>
-          <th>Dependencies</th>
-          <th>Impact</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for measure in unused_measures %}
         <tr data-measure="{{ measure }}">
-          <td data-label="Measure Name">{{ measure }}</td>
-          <td data-label="Type">
-            <span class="measure-type final">Final</span>
-          </td>
-          <td data-label="Dependencies">
-            <span class="dependency-count">0</span> dependencies
-          </td>
-          <td data-label="Impact">
-            <span class="impact-score">1</span>
-          </td>
           <td>
-            <button class="icon-button view-dependencies" title="View dependencies">
-              <i class="fas fa-project-diagram"></i>
-            </button>
             <button class="icon-button mark-measure" title="Mark for deletion">
               <i class="far fa-square"></i>
             </button>
           </td>
+          <td data-label="Measure Name">{{ measure }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <!-- Empty State for when search yields no results -->
+  <!-- Empty State -->
   <div id="emptyState" class="empty-state" style="display: none">
     <div class="empty-state-icon">
       <i class="fas fa-search"></i>
@@ -171,55 +119,11 @@
   </div>
 </div>
 
-<!-- Dependency View -->
-<div id="dependencyViewPanel" class="panel-content">
-  <div class="view-info">
-    <p>
-      This view shows the dependency graph for unused measures. Measures in red are directly unused.
-      Measures in orange could be candidates for removal after their dependencies are removed.
-    </p>
-  </div>
-
-  <!-- Dependency Network Graph -->
-  <div class="network-container">
-    <div id="dependencyNetwork" class="network-diagram"></div>
-    <div class="network-legend">
-      <div class="legend-item">
-        <span class="legend-color unused-color"></span>
-        <span>Directly Unused</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color potential-color"></span>
-        <span>Potentially Unused</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color used-color"></span>
-        <span>Used Measure</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Deletion Chain View -->
-<div id="chainViewPanel" class="panel-content">
-  <div class="view-info">
-    <p>
-      This view shows chains of measures that can be deleted sequentially. Each level represents measures
-      that can be removed after the previous level is deleted.
-    </p>
-  </div>
-
-  <!-- Chain Visualization -->
-  <div class="chain-container">
-    <div id="deletionChain" class="chain-visualization"></div>
-  </div>
-</div>
-
 <!-- Tabular Editor Script Section -->
 <div class="script-section">
   <h2 class="section-title"><i class="fas fa-code"></i> Tabular Editor Script</h2>
   <p class="section-description">
-    You can use this C# script in Tabular Editor to manage the selected unused measures. This script will help identify and manage dependency chains.
+    You can use this C# script in Tabular Editor to help manage unused measures.
   </p>
   
   <div class="code-container">
@@ -245,7 +149,7 @@ foreach (var measureName in unusedMeasures)
   
   <div class="script-alert">
     <i class="fas fa-info-circle"></i>
-    <p>The above script will be updated as you select measures for deletion. It includes dependency chain analysis for safe deletion.</p>
+    <p>The above script will prepend a dot to unused measure names, making them easier to identify and potentially remove.</p>
   </div>
 </div>
 
@@ -255,8 +159,6 @@ foreach (var measureName in unusedMeasures)
 <!-- Include Prism.js for syntax highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-csharp.min.js"></script>
-<!-- Include Vis.js for network visualization -->
-<script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -265,52 +167,20 @@ foreach (var measureName in unusedMeasures)
     const clearSearch = document.getElementById("clearSearch");
     const resultCount = document.getElementById("resultCount");
     const measuresTable = document.getElementById("measuresTable");
+    const tableRows = measuresTable ? measuresTable.querySelectorAll("tbody tr") : [];
     const emptyState = document.getElementById("emptyState");
     const clearEmptyState = document.getElementById("clearEmptyState");
     const copyScript = document.getElementById("copyScript");
     const copyCodeButton = document.getElementById("copyCodeButton");
     const exportMeasures = document.getElementById("exportMeasures");
     const tabularScript = document.getElementById("tabularScript");
-    const potentialUnusedCount = document.getElementById("potentialUnusedCount");
-    const impactScore = document.getElementById("impactScore");
     const searchCount = document.querySelector(".search-count");
+    const selectAll = document.getElementById("selectAll");
+    const unselectAll = document.getElementById("unselectAll");
     
-    // Tab elements
-    const listViewTab = document.getElementById("listViewTab");
-    const dependencyViewTab = document.getElementById("dependencyViewTab");
-    const chainViewTab = document.getElementById("chainViewTab");
-    const listViewPanel = document.getElementById("listViewPanel");
-    const dependencyViewPanel = document.getElementById("dependencyViewPanel");
-    const chainViewPanel = document.getElementById("chainViewPanel");
-    const showDependencyView = document.getElementById("showDependencyView");
-    
-    // If we have table rows
-    const tableRows = measuresTable ? measuresTable.querySelectorAll("tbody tr") : [];
-    
-    // Dependency data (this would come from the server in a real implementation)
-    // For demo purposes, we'll create some sample dependency data
-    const measureDependencies = {
-      {% for measure in unused_measures %}
-      "{{ measure }}": {
-        "parent_measures": ["Parent1", "Parent2"].slice(0, Math.floor(Math.random() * 3)),
-        "child_measures": ["Child1", "Child2"].slice(0, Math.floor(Math.random() * 3)),
-        "type": "final"
-      }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    };
-    
+    // State tracking
     let currentVisibleItems = tableRows.length;
     let selectedMeasures = new Set();
-    let potentialChain = calculatePotentialChain(selectedMeasures);
-    
-    // Update metrics
-    updateMetrics();
-    
-    // Initialize dependency graph
-    initializeDependencyGraph();
-    
-    // Initialize deletion chain
-    initializeDeletionChain();
     
     // Set up event listeners
     setupEventListeners();
@@ -352,18 +222,13 @@ foreach (var measureName in unusedMeasures)
         });
       }
       
-      // Copy script button
+      // Copy script buttons
       if (copyScript) {
-        copyScript.addEventListener("click", function() {
-          copyCode();
-        });
+        copyScript.addEventListener("click", copyCode);
       }
       
-      // Copy code button
       if (copyCodeButton) {
-        copyCodeButton.addEventListener("click", function() {
-          copyCode();
-        });
+        copyCodeButton.addEventListener("click", copyCode);
       }
       
       // Export measures button
@@ -371,30 +236,14 @@ foreach (var measureName in unusedMeasures)
         exportMeasures.addEventListener("click", exportMeasuresToCSV);
       }
       
-      // Tab navigation
-      if (listViewTab) {
-        listViewTab.addEventListener("click", function() {
-          setActiveTab("list");
-        });
+      // Select all button
+      if (selectAll) {
+        selectAll.addEventListener("click", selectAllMeasures);
       }
       
-      if (dependencyViewTab) {
-        dependencyViewTab.addEventListener("click", function() {
-          setActiveTab("dependency");
-        });
-      }
-      
-      if (chainViewTab) {
-        chainViewTab.addEventListener("click", function() {
-          setActiveTab("chain");
-        });
-      }
-      
-      // Show dependency view button
-      if (showDependencyView) {
-        showDependencyView.addEventListener("click", function() {
-          setActiveTab("dependency");
-        });
+      // Unselect all button
+      if (unselectAll) {
+        unselectAll.addEventListener("click", unselectAllMeasures);
       }
       
       // Mark measure buttons
@@ -413,28 +262,7 @@ foreach (var measureName in unusedMeasures)
             row.classList.add("selected");
           }
           
-          // Update potential chain
-          potentialChain = calculatePotentialChain(selectedMeasures);
-          updateMetrics();
           updateTabularScript();
-          
-          // Update visualizations
-          updateDependencyGraph();
-          updateDeletionChain();
-        });
-      });
-      
-      // View dependencies buttons
-      document.querySelectorAll(".view-dependencies").forEach(button => {
-        button.addEventListener("click", function() {
-          const row = this.closest("tr");
-          const measureName = row.getAttribute("data-measure");
-          
-          // Focus on this measure in the dependency graph
-          focusOnMeasure(measureName);
-          
-          // Switch to dependency view
-          setActiveTab("dependency");
         });
       });
       
@@ -444,45 +272,6 @@ foreach (var measureName in unusedMeasures)
           sortTable(this.getAttribute("data-sort"));
         });
       });
-    }
-    
-    /**
-     * Set active tab
-     * @param {string} tabName - Name of the tab to activate
-     */
-    function setActiveTab(tabName) {
-      // Remove active class from all tabs and panels
-      [listViewTab, dependencyViewTab, chainViewTab].forEach(tab => {
-        if (tab) tab.classList.remove("active");
-      });
-      
-      [listViewPanel, dependencyViewPanel, chainViewPanel].forEach(panel => {
-        if (panel) panel.classList.remove("active");
-      });
-      
-      // Add active class to selected tab and panel
-      if (tabName === "list") {
-        if (listViewTab) listViewTab.classList.add("active");
-        if (listViewPanel) listViewPanel.classList.add("active");
-      } else if (tabName === "dependency") {
-        if (dependencyViewTab) dependencyViewTab.classList.add("active");
-        if (dependencyViewPanel) dependencyViewPanel.classList.add("active");
-        // Resize network to fit container
-        if (window.dependencyNetwork) {
-          setTimeout(() => {
-            window.dependencyNetwork.fit();
-          }, 100);
-        }
-      } else if (tabName === "chain") {
-        if (chainViewTab) chainViewTab.classList.add("active");
-        if (chainViewPanel) chainViewPanel.classList.add("active");
-        // Resize network to fit container
-        if (window.chainNetwork) {
-          setTimeout(() => {
-            window.chainNetwork.fit();
-          }, 100);
-        }
-      }
     }
     
     /**
@@ -506,7 +295,7 @@ foreach (var measureName in unusedMeasures)
       // Filter table rows
       if (tableRows) {
         tableRows.forEach(row => {
-          const cell = row.querySelector("td");
+          const cell = row.querySelector("td:nth-child(2)");
           const text = cell.textContent.toLowerCase();
           
           const isVisible = !searchValue || text.includes(searchValue);
@@ -566,7 +355,7 @@ foreach (var measureName in unusedMeasures)
     
     /**
      * Sort the table by a column
-     * @param {string} column - Column to sort by ('name' or 'type')
+     * @param {string} column - Column to sort by ('name')
      */
     function sortTable(column) {
       const table = document.getElementById("measuresTable");
@@ -587,21 +376,97 @@ foreach (var measureName in unusedMeasures)
       const rows = Array.from(tbody.querySelectorAll("tr"));
       
       rows.sort((a, b) => {
-        let valA, valB;
-        
-        if (column === "name") {
-          valA = a.querySelector("td").textContent.toLowerCase();
-          valB = b.querySelector("td").textContent.toLowerCase();
-        } else if (column === "type") {
-          valA = a.querySelector("td:nth-child(2)").textContent.toLowerCase();
-          valB = b.querySelector("td:nth-child(2)").textContent.toLowerCase();
-        }
+        const valA = a.querySelector("td:nth-child(2)").textContent.toLowerCase();
+        const valB = b.querySelector("td:nth-child(2)").textContent.toLowerCase();
         
         return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
       });
       
       // Re-append rows in sorted order
       rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    /**
+     * Select all measures
+     */
+    function selectAllMeasures() {
+      tableRows.forEach(row => {
+        if (row.style.display !== "none") {
+          const measureName = row.getAttribute("data-measure");
+          const button = row.querySelector(".mark-measure");
+          
+          selectedMeasures.add(measureName);
+          if (button) button.innerHTML = '<i class="fas fa-check-square"></i>';
+          row.classList.add("selected");
+        }
+      });
+      
+      updateTabularScript();
+    }
+    
+    /**
+     * Unselect all measures
+     */
+    function unselectAllMeasures() {
+      selectedMeasures.clear();
+      
+      tableRows.forEach(row => {
+        const button = row.querySelector(".mark-measure");
+        if (button) button.innerHTML = '<i class="far fa-square"></i>';
+        row.classList.remove("selected");
+      });
+      
+      updateTabularScript();
+    }
+    
+    /**
+     * Update tabular script based on selected measures
+     */
+    function updateTabularScript() {
+      if (!tabularScript) return;
+      
+      if (selectedMeasures.size === 0) {
+        // Default script with all unused measures
+        const allMeasures = Array.from(tableRows)
+          .map(row => row.getAttribute("data-measure"))
+          .filter(Boolean);
+          
+        const script = `// C# script for Tabular Editor
+var unusedMeasures = new List<string> {
+    ${allMeasures.map(m => `"${m}"`).join(",\n    ")}
+};
+
+foreach (var measureName in unusedMeasures)
+{
+    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
+    if (measure != null)
+    {
+        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
+    }
+}`;
+        
+        tabularScript.textContent = script;
+      } else {
+        // Script with selected measures only
+        const script = `// C# script for Tabular Editor
+var selectedMeasures = new List<string> {
+    ${Array.from(selectedMeasures).map(m => `"${m}"`).join(",\n    ")}
+};
+
+foreach (var measureName in selectedMeasures)
+{
+    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
+    if (measure != null)
+    {
+        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
+    }
+}`;
+        
+        tabularScript.textContent = script;
+      }
+      
+      // Highlight the code
+      Prism.highlightElement(tabularScript);
     }
     
     /**
@@ -696,32 +561,37 @@ foreach (var measureName in unusedMeasures)
      * Export measures to CSV
      */
     function exportMeasuresToCSV() {
-      // Prepare data rows
-      const rows = ["Measure Name,Type,Dependencies,Impact"];
-      
       // Get visible measures
-      if (tableRows) {
-        tableRows.forEach(row => {
-          if (row.style.display !== "none") {
-            const measureName = row.querySelector("td").textContent.trim();
-            const type = row.querySelector("td:nth-child(2)").textContent.trim();
-            const dependencies = row.querySelector("td:nth-child(3)").textContent.trim();
-            const impact = row.querySelector("td:nth-child(4)").textContent.trim();
-            
-            rows.push(`"${measureName}",${type},${dependencies},${impact}`);
-          }
-        });
-      }
+      const measures = [];
+      
+      tableRows.forEach(row => {
+        if (row.style.display !== "none") {
+          const measureName = row.getAttribute("data-measure");
+          const isSelected = selectedMeasures.has(measureName);
+          
+          measures.push({
+            name: measureName,
+            selected: isSelected
+          });
+        }
+      });
       
       // Create CSV content
-      const csvContent = rows.join("\n");
+      const headers = ["Measure Name", "Selected"];
+      const csvRows = [headers.join(",")];
+      
+      measures.forEach(measure => {
+        csvRows.push(`"${measure.name}",${measure.selected}`);
+      });
+      
+      const csvContent = csvRows.join("\n");
       
       // Create and trigger download
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", "unused_measures_with_dependencies.csv");
+      link.setAttribute("download", "unused_measures.csv");
       link.style.display = "none";
       document.body.appendChild(link);
       
@@ -735,717 +605,11 @@ foreach (var measureName in unusedMeasures)
         window.PowerBIExplorer.showNotification("Measures exported to CSV", "success");
       }
     }
-    
-    /**
-     * Calculate potential chain of measures that could be deleted
-     * @param {Set} selectedMeasures - Currently selected measures
-     * @returns {Object} Object with chain info
-     */
-    function calculatePotentialChain(selectedMeasures) {
-      // In a real implementation, this would use the actual measure dependency data
-      // Here we're just using mock data for demonstration
-      
-      // Start with the selected measures
-      const chain = {
-        level1: Array.from(selectedMeasures),
-        level2: [],
-        level3: []
-      };
-      
-      // For each measure, find potential additional candidates
-      selectedMeasures.forEach(measure => {
-        if (measureDependencies[measure]) {
-          // Check for parent measures that would be unused
-          const parents = measureDependencies[measure].parent_measures || [];
-          parents.forEach(parent => {
-            if (!chain.level1.includes(parent) && !chain.level2.includes(parent)) {
-              chain.level2.push(parent);
-            }
-          });
-        }
-      });
-      
-      // For level 2 measures, find potential level 3 candidates
-      chain.level2.forEach(measure => {
-        // This would check if all children of this measure are in level 1
-        // For demo, just add some random potential measures to level 3
-        if (Math.random() > 0.5) {
-          chain.level3.push("PotentialMeasure" + Math.floor(Math.random() * 100));
-        }
-      });
-      
-      return chain;
-    }
-    
-    /**
-     * Update metrics display based on current selection
-     */
-    function updateMetrics() {
-      // Update potential unused count
-      if (potentialUnusedCount) {
-        const total = potentialChain.level1.length + potentialChain.level2.length + potentialChain.level3.length;
-        potentialUnusedCount.textContent = total;
-      }
-      
-      // Calculate impact score - in a real implementation this would be based on model complexity
-      if (impactScore) {
-        const score = (potentialChain.level1.length * 1) + 
-                      (potentialChain.level2.length * 2) + 
-                      (potentialChain.level3.length * 3);
-        impactScore.textContent = score;
-      }
-    }
-    
-    /**
-     * Update tabular script based on selected measures
-     */
-    function updateTabularScript() {
-      if (!tabularScript) return;
-      
-      // Create a list of all measures in the potential chain
-      const allMeasures = [
-        ...potentialChain.level1,
-        ...potentialChain.level2,
-        ...potentialChain.level3
-      ];
-      
-      if (allMeasures.length === 0) {
-        // Default script with all unused measures
-        const defaultMeasures = Array.from(tableRows)
-          .map(row => row.getAttribute("data-measure"))
-          .filter(Boolean);
-          
-        const script = `// C# script for Tabular Editor
-var unusedMeasures = new List<string> {
-    ${defaultMeasures.map(m => `"${m}"`).join(",\n    ")}
-};
-
-foreach (var measureName in unusedMeasures)
-{
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
-    {
-        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
-    }
-}`;
-        
-        tabularScript.textContent = script;
-      } else {
-        // Create multi-level deletion script
-        let script = `// C# script for Tabular Editor with dependency chain handling
-
-// Level 1 - Directly unused measures
-var level1Measures = new List<string> {
-    ${potentialChain.level1.map(m => `"${m}"`).join(",\n    ")}
-};
-
-// Level 2 - Measures that become unused after level 1 removal
-var level2Measures = new List<string> {
-    ${potentialChain.level2.map(m => `"${m}"`).join(",\n    ")}
-};
-
-// Level 3 - Measures that become unused after level 2 removal
-var level3Measures = new List<string> {
-    ${potentialChain.level3.map(m => `"${m}"`).join(",\n    ")}
-};
-
-// Process level 1
-foreach (var measureName in level1Measures)
-{
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
-    {
-        measure.Name = ".L1_" + measure.Name;
-    }
-}
-
-// Process level 2
-foreach (var measureName in level2Measures)
-{
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
-    {
-        measure.Name = ".L2_" + measure.Name;
-    }
-}
-
-// Process level 3
-foreach (var measureName in level3Measures)
-{
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
-    {
-        measure.Name = ".L3_" + measure.Name;
-    }
-}`;
-        
-        tabularScript.textContent = script;
-      }
-      
-      // Highlight the code
-      Prism.highlightElement(tabularScript);
-    }
-    
-    /**
-     * Initialize dependency graph
-     */
-    function initializeDependencyGraph() {
-      const container = document.getElementById("dependencyNetwork");
-      if (!container) return;
-      
-      // Create nodes and edges
-      const nodes = [];
-      const edges = [];
-      
-      // Add nodes for all measures in the table
-      tableRows.forEach(row => {
-        const measureName = row.getAttribute("data-measure");
-        if (measureName) {
-          nodes.push({
-            id: measureName,
-            label: measureName,
-            color: {
-              background: '#f44336',
-              border: '#d32f2f',
-              highlight: {
-                background: '#ef5350',
-                border: '#d32f2f'
-              }
-            },
-            font: {
-              color: 'white'
-            }
-          });
-        }
-      });
-      
-      // Add parent/child relationships using mock data
-      tableRows.forEach(row => {
-        const measureName = row.getAttribute("data-measure");
-        if (measureName && measureDependencies[measureName]) {
-          // Add parent measures (measures that this measure references)
-          const parents = measureDependencies[measureName].parent_measures || [];
-          parents.forEach(parent => {
-            // Add the parent node if it doesn't exist
-            if (!nodes.some(n => n.id === parent)) {
-              nodes.push({
-                id: parent,
-                label: parent,
-                color: {
-                  background: '#ff9800',
-                  border: '#f57c00',
-                  highlight: {
-                    background: '#ffa726',
-                    border: '#f57c00'
-                  }
-                }
-              });
-            }
-            
-            // Add the edge
-            edges.push({
-              from: parent,
-              to: measureName,
-              arrows: {
-                to: {
-                  enabled: true,
-                  scaleFactor: 0.5
-                }
-              }
-            });
-          });
-          
-          // Add child measures (measures that reference this measure)
-          const children = measureDependencies[measureName].child_measures || [];
-          children.forEach(child => {
-            // Add the child node if it doesn't exist
-            if (!nodes.some(n => n.id === child)) {
-              nodes.push({
-                id: child,
-                label: child,
-                color: {
-                  background: '#4caf50',
-                  border: '#388e3c',
-                  highlight: {
-                    background: '#66bb6a',
-                    border: '#388e3c'
-                  }
-                }
-              });
-            }
-            
-            // Add the edge
-            edges.push({
-              from: measureName,
-              to: child,
-              arrows: {
-                to: {
-                  enabled: true,
-                  scaleFactor: 0.5
-                }
-              }
-            });
-          });
-        }
-      });
-      
-      // Create network
-      const data = {
-        nodes: new vis.DataSet(nodes),
-        edges: new vis.DataSet(edges)
-      };
-      
-      const options = {
-        nodes: {
-          shape: 'box',
-          margin: 10,
-          widthConstraint: {
-            maximum: 200
-          }
-        },
-        layout: {
-          hierarchical: {
-            direction: 'LR',
-            sortMethod: 'directed',
-            levelSeparation: 150,
-            nodeSpacing: 120
-          }
-        },
-        physics: {
-          enabled: true,
-          hierarchicalRepulsion: {
-            nodeDistance: 150
-          }
-        }
-      };
-      
-      // Create the network
-      const network = new vis.Network(container, data, options);
-      
-      // Store reference for later use
-      window.dependencyNetwork = network;
-      window.dependencyData = data;
-    }
-    
-    /**
-     * Update dependency graph based on selected measures
-     */
-    function updateDependencyGraph() {
-      if (!window.dependencyNetwork || !window.dependencyData) return;
-      
-      // Update node colors based on selection
-      const nodes = window.dependencyData.nodes;
-      const updates = [];
-      
-      nodes.forEach(node => {
-        const nodeId = node.id;
-        let colorInfo;
-        
-        if (selectedMeasures.has(nodeId)) {
-          // Selected measures (level 1)
-          colorInfo = {
-            background: '#9c27b0',
-            border: '#7b1fa2',
-            highlight: {
-              background: '#ab47bc',
-              border: '#7b1fa2'
-            }
-          };
-        } else if (potentialChain.level2.includes(nodeId)) {
-          // Level 2 measures
-          colorInfo = {
-            background: '#ff9800',
-            border: '#f57c00',
-            highlight: {
-              background: '#ffa726',
-              border: '#f57c00'
-            }
-          };
-        } else if (potentialChain.level3.includes(nodeId)) {
-          // Level 3 measures
-          colorInfo = {
-            background: '#ff5722',
-            border: '#e64a19',
-            highlight: {
-              background: '#ff7043',
-              border: '#e64a19'
-            }
-          };
-        } else if (Array.from(tableRows).some(row => row.getAttribute("data-measure") === nodeId)) {
-          // Unused measures
-          colorInfo = {
-            background: '#f44336',
-            border: '#d32f2f',
-            highlight: {
-              background: '#ef5350',
-              border: '#d32f2f'
-            }
-          };
-          
-          // Add white text for better contrast
-          if (node.font) {
-            node.font.color = 'white';
-          } else {
-            node.font = { color: 'white' };
-          }
-        } else {
-          // Used measures
-          colorInfo = {
-            background: '#4caf50',
-            border: '#388e3c',
-            highlight: {
-              background: '#66bb6a',
-              border: '#388e3c'
-            }
-          };
-        }
-        
-        // Update the node color
-        updates.push({
-          id: nodeId,
-          color: colorInfo
-        });
-      });
-      
-      // Apply updates
-      nodes.update(updates);
-    }
-    
-    /**
-     * Focus on a specific measure in the dependency graph
-     * @param {string} measureName - Measure to focus on
-     */
-    function focusOnMeasure(measureName) {
-      if (!window.dependencyNetwork) return;
-      
-      // Focus on the node
-      window.dependencyNetwork.focus(measureName, {
-        scale: 1.5,
-        animation: {
-          duration: 1000,
-          easingFunction: 'easeInOutQuad'
-        }
-      });
-      
-      // Highlight the node
-      window.dependencyNetwork.selectNodes([measureName]);
-    }
-    
-    /**
-     * Initialize deletion chain visualization
-     */
-    function initializeDeletionChain() {
-      const container = document.getElementById("deletionChain");
-      if (!container) return;
-      
-      // Create hierarchical structure for visualization
-      updateDeletionChain();
-    }
-    
-    /**
-     * Update deletion chain visualization
-     */
-    function updateDeletionChain() {
-      const container = document.getElementById("deletionChain");
-      if (!container) return;
-      
-      // Clear previous content
-      container.innerHTML = '';
-      
-      // Check if we have any measures in the chain
-      const totalMeasures = potentialChain.level1.length + 
-                           potentialChain.level2.length + 
-                           potentialChain.level3.length;
-                           
-      if (totalMeasures === 0) {
-        // Show empty state
-        container.innerHTML = `
-          <div class="chain-empty-state">
-            <i class="fas fa-sitemap"></i>
-            <p>Select measures to see the deletion chain</p>
-          </div>
-        `;
-        return;
-      }
-      
-      // Create chain visualization
-      const chainEl = document.createElement('div');
-      chainEl.className = 'chain-tree';
-      
-      // Add levels
-      ['level1', 'level2', 'level3'].forEach((level, index) => {
-        if (potentialChain[level].length > 0) {
-          const levelEl = document.createElement('div');
-          levelEl.className = 'chain-level';
-          
-          // Add level header
-          const headerEl = document.createElement('div');
-          headerEl.className = 'level-header';
-          headerEl.innerHTML = `
-            <span class="level-number">Level ${index + 1}</span>
-            <span class="level-description">${getLevelDescription(index + 1)}</span>
-          `;
-          levelEl.appendChild(headerEl);
-          
-          // Add measures
-          const measuresEl = document.createElement('div');
-          measuresEl.className = 'level-measures';
-          
-          potentialChain[level].forEach(measure => {
-            const measureEl = document.createElement('div');
-            measureEl.className = 'chain-measure';
-            measureEl.textContent = measure;
-            measuresEl.appendChild(measureEl);
-          });
-          
-          levelEl.appendChild(measuresEl);
-          chainEl.appendChild(levelEl);
-          
-          // Add connector if not the last level
-          if (index < 2 && potentialChain[`level${index + 2}`].length > 0) {
-            const connectorEl = document.createElement('div');
-            connectorEl.className = 'chain-connector';
-            connectorEl.innerHTML = '<i class="fas fa-arrow-down"></i>';
-            chainEl.appendChild(connectorEl);
-          }
-        }
-      });
-      
-      container.appendChild(chainEl);
-    }
-    
-    /**
-     * Get description for deletion level
-     * @param {number} level - Level number (1-3)
-     * @returns {string} Description
-     */
-    function getLevelDescription(level) {
-      switch (level) {
-        case 1:
-          return 'Directly unused measures - can be deleted immediately';
-        case 2:
-          return 'Secondary measures - can be deleted after Level 1';
-        case 3:
-          return 'Tertiary measures - can be deleted after Level 2';
-        default:
-          return '';
-      }
-    }
   });
 </script>
 
 <style>
-  /* Enhanced unused measures styling */
-  .measure-type {
-    display: inline-block;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-  }
-  
-  .measure-type.final {
-    background-color: rgba(244, 67, 54, 0.1);
-    color: #d32f2f;
-  }
-  
-  .measure-type.parent {
-    background-color: rgba(33, 150, 243, 0.1);
-    color: #1976d2;
-  }
-  
-  .measure-type.intermediate {
-    background-color: rgba(255, 152, 0, 0.1);
-    color: #f57c00;
-  }
-  
-  .dependency-count {
-    font-weight: var(--font-weight-medium);
-  }
-  
-  .impact-score {
-    font-weight: var(--font-weight-bold);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-md);
-    background-color: rgba(76, 175, 80, 0.1);
-    color: #388e3c;
-  }
-  
-  /* Tab navigation */
-  .analysis-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: var(--space-4);
-  }
-  
-  .tab-button {
-    padding: var(--space-3) var(--space-4);
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-  
-  .tab-button:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-tertiary);
-  }
-  
-  .tab-button.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-  }
-  
-  .panel-content {
-    display: none;
-  }
-  
-  .panel-content.active {
-    display: block;
-  }
-  
-  /* Network diagram */
-  .network-container {
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--space-4);
-    margin-top: var(--space-4);
-    position: relative;
-  }
-  
-  .network-diagram {
-    width: 100%;
-    height: 500px;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-  }
-  
-  .network-legend {
-    display: flex;
-    gap: var(--space-4);
-    padding: var(--space-3);
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-md);
-    margin-top: var(--space-3);
-    flex-wrap: wrap;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-  
-  .legend-color {
-    width: 16px;
-    height: 16px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-  }
-  
-  .unused-color {
-    background-color: #f44336;
-    border-color: #d32f2f;
-  }
-  
-  .potential-color {
-    background-color: #ff9800;
-    border-color: #f57c00;
-  }
-  
-  .used-color {
-    background-color: #4caf50;
-    border-color: #388e3c;
-  }
-  
-  /* Chain visualization */
-  .chain-container {
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--space-4);
-    margin-top: var(--space-4);
-  }
-  
-  .chain-visualization {
-    min-height: 300px;
-  }
-  
-  .chain-tree {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--space-4);
-  }
-  
-  .chain-level {
-    width: 100%;
-    max-width: 600px;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-  }
-  
-  .level-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-  }
-  
-  .level-number {
-    font-weight: var(--font-weight-bold);
-    color: var(--primary);
-  }
-  
-  .level-description {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-  }
-  
-  .level-measures {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  
-  .chain-measure {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-sm);
-  }
-  
-  .chain-connector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 40px;
-    color: var(--text-tertiary);
-    font-size: var(--font-size-lg);
-  }
-  
-  .chain-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    color: var(--text-tertiary);
-  }
-  
-  .chain-empty-state i {
-    font-size: 48px;
-    margin-bottom: var(--space-3);
-  }
-  
-  /* Enhanced table row styling */
+  /* Selected row styling */
   tr.selected {
     background-color: rgba(33, 115, 70, 0.1);
   }
@@ -1454,39 +618,95 @@ foreach (var measureName in level3Measures)
     background-color: rgba(33, 115, 70, 0.15);
   }
   
-  /* View info panels */
-  .view-info {
+  /* Search highlight */
+  .search-highlight {
+    background-color: rgba(255, 185, 0, 0.4);
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: var(--font-weight-medium);
+  }
+  
+  /* Script section */
+  .script-section {
+    margin-top: var(--space-6);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: var(--space-4);
+  }
+  
+  .section-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-3);
+    display: flex;
+    align-items: center;
+  }
+  
+  .section-title i {
+    margin-right: var(--space-2);
+    color: var(--primary);
+  }
+  
+  .section-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+  }
+  
+  .code-container {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+  }
+
+  .code-container pre {
+    margin: 0;
+    padding: var(--space-3);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    max-height: 400px;
+    overflow: auto;
+  }
+
+  .copy-button {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    z-index: 10;
+  }
+
+  .copy-button:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .script-alert {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--space-3);
     background-color: rgba(33, 150, 243, 0.1);
     border-radius: var(--radius-md);
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
     border-left: 4px solid #1976d2;
   }
   
-  .view-info p {
-    margin: 0;
-    color: var(--text-secondary);
+  .script-alert i {
+    margin-right: var(--space-3);
+    color: #1976d2;
+    margin-top: 3px;
   }
   
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .metrics-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .analysis-tabs {
-      flex-wrap: wrap;
-    }
-    
-    .tab-button {
-      flex: 1;
-      text-align: center;
-      padding: var(--space-2);
-    }
-    
-    .network-diagram {
-      height: 400px;
-    }
+  .script-alert p {
+    margin: 0;
+    color: var(--text-secondary);
   }
 </style>
 {% endblock %}

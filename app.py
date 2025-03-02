@@ -249,14 +249,21 @@ def create_app(config_object: str = 'config.Config') -> Flask:
         # Get final measures (measures that don't have children)
         final_measures = lvp.get_final_measures()
         
-        # Calculate unused final measures - THIS IS THE KEY FIX
-        unused_final_measures = final_measures - used_measures
+        # Calculate unused final measures
+        unused_final_measures = sorted(list(final_measures - used_measures))
+        
+        # Get dependency data for the unused measures
+        dependency_data = lvp.get_full_dependency_chain(unused_final_measures)
+        
+        # Get initial deletion impact analysis
+        deletion_impact = lvp.analyze_deletion_impact(unused_final_measures)
 
-        used_measures = dp.get_used_measures()
-        all_measures = lvp.get_all_measures()
-        unused_measures = sorted(list(all_measures - used_measures))
-
-        return render_template('unused_measures.html', unused_measures=unused_final_measures)
+        return render_template(
+            'unused_measures.html', 
+            unused_measures=unused_final_measures,
+            measure_dependencies=dependency_data,
+            deletion_impact=deletion_impact
+        )
 
     return app
 

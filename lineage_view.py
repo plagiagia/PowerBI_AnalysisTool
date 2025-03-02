@@ -13,6 +13,7 @@ class LineageView:
         self.PARENT_INDEX = 2
         self.CHILD_INDEX = 3
         self.COLUMN_INDEX = 5
+        self.measure_data = {}  # Cache for measure data
 
     def process_lineage_data(self):
         with open(self.tsv_file_path, 'r', encoding='utf-8') as file:
@@ -29,6 +30,28 @@ class LineageView:
             parent_measures = measure[self.PARENT_INDEX].split(
                 '; ') if measure[self.PARENT_INDEX] else []
             has_parent = bool(parent_measures)
+
+            # Store all parent measures
+            if parent_measures:
+                for parent in parent_measures:
+                    if parent:
+                        self.measures_with_children.add(parent)
+
+            # Store all child measures
+            child_measures = measure[self.CHILD_INDEX].split(
+                '; ') if measure[self.CHILD_INDEX] else []
+            if child_measures:
+                for child in child_measures:
+                    if child:
+                        self.measures_with_children.add(measure_name)
+
+            # Cache the measure data for later use
+            self.measure_data[measure_name] = {
+                'parent_measures': parent_measures,
+                'child_measures': child_measures,
+                'dax': measure[self.DAX_EXPRESSION_INDEX],
+                'columns': measure[self.COLUMN_INDEX].split('; ') if measure[self.COLUMN_INDEX] else []
+            }
 
             # Processing for columns
             measure_columns = measure[self.COLUMN_INDEX].split(
@@ -110,3 +133,202 @@ class LineageView:
 
         # A measure is final if it's in final_measures and not a parent
         return final_measures - parent_measures
+
+    def get_measure_dependencies(self, measure_name):
+        """
+        Get parent and child measures for a specific measure.
+        
+        Parameters:
+        measure_name (str): Name of the measure to get dependencies for
+        
+        Returns:
+        dict: Dictionary with 'parent_measures', 'child_measures', and 'type'
+        """
+        # Process data first if not already done
+        if not self.measure_data:
+            self.process_lineage_data()
+            
+        # Get the data from our cache if available
+        if measure_name in self.measure_data:
+            data = self.measure_data[measure_name]
+            
+            # Determine measure type
+            measure_type = "final"
+            if data['child_measures'] and not data['parent_measures']:
+                measure_type = "parent"
+            elif data['child_measures'] and data['parent_measures']:
+                measure_type = "intermediate"
+                
+            return {
+                "parent_measures": data['parent_measures'],
+                "child_measures": data['child_measures'],
+                "columns": data['columns'],
+                "type": measure_type
+            }
+        
+        # If not in the cache, return empty data
+        return {
+            "parent_measures": [],
+            "child_measures": [],
+            "columns": [],
+            "type": "unknown"
+        }
+
+    def get_dependency_data(self, measure_names):
+        """
+        Get dependency data for multiple measures.
+        
+        Parameters:
+        measure_names (list): List of measure names to get dependencies for
+        
+        Returns:
+        dict: Dictionary mapping measure names to their dependencies
+        """
+        dependency_data = {}
+        
+        for measure_name in measure_names:
+            dependency_data[measure_name] = self.get_measure_dependencies(measure_name)
+        
+        return dependency_data
+        
+    def get_full_dependency_chain(self, measure_names):
+        """
+        Get a complete dependency chain including all related measures.
+        This helps with visualizing the entire network of dependencies.
+        
+        Parameters:
+        measure_names (list): Starting list of measure names
+        
+        Returns:
+        dict: Full dependency graph with all related measures
+        """
+        # Process data first if not already done
+        if not self.measure_data:
+            self.process_lineage_data()
+            
+        # Initialize with the starting measures
+        all_measures = set(measure_names)
+        dependency_data = {}
+        
+        # First pass: collect all related measures (breadth-first)
+        measures_to_process = list(measure_names)
+        processed = set()
+        
+        while measures_to_process:
+            current_measure = measures_to_process.pop(0)
+            
+            if current_measure in processed:
+                continue
+                
+            processed.add(current_measure)
+            
+            if current_measure in self.measure_data:
+                data = self.measure_data[current_measure]
+                
+                # Add parents to the processing queue
+                for parent in data['parent_measures']:
+                    if parent and parent not in processed:
+                        all_measures.add(parent)
+                        measures_to_process.append(parent)
+                
+                # Add children to the processing queue
+                for child in data['child_measures']:
+                    if child and child not in processed:
+                        all_measures.add(child)
+                        measures_to_process.append(child)
+        
+        # Second pass: get dependency data for all collected measures
+        for measure in all_measures:
+            dependency_data[measure] = self.get_measure_dependencies(measure)
+            
+        return dependency_data
+
+    def analyze_deletion_impact(self, measure_names):
+        """
+        Analyze what happens if we delete these measures.
+        
+        Parameters:
+        measure_names (list): List of measure names to consider for deletion
+        
+        Returns:
+        dict: Deletion analysis with chains and impact
+        """
+        # Process data first if not already done
+        if not self.measure_data:
+            self.process_lineage_data()
+            
+        # Start with the selected measures as level 1
+        chain = {
+            "level1": list(measure_names),
+            "level2": [],
+            "level3": []
+        }
+        
+        # Collect all measures that reference our level 1 measures
+        level2_candidates = set()
+        
+        for measure in self.measure_data:
+            data = self.measure_data[measure]
+            
+            # Skip if this is in our level 1
+            if measure in measure_names:
+                continue
+                
+            # Check if this measure depends on any level 1 measure
+            for parent in data['parent_measures']:
+                if parent in measure_names:
+                    level2_candidates.add(measure)
+                    break
+        
+        # Filter level 2 candidates - only include ones where ALL parents are in level 1
+        for candidate in level2_candidates:
+            data = self.measure_data[candidate]
+            all_parents_in_level1 = True
+            
+            for parent in data['parent_measures']:
+                if parent not in measure_names:
+                    all_parents_in_level1 = False
+                    break
+                    
+            if all_parents_in_level1:
+                chain["level2"].append(candidate)
+        
+        # Now similarly for level 3 - measures that depend only on level 1 and level 2
+        level3_candidates = set()
+        
+        for measure in self.measure_data:
+            data = self.measure_data[measure]
+            
+            # Skip if already in level 1 or 2
+            if measure in measure_names or measure in chain["level2"]:
+                continue
+                
+            # Check if this measure depends on any level 2 measure
+            for parent in data['parent_measures']:
+                if parent in chain["level2"]:
+                    level3_candidates.add(measure)
+                    break
+        
+        # Filter level 3 candidates - only include ones where ALL parents are in level 1 or 2
+        all_previous_levels = set(measure_names) | set(chain["level2"])
+        
+        for candidate in level3_candidates:
+            data = self.measure_data[candidate]
+            all_parents_in_previous_levels = True
+            
+            for parent in data['parent_measures']:
+                if parent not in all_previous_levels:
+                    all_parents_in_previous_levels = False
+                    break
+                    
+            if all_parents_in_previous_levels:
+                chain["level3"].append(candidate)
+        
+        # Calculate impact score - more complex formulas could be used
+        impact_score = len(chain["level1"]) + len(chain["level2"])*2 + len(chain["level3"])*3
+        
+        return {
+            "chain": chain,
+            "impact_score": impact_score,
+            "total_measures": len(chain["level1"]) + len(chain["level2"]) + len(chain["level3"])
+        }
