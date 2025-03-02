@@ -2,6 +2,7 @@
 /data/
 *.json
 *.tsv
+.env
 
 # Python
 __pycache__/
