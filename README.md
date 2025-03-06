@@ -14,8 +14,9 @@ The Power BI Analysis Tool provides an intuitive interface to explore the struct
 - **Visual Fields Explorer** - See all fields used across your report's visuals with advanced filtering and search capabilities
 - **Data Lineage Diagram** - Visualize relationships between measures and columns with interactive network diagrams
 - **DAX Explorer** - Browse and analyze DAX formulas with syntax highlighting and similarity analysis
-- **Source Explorer** - Examine the M queries that form your data sources with syntax highlighting
+- **Source Explorer** - Examine the M queries that form your data sources with syntax highlighting and AI-powered analysis
 - **Unused Measures Detector** - Identify measures not used in any visuals with dependency chain analysis
+- **Power BI Assistant** - Get AI-powered answers to any Power BI related questions
 
 ## 🖼️ Screenshots
 
