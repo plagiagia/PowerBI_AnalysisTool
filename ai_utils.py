@@ -164,9 +164,21 @@ class AIService:
         Do not include any text outside of the JSON structure. The explanation should be a plain string with markdown 
         formatting, not a nested JSON object.
         
+        For the "explanation" field, structure your response as follows:
+        
+        1. Start with a brief overview paragraph: "This M query performs the following steps:"
+        
+        2. For each step in the query, use a strong (bold) formatting with a colon at the end, followed by the explanation:
+           **Source Connection:** Connects to a SQL database...
+           **Table Reference:** Retrieves the 'Sales' table...
+           
+        3. Include a separate paragraph starting with "Potential performance issues or inefficiencies include..."
+        
+        4. End with a paragraph starting with "Suggestions for improvement include..."
+        
         Example of correct format:
         {
-          "explanation": "This query connects to a SQL database and retrieves data from the Sales table. It then filters the results to only include records from the current year.",
+          "explanation": "This M query performs the following steps:\\n\\n**Source Connection:** Connects to a SQL database hosted at 'server' and accesses the 'db' database.\\n**Table Reference:** Retrieves the 'Sales' table from the database.\\n**Filter Data:** Filters the rows to include only records from the current year.\\n\\nPotential performance issues or inefficiencies include the use of a direct filter rather than using query folding, which could be optimized.\\n\\nSuggestions for improvement include leveraging query folding by pushing the filter to the database level.",
           "renamed_code": "let\\n    DatabaseConnection = Sql.Database(\\"server\\", \\"db\\"),\\n    SalesTable = DatabaseConnection{\\"Sales\\"},\\n    FilteredToCurrentYear = Table.SelectRows(SalesTable, each [Year] = Date.Year(DateTime.LocalNow()))\\nin\\n    FilteredToCurrentYear"
         }
         
