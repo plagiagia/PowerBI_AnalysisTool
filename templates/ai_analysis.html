@@ -1,132 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}AI Analysis - {{ app_name }}{% endblock %}
+{% block title %}Power BI Assistant - {{ app_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <li>
-  <a href="/ai-analysis"><i class="fas fa-robot"></i><span class="breadcrumb-text">AI Analysis</span></a>
+  <a href="/ai-analysis"><i class="fas fa-robot"></i><span class="breadcrumb-text">Power BI Assistant</span></a>
 </li>
 {% endblock %}
 
 {% block content %}
 <div class="content-container">
   <div class="content-header">
-    <h1><i class="fas fa-robot"></i> AI-Powered Analysis</h1>
-    <p class="subtitle">Leverage AI to gain insights from your Power BI report</p>
+    <h1><i class="fas fa-robot"></i> Power BI Assistant</h1>
+    <p class="subtitle">Your AI-powered guide to Power BI</p>
   </div>
 
-  <div class="card-grid">
-    <!-- DAX Analysis Card -->
+  <div class="assistant-container">
     <div class="card">
       <div class="card-header">
-        <h2><i class="fas fa-code"></i> DAX Expression Analysis</h2>
+        <h2><i class="fas fa-comments"></i> Ask Anything About Power BI</h2>
       </div>
       <div class="card-content">
-        <p>Get AI-powered insights and suggestions for your DAX expressions.</p>
-        <form id="daxAnalysisForm" action="/ai-analysis/dax" method="post" class="ai-form">
-          <div class="form-group">
-            <label for="daxExpression">DAX Expression:</label>
-            <textarea id="daxExpression" name="daxExpression" rows="6" placeholder="Enter your DAX expression here..." required></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn primary">Analyze</button>
-          </div>
-        </form>
-        {% if dax_analysis_result %}
-        <div class="analysis-result">
-          <h3>Analysis Result:</h3>
-          <div class="result-content">
-            {{ dax_analysis_result | safe }}
-          </div>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Measure Suggestion Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2><i class="fas fa-lightbulb"></i> Measure Suggestions</h2>
-      </div>
-      <div class="card-content">
-        <p>Get AI-powered suggestions for DAX measures based on your business question.</p>
-        <form id="measureSuggestionForm" action="/ai-analysis/suggest-measures" method="post" class="ai-form">
-          <div class="form-group">
-            <label for="tableSchema">Table Schema:</label>
-            <textarea id="tableSchema" name="tableSchema" rows="6" placeholder="Describe your table schema here..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="businessQuestion">Business Question:</label>
-            <textarea id="businessQuestion" name="businessQuestion" rows="3" placeholder="What business question are you trying to answer?" required></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn primary">Get Suggestions</button>
-          </div>
-        </form>
-        {% if measure_suggestion_result %}
-        <div class="analysis-result">
-          <h3>Suggested Measures:</h3>
-          <div class="result-content">
-            {{ measure_suggestion_result | safe }}
-          </div>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Model Relationship Analysis Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2><i class="fas fa-project-diagram"></i> Model Relationship Analysis</h2>
-      </div>
-      <div class="card-content">
-        <p>Get AI-powered insights about your data model relationships.</p>
-        <form id="modelAnalysisForm" action="/ai-analysis/model-relationships" method="post" class="ai-form">
-          <div class="form-group">
-            <label for="modelJson">Model JSON:</label>
-            <textarea id="modelJson" name="modelJson" rows="6" placeholder="Paste your model JSON here..." required></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn primary">Analyze</button>
-            <button type="button" id="loadModelBtn" class="btn secondary">Load Current Model</button>
-          </div>
-        </form>
-        {% if model_analysis_result %}
-        <div class="analysis-result">
-          <h3>Model Analysis:</h3>
-          <div class="result-content">
-            {{ model_analysis_result | safe }}
-          </div>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- General AI Assistant Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2><i class="fas fa-comments"></i> Power BI Assistant</h2>
-      </div>
-      <div class="card-content">
-        <p>Ask any Power BI related question and get AI-powered answers.</p>
+        <p>Get expert answers to any Power BI related question. Ask about DAX formulas, best practices, troubleshooting, or how to implement specific visualizations.</p>
         <form id="assistantForm" action="/ai-analysis/assistant" method="post" class="ai-form">
           <div class="form-group">
             <label for="question">Your Question:</label>
-            <textarea id="question" name="question" rows="3" placeholder="Ask a Power BI related question..." required></textarea>
+            <textarea id="question" name="question" rows="4" placeholder="Ask a Power BI related question..." required></textarea>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn primary">Ask</button>
+            <button type="submit" class="btn primary">
+              <i class="fas fa-paper-plane"></i> Ask Assistant
+            </button>
           </div>
         </form>
+        
         {% if assistant_result %}
         <div class="analysis-result">
-          <h3>Answer:</h3>
+          <h3><i class="fas fa-reply"></i> Answer:</h3>
           <div class="result-content">
             {{ assistant_result | safe }}
           </div>
         </div>
         {% endif %}
       </div>
+    </div>
+    
+    <div class="assistant-tips">
+      <h3><i class="fas fa-lightbulb"></i> Example Questions</h3>
+      <ul class="example-questions">
+        <li>
+          <button class="example-question-btn" data-question="How do I create a calculated column in Power BI?">
+            How do I create a calculated column in Power BI?
+          </button>
+        </li>
+        <li>
+          <button class="example-question-btn" data-question="What's the difference between calculated columns and measures in DAX?">
+            What's the difference between calculated columns and measures in DAX?
+          </button>
+        </li>
+        <li>
+          <button class="example-question-btn" data-question="How can I optimize the performance of my Power BI report?">
+            How can I optimize the performance of my Power BI report?
+          </button>
+        </li>
+        <li>
+          <button class="example-question-btn" data-question="Explain how to use CALCULATE function in DAX with examples">
+            Explain how to use CALCULATE function in DAX with examples
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
@@ -135,26 +77,25 @@
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Handle "Load Current Model" button click
-    const loadModelBtn = document.getElementById('loadModelBtn');
-    if (loadModelBtn) {
-      loadModelBtn.addEventListener('click', async function() {
-        try {
-          const response = await fetch('/api/model-json');
-          if (!response.ok) {
-            throw new Error('Failed to load model data');
-          }
-          const data = await response.json();
-          document.getElementById('modelJson').value = JSON.stringify(data, null, 2);
-        } catch (error) {
-          showNotification('Error loading model data: ' + error.message, 'error');
-        }
+    // Handle example question buttons
+    const exampleButtons = document.querySelectorAll('.example-question-btn');
+    const questionTextarea = document.getElementById('question');
+    
+    exampleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const question = this.getAttribute('data-question');
+        questionTextarea.value = question;
+        questionTextarea.focus();
+        // Scroll to the form
+        document.getElementById('assistantForm').scrollIntoView({ behavior: 'smooth' });
       });
-    }
+    });
 
     // Function to show notifications
     function showNotification(message, type = 'info') {
       const container = document.querySelector('.notification-container');
+      if (!container) return;
+      
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
       notification.innerHTML = `
@@ -190,4 +131,95 @@
     }
   });
 </script>
+
+<style>
+  .assistant-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+  
+  @media (max-width: 992px) {
+    .assistant-container {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .assistant-tips {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    align-self: start;
+  }
+  
+  .assistant-tips h3 {
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    display: flex;
+    align-items: center;
+  }
+  
+  .assistant-tips h3 i {
+    color: #ffc107;
+    margin-right: var(--space-2);
+  }
+  
+  .example-questions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .example-questions li {
+    margin-bottom: var(--space-2);
+  }
+  
+  .example-question-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    text-align: left;
+    padding: var(--space-2);
+    width: 100%;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+  }
+  
+  .example-question-btn:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    text-decoration: underline;
+  }
+  
+  .analysis-result {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+  }
+  
+  .analysis-result h3 {
+    display: flex;
+    align-items: center;
+    color: var(--primary);
+    margin-bottom: var(--space-3);
+  }
+  
+  .analysis-result h3 i {
+    margin-right: var(--space-2);
+  }
+  
+  .result-content {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    line-height: 1.6;
+  }
+  
+  .form-actions .btn i {
+    margin-right: var(--space-2);
+  }
+</style>
 {% endblock %}
