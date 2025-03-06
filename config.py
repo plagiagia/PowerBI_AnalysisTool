@@ -33,7 +33,7 @@ class Config:
     # AI Integration
     ENABLE_AI_FEATURES = True
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-    OPENAI_MODEL = "gpt-3.5-turbo"  # Default model - can be adjusted based on needs
+    OPENAI_MODEL = os.environ.get('OPENAI_MODEL', "gpt-4o")  # Default model - can be adjusted based on needs
     AI_TEMPERATURE = 0.7  # Controls randomness (0.0-1.0)
     AI_MAX_TOKENS = 2000  # Maximum tokens per request
 

@@ -4,11 +4,13 @@ import csv
 import re
 import datetime
 import collections
+import markdown
 from typing import List, Set, Dict, Any, Optional
-from flask import Flask, render_template, g, current_app, abort, request
+from flask import Flask, render_template, g, current_app, abort, request, jsonify
 from data_processor import DataProcessor
 from lineage_view import LineageView
 from config import get_config
+from ai_utils import get_ai_service
 
 def create_app(config_object=None) -> Flask:
     """
@@ -252,6 +254,126 @@ def create_app(config_object=None) -> Flask:
         unused_final_measures = sorted(list(final_measures - used_measures))
 
         return render_template('unused_measures.html', unused_measures=unused_final_measures)
+        
+    # AI Analysis Routes
+    @app.route('/ai-analysis')
+    def ai_analysis() -> str:
+        """Render the AI analysis page."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            abort(404, description="AI features are currently disabled.")
+            
+        return render_template('ai_analysis.html')
+    
+    @app.route('/ai-analysis/dax', methods=['POST'])
+    def analyze_dax() -> str:
+        """Analyze a DAX expression using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            abort(404, description="AI features are currently disabled.")
+            
+        dax_expression = request.form.get('daxExpression', '')
+        if not dax_expression:
+            return render_template('ai_analysis.html', 
+                                  dax_analysis_result="Please provide a DAX expression to analyze.")
+        
+        try:
+            ai_service = get_ai_service()
+            result = ai_service.analyze_dax(dax_expression)
+            # Convert markdown to HTML for better formatting (ensure result is a string)
+            result_html = markdown.markdown(str(result))
+            return render_template('ai_analysis.html', dax_analysis_result=result_html)
+        except Exception as e:
+            current_app.logger.error(f"Error analyzing DAX expression: {e}")
+            return render_template('ai_analysis.html', 
+                                  dax_analysis_result=f"Error analyzing DAX expression: {str(e)}")
+    
+    @app.route('/ai-analysis/suggest-measures', methods=['POST'])
+    def suggest_measures() -> str:
+        """Suggest DAX measures based on a business question."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            abort(404, description="AI features are currently disabled.")
+            
+        table_schema = request.form.get('tableSchema', '')
+        business_question = request.form.get('businessQuestion', '')
+        
+        if not table_schema or not business_question:
+            return render_template('ai_analysis.html', 
+                                  measure_suggestion_result="Please provide both table schema and business question.")
+        
+        try:
+            ai_service = get_ai_service()
+            result = ai_service.suggest_measures(table_schema, business_question)
+            # Convert markdown to HTML for better formatting (ensure result is a string)
+            result_html = markdown.markdown(str(result))
+            return render_template('ai_analysis.html', measure_suggestion_result=result_html)
+        except Exception as e:
+            current_app.logger.error(f"Error suggesting measures: {e}")
+            return render_template('ai_analysis.html', 
+                                  measure_suggestion_result=f"Error suggesting measures: {str(e)}")
+    
+    @app.route('/ai-analysis/model-relationships', methods=['POST'])
+    def analyze_model_relationships() -> str:
+        """Analyze model relationships using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            abort(404, description="AI features are currently disabled.")
+            
+        model_json = request.form.get('modelJson', '')
+        
+        if not model_json:
+            return render_template('ai_analysis.html', 
+                                  model_analysis_result="Please provide model JSON to analyze.")
+        
+        try:
+            ai_service = get_ai_service()
+            result = ai_service.explain_model_relationships(model_json)
+            # Convert markdown to HTML for better formatting (ensure result is a string)
+            result_html = markdown.markdown(str(result))
+            return render_template('ai_analysis.html', model_analysis_result=result_html)
+        except Exception as e:
+            current_app.logger.error(f"Error analyzing model relationships: {e}")
+            return render_template('ai_analysis.html', 
+                                  model_analysis_result=f"Error analyzing model relationships: {str(e)}")
+    
+    @app.route('/ai-analysis/assistant', methods=['POST'])
+    def ai_assistant() -> str:
+        """General Power BI assistant using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            abort(404, description="AI features are currently disabled.")
+            
+        question = request.form.get('question', '')
+        
+        if not question:
+            return render_template('ai_analysis.html', 
+                                  assistant_result="Please provide a question to answer.")
+        
+        try:
+            ai_service = get_ai_service()
+            system_prompt = """
+            You are a Power BI expert assistant. Provide helpful, accurate, and concise answers 
+            to questions about Power BI. Include examples where appropriate and focus on best practices.
+            """
+            result = ai_service.generate_text(question, system_prompt=system_prompt)
+            # Convert markdown to HTML for better formatting (ensure result is a string)
+            result_html = markdown.markdown(str(result))
+            return render_template('ai_analysis.html', assistant_result=result_html)
+        except Exception as e:
+            current_app.logger.error(f"Error with AI assistant: {e}")
+            return render_template('ai_analysis.html', 
+                                  assistant_result=f"Error with AI assistant: {str(e)}")
+    
+    @app.route('/api/model-json', methods=['GET'])
+    def get_model_json():
+        """API endpoint to get the current model JSON."""
+        try:
+            model_data = load_model_data(app.config['MODEL_JSON_PATH'])
+            return jsonify(model_data)
+        except Exception as e:
+            current_app.logger.error(f"Error loading model JSON: {e}")
+            return jsonify({"error": str(e)}), 500
 
     # Register error handlers
     @app.errorhandler(404)

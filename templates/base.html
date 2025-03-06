@@ -93,6 +93,13 @@
             <span>Unused Measures</span>
           </a>
         </li>
+        <li class="nav-item{% if request.path == '/ai-analysis' %} active{% endif %}">
+          <a href="/ai-analysis" class="nav-link"
+            aria-current="{{ 'page' if request.path == '/ai-analysis' else 'false' }}">
+            <i class="fas fa-robot"></i>
+            <span>AI Analysis</span>
+          </a>
+        </li>
       </ul>
     </nav>
 
