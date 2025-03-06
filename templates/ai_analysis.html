@@ -28,11 +28,33 @@
             <textarea id="question" name="question" rows="4" placeholder="Ask a Power BI related question..." required></textarea>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn primary">
+            <button type="submit" class="btn primary" id="submitButton">
               <i class="fas fa-paper-plane"></i> Ask Assistant
             </button>
           </div>
         </form>
+        
+        <!-- Loading Animation -->
+        <div id="loadingAnimation" class="loading-animation" style="display: none;">
+          <div class="brain-animation">
+            <div class="brain-container">
+              <i class="fas fa-brain"></i>
+              <div class="pulse-circles">
+                <div class="pulse-circle pulse-circle-1"></div>
+                <div class="pulse-circle pulse-circle-2"></div>
+                <div class="pulse-circle pulse-circle-3"></div>
+              </div>
+            </div>
+          </div>
+          <div class="loading-text">
+            <p>AI is thinking...</p>
+            <div class="typing-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </div>
         
         {% if assistant_result %}
         <div class="analysis-result">
@@ -80,7 +102,35 @@
     // Handle example question buttons
     const exampleButtons = document.querySelectorAll('.example-question-btn');
     const questionTextarea = document.getElementById('question');
+    const assistantForm = document.getElementById('assistantForm');
+    const loadingAnimation = document.getElementById('loadingAnimation');
+    const submitButton = document.getElementById('submitButton');
     
+    // Handle form submission to show loading animation
+    if (assistantForm) {
+      assistantForm.addEventListener('submit', function(e) {
+        // Show loading animation
+        if (loadingAnimation) {
+          loadingAnimation.style.display = 'flex';
+        }
+        
+        // Disable submit button to prevent multiple submissions
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        }
+        
+        // Continue with form submission
+        // The form will be submitted normally and the page will reload with the result
+      });
+    }
+    
+    // If there's a result already on the page, hide the loading animation
+    if (document.querySelector('.analysis-result') && loadingAnimation) {
+      loadingAnimation.style.display = 'none';
+    }
+    
+    // Handle example question buttons
     exampleButtons.forEach(button => {
       button.addEventListener('click', function() {
         const question = this.getAttribute('data-question');
@@ -220,6 +270,145 @@
   
   .form-actions .btn i {
     margin-right: var(--space-2);
+  }
+  
+  /* Loading Animation Styles */
+  .loading-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    margin-top: var(--space-6);
+    text-align: center;
+  }
+  
+  .brain-animation {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: var(--space-4);
+  }
+  
+  .brain-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .brain-container i {
+    font-size: 60px;
+    color: var(--primary);
+    animation: pulse 2s infinite;
+    z-index: 2;
+  }
+  
+  .pulse-circles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .pulse-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background-color: rgba(0, 123, 255, 0.1);
+    animation: pulse-grow 2s infinite;
+  }
+  
+  .pulse-circle-1 {
+    width: 70px;
+    height: 70px;
+    animation-delay: 0s;
+  }
+  
+  .pulse-circle-2 {
+    width: 90px;
+    height: 90px;
+    animation-delay: 0.3s;
+  }
+  
+  .pulse-circle-3 {
+    width: 110px;
+    height: 110px;
+    animation-delay: 0.6s;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes pulse-grow {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0;
+    }
+  }
+  
+  .loading-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .loading-text p {
+    margin-bottom: var(--space-2);
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+  }
+  
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    animation: dot-typing 1.5s infinite ease-in-out;
+  }
+  
+  .dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes dot-typing {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 </style>
 {% endblock %}
