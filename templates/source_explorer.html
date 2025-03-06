@@ -670,11 +670,23 @@
         stepsTitle.innerHTML = '<i class="fas fa-list-ol"></i> Query Steps';
         stepsWrapper.appendChild(stepsTitle);
         
+        // Track which steps we've already processed to avoid duplicates
+        const processedSteps = new Set();
+        
         // Find all steps (usually strong text followed by description)
         const strongElements = tempDiv.querySelectorAll('strong');
         strongElements.forEach(strong => {
           // Check if this is a step name (usually followed by a colon)
           if (strong.textContent.includes(':')) {
+            const stepName = strong.textContent.trim();
+            
+            // Skip if we've already processed this step
+            if (processedSteps.has(stepName)) {
+              return;
+            }
+            
+            processedSteps.add(stepName);
+            
             // Get the parent paragraph
             const paragraph = strong.closest('p');
             if (paragraph) {
@@ -687,9 +699,30 @@
               stepTitle.className = 'step-title';
               stepTitle.innerHTML = '<i class="fas fa-arrow-right"></i> ' + strong.outerHTML;
               
-              // Get the description (everything after the strong element)
-              let description = paragraph.innerHTML;
-              description = description.substring(description.indexOf(strong.outerHTML) + strong.outerHTML.length);
+              // Extract just this step's description (up to the next strong element or end of paragraph)
+              let description = '';
+              let nextElement = strong.nextSibling;
+              let foundNextStep = false;
+              
+              while (nextElement && !foundNextStep) {
+                // If we find another strong element, stop
+                if (nextElement.nodeName === 'STRONG' && nextElement.textContent.includes(':')) {
+                  foundNextStep = true;
+                } else {
+                  // Clone the node to avoid modifying the original
+                  const clone = nextElement.cloneNode(true);
+                  
+                  // If it's a text node, append its content
+                  if (nextElement.nodeType === Node.TEXT_NODE) {
+                    description += nextElement.textContent;
+                  } else {
+                    // For element nodes, append their outer HTML
+                    description += nextElement.outerHTML || '';
+                  }
+                  
+                  nextElement = nextElement.nextSibling;
+                }
+              }
               
               // Add the title and description to the step div
               stepDiv.appendChild(stepTitle);
@@ -697,11 +730,16 @@
               
               // Add the step to the steps wrapper
               stepsWrapper.appendChild(stepDiv);
-              
-              // Remove the original paragraph
-              if (paragraph.parentNode) {
-                paragraph.parentNode.removeChild(paragraph);
-              }
+            }
+          }
+        });
+        
+        // Remove all the original paragraphs with steps
+        strongElements.forEach(strong => {
+          if (strong.textContent.includes(':')) {
+            const paragraph = strong.closest('p');
+            if (paragraph && paragraph.parentNode) {
+              paragraph.parentNode.removeChild(paragraph);
             }
           }
         });
@@ -1149,24 +1187,41 @@
 }
 
 /* Custom styling for the AI analysis content */
+.explanation-content .steps-section {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
 .explanation-content .step {
   background-color: rgba(0, 123, 255, 0.05);
   border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: var(--space-4);
   margin-bottom: var(--space-3);
-  border-left: 3px solid var(--primary);
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.explanation-content .step:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .explanation-content .step-title {
   font-weight: 600;
+  font-size: 1.1em;
   color: var(--primary);
   display: flex;
   align-items: center;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px dashed rgba(0, 123, 255, 0.2);
 }
 
 .explanation-content .step-title i {
   margin-right: var(--space-2);
+  color: var(--primary);
+  font-size: 1.2em;
 }
 
 .explanation-content .issues {
