@@ -138,6 +138,82 @@ class AIService:
         """
         
         return self.generate_text(model_json, system_prompt=system_prompt)
+    
+    def analyze_m_query(self, m_query):
+        """
+        Analyze an M query and provide insights and explanations.
+        
+        Args:
+            m_query (str): The M query to analyze
+            
+        Returns:
+            dict: Analysis containing explanation and renamed steps
+        """
+        system_prompt = """
+        You are a Power BI M language (Power Query) expert. Analyze the given M query and provide:
+        1. A clear explanation of what the query does, step by step
+        2. Potential performance issues or inefficiencies
+        3. Suggestions for improvement
+        4. A version of the same code with steps renamed to clearly reflect what each step accomplishes
+        
+        You MUST format your response as a valid JSON object with exactly two keys:
+        - "explanation": A string containing a detailed explanation of the query with markdown formatting
+        - "renamed_code": A string containing the full M query with renamed steps that better describe their purpose
+        
+        IMPORTANT: Make sure your response is valid JSON. Escape any special characters in the strings properly.
+        Do not include any text outside of the JSON structure. The explanation should be a plain string with markdown 
+        formatting, not a nested JSON object.
+        
+        Example of correct format:
+        {
+          "explanation": "This query connects to a SQL database and retrieves data from the Sales table. It then filters the results to only include records from the current year.",
+          "renamed_code": "let\\n    DatabaseConnection = Sql.Database(\\"server\\", \\"db\\"),\\n    SalesTable = DatabaseConnection{\\"Sales\\"},\\n    FilteredToCurrentYear = Table.SelectRows(SalesTable, each [Year] = Date.Year(DateTime.LocalNow()))\\nin\\n    FilteredToCurrentYear"
+        }
+        
+        Be thorough in your analysis but ensure the renamed code is valid M syntax.
+        """
+        
+        response = self.generate_text(m_query, system_prompt=system_prompt)
+        
+        # Handle case where response might be None
+        if not response:
+            return {
+                "explanation": "Failed to generate analysis.",
+                "renamed_code": m_query
+            }
+        
+        try:
+            # Try to parse the response as JSON
+            import json
+            
+            # First, try to parse the response directly
+            try:
+                result = json.loads(response)
+                return result
+            except json.JSONDecodeError:
+                # If direct parsing fails, try to extract JSON from the response
+                # Sometimes the model might add extra text before or after the JSON
+                import re
+                json_match = re.search(r'({[\s\S]*})', response)
+                if json_match:
+                    try:
+                        result = json.loads(json_match.group(1))
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                
+                # If all parsing attempts fail, return a formatted response
+                return {
+                    "explanation": "The AI generated a non-JSON response. Here's the raw analysis:\n\n" + str(response),
+                    "renamed_code": m_query  # Return original code if parsing fails
+                }
+        except Exception as e:
+            # Catch any other exceptions
+            print(f"Error processing AI response: {str(e)}")
+            return {
+                "explanation": f"Error processing AI response: {str(e)}\n\nRaw response:\n\n{str(response)}",
+                "renamed_code": m_query  # Return original code if processing fails
+            }
 
 # Create a singleton instance for use throughout the application
 ai_service = AIService()
