@@ -108,8 +108,123 @@ Examine the M queries that form your report's data sources:
 - Search functionality across queries
 - Copy capabilities for table names and query code
 - Export functionality for M queries
+- **AI Analysis** for M queries that provides:
+  - Step-by-step explanation of what each query does
+  - Identification of potential performance issues
+  - Suggestions for improvement
+  - Renamed version of the code with more descriptive step names
+
+### Power BI Assistant
+
+Get AI-powered answers to any Power BI related questions:
+- Ask questions about DAX formulas, best practices, and troubleshooting
+- Get detailed explanations with examples
+- Interactive interface with example questions
+- Engaging loading animation while the AI generates responses
 
 ### Unused Measures
+# Power BI Analysis Tool
+
+![Power BI Analysis Tool](https://img.shields.io/badge/Power%20BI-Analysis%20Tool-217346?style=for-the-badge&logo=powerbi)
+![Flask](https://img.shields.io/badge/Flask-Web%20App-0078D4?style=for-the-badge&logo=flask)
+![License: Custom Non-Commercial](https://img.shields.io/badge/License-NonCommercial-red.svg?style=for-the-badge)
+
+## 📋 Overview
+
+The Power BI Analysis Tool provides an intuitive interface to explore the structure and components of your Power BI reports, helping you to understand complex data models, optimize measure usage, and identify opportunities for improvement.
+
+## ✨ Key Features
+
+- **Dashboard** - Get an overview of your report structure with key metrics including visual count, measure count, page count, and unused measures
+- **Visual Fields Explorer** - See all fields used across your report's visuals with advanced filtering and search capabilities
+- **Data Lineage Diagram** - Visualize relationships between measures and columns with interactive network diagrams
+- **DAX Explorer** - Browse and analyze DAX formulas with syntax highlighting and similarity analysis
+- **Source Explorer** - Examine the M queries that form your data sources with syntax highlighting and AI-powered analysis
+- **Unused Measures Detector** - Identify measures not used in any visuals with dependency chain analysis
+- **Power BI Assistant** - Get AI-powered answers to any Power BI related questions
+
+## 🖼️ Screenshots
+
+*[Screenshots would appear here]*
+
+## 🚀 Installation
+
+### Prerequisites
+
+- Python 3.7+
+- Flask
+- Modern web browser
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/plagiagia/PowerBI_AnalysisTool.git
+   cd PowerBI_AnalysisTool
+   ```
+
+2. Create and activate a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Set up your data files:
+   - Place your Power BI report JSON in `data/report.json`
+   - Place your measure dependencies TSV in `data/MeasureDependencies.tsv`
+   - Place your model JSON in `data/model.json`
+
+5. Run the application:
+   ```bash
+   python app.py
+   ```
+
+6. Open a web browser and navigate to `http://localhost:5000`
+
+## 🔍 Usage
+
+### Dashboard
+
+The dashboard provides a high-level overview of your report, including:
+- Total number of visuals
+- Number of measures
+- Number of pages
+- Number of unused measures
+- Most common visual type used in the report
+- Quick access to all analysis tools
+
+### Visual Fields Explorer
+
+Explore all fields used across visuals in your report with:
+- Advanced filtering by page and visual type
+- Field-level search functionality
+- Export to CSV capability
+- Table view with sortable columns
+- Color-coded visual types and field categories
+
+### Data Lineage
+
+Visualize relationships between measures and columns to understand dependencies:
+- Interactive network diagram with hierarchical or force-directed layouts
+- Filters for parent measures, final measures, and columns
+- Focus on specific measures and their relationships
+- Statistical breakdown of measure types and relationships
+- Export lineage data to CSV
+
+### DAX Explorer
+
+Browse and analyze DAX formulas with:
+- Syntax highlighting for DAX code
+- Search functionality with highlighted matches
+- Copy functionality for both measure names and full expressions
+- Export capability for DAX expressions
+- Measure similarity analysis to identify redundant measures
+
 
 Identify measures not used in any visuals for optimization:
 - List of all unused measures
