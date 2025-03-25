@@ -74,101 +74,141 @@
   </div>
 </section>
 
-<!-- Analysis Tools Section with improved layout -->
+<!-- Analysis Tools Section with improved layout and categorization -->
 <section class="tools-section">
   <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
 
-  <div class="tools-grid improved-layout">
-    <!-- Visual Fields Table -->
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-table"></i>
+  <!-- Data Exploration Category -->
+  <div class="tools-category">
+    <h3 class="category-title"><i class="fas fa-chart-bar"></i> Data Exploration</h3>
+    <div class="tools-grid improved-layout">
+      <!-- Visual Fields Table -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-table"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">Visual Fields Table</h3>
+            <p class="tool-description">
+              Get a comprehensive view of all the fields used across visuals in
+              your report.
+            </p>
+          </div>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Visual Fields Table</h3>
-          <p class="tool-description">
-            Get a comprehensive view of all the fields used across visuals in
-            your report.
-          </p>
+        <div class="tool-card-footer">
+          <a href="/table-view" class="tool-button">Explore Fields <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/table-view" class="tool-button">Explore Fields <i class="fas fa-arrow-right"></i></a>
+
+      <!-- Data Lineage Diagram -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">Data Lineage Diagram</h3>
+            <p class="tool-description">
+              Visualize relationships between measures and columns to understand
+              dependencies.
+            </p>
+          </div>
+        </div>
+        <div class="tool-card-footer">
+          <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Data Lineage Diagram -->
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-project-diagram"></i>
+  <!-- Code Analysis Category -->
+  <div class="tools-category">
+    <h3 class="category-title"><i class="fas fa-code"></i> Code Analysis</h3>
+    <div class="tools-grid improved-layout">
+      <!-- DAX Explorer -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-code"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">DAX Explorer</h3>
+            <p class="tool-description">
+              Browse and analyze DAX formulas with syntax highlighting and copy
+              functionality.
+            </p>
+          </div>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Data Lineage Diagram</h3>
-          <p class="tool-description">
-            Visualize relationships between measures and columns to understand
-            dependencies.
-          </p>
+        <div class="tool-card-footer">
+          <a href="/dax-expressions" class="tool-button">Browse DAX <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
+
+      <!-- Source Explorer -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">Source Explorer</h3>
+            <p class="tool-description">
+              Examine the M queries that form your report's data sources.
+            </p>
+          </div>
+        </div>
+        <div class="tool-card-footer">
+          <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- DAX Explorer -->
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-code"></i>
+  <!-- Optimization Category -->
+  <div class="tools-category">
+    <h3 class="category-title"><i class="fas fa-tachometer-alt"></i> Optimization</h3>
+    <div class="tools-grid improved-layout">
+      <!-- Unused Measures -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-search-minus"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">Unused Measures</h3>
+            <p class="tool-description">
+              Identify measures not used in any visuals for optimization.
+            </p>
+          </div>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">DAX Explorer</h3>
-          <p class="tool-description">
-            Browse and analyze DAX formulas with syntax highlighting and copy
-            functionality.
-          </p>
+        <div class="tool-card-footer">
+          <a href="/unused-measures" class="tool-button">Find Unused Measures <i class="fas fa-arrow-right"></i></a>
         </div>
-      </div>
-      <div class="tool-card-footer">
-        <a href="/dax-expressions" class="tool-button">Browse DAX <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
+  </div>
 
-    <!-- Source Explorer -->
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-database"></i>
+  <!-- AI Tools Category -->
+  <div class="tools-category">
+    <h3 class="category-title"><i class="fas fa-robot"></i> AI Tools</h3>
+    <div class="tools-grid improved-layout">
+      <!-- AI Analysis -->
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="tool-info">
+            <h3 class="tool-title">AI Analysis</h3>
+            <p class="tool-description">
+              Get AI-powered insights and recommendations for your Power BI report.
+            </p>
+          </div>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Source Explorer</h3>
-          <p class="tool-description">
-            Examine the M queries that form your report's data sources.
-          </p>
+        <div class="tool-card-footer">
+          <a href="/ai-analysis" class="tool-button">Ask AI Assistant <i class="fas fa-arrow-right"></i></a>
         </div>
-      </div>
-      <div class="tool-card-footer">
-        <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
-      </div>
-    </div>
-
-    <!-- Unused Measures -->
-    <div class="tool-card">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-search-minus"></i>
-        </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Unused Measures</h3>
-          <p class="tool-description">
-            Identify measures not used in any visuals for optimization.
-          </p>
-        </div>
-      </div>
-      <div class="tool-card-footer">
-        <a href="/unused-measures" class="tool-button">Find Unused Measures <i class="fas fa-arrow-right"></i></a>
       </div>
     </div>
   </div>
@@ -200,13 +240,16 @@
   /* Improved layout for tools grid */
   .tools-grid.improved-layout {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-5);
+    margin-bottom: var(--space-4);
   }
   
   /* Make the last card centered if total cards are odd */
   .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-    grid-column: 2;
+    grid-column: 1 / span 2;
+    max-width: 50%;
+    margin: 0 auto;
   }
   
   /* Add some elevation and transition effects */
@@ -219,20 +262,42 @@
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
   }
   
+  /* Category styling */
+  .tools-category {
+    margin-bottom: var(--space-6);
+  }
+  
+  .category-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    display: flex;
+    align-items: center;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--primary);
+  }
+  
+  .category-title i {
+    margin-right: var(--space-2);
+    color: var(--primary);
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 1200px) {
     .tools-grid.improved-layout {
       grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-      grid-column: auto;
     }
   }
   
   @media (max-width: 768px) {
     .tools-grid.improved-layout {
       grid-template-columns: 1fr;
+    }
+    
+    .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
+      grid-column: 1;
+      max-width: 100%;
     }
   }
   
@@ -249,6 +314,36 @@
     width: 50px;
     height: 50px;
     font-size: 1.75rem;
+  }
+  
+  /* Empty state handling */
+  .empty-state {
+    padding: var(--space-6);
+    text-align: center;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border);
+    margin: var(--space-4) 0;
+  }
+  
+  .empty-state-icon {
+    font-size: 48px;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-4);
+  }
+  
+  .empty-state-title {
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .empty-state-message {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 </style>
 {% endblock %}

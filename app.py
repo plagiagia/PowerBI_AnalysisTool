@@ -391,6 +391,52 @@ def create_app(config_object=None) -> Flask:
             current_app.logger.error(f"Error analyzing M query: {e}")
             return jsonify({"error": str(e)}), 500
     
+    @app.route('/api/optimize-dax', methods=['POST'])
+    def optimize_dax():
+        """API endpoint to optimize a DAX measure using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            return jsonify({"error": "AI features are currently disabled."}), 404
+            
+        try:
+            data = request.json
+            if not data or 'dax' not in data:
+                return jsonify({"error": "No DAX expression provided"}), 400
+                
+            dax_expression = data['dax']
+            measure_name = data.get('measureName', '')
+            
+            ai_service = get_ai_service()
+            result = ai_service.optimize_dax_measure(dax_expression, measure_name)
+            
+            return jsonify({"optimized_dax": result})
+        except Exception as e:
+            current_app.logger.error(f"Error optimizing DAX measure: {e}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route('/api/explain-dax', methods=['POST'])
+    def explain_dax():
+        """API endpoint to explain a DAX measure using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            return jsonify({"error": "AI features are currently disabled."}), 404
+            
+        try:
+            data = request.json
+            if not data or 'dax' not in data:
+                return jsonify({"error": "No DAX expression provided"}), 400
+                
+            dax_expression = data['dax']
+            measure_name = data.get('measureName', '')
+            
+            ai_service = get_ai_service()
+            result = ai_service.explain_dax_measure(dax_expression, measure_name)
+            
+            return jsonify({"explanation": result})
+        except Exception as e:
+            current_app.logger.error(f"Error explaining DAX measure: {e}")
+            return jsonify({"error": str(e)}), 500
+    
     @app.route('/api/model-json', methods=['GET'])
     def get_model_json():
         """API endpoint to get the current model JSON."""

@@ -87,6 +87,76 @@ class AIService:
         """
         
         return self.generate_text(dax_expression, system_prompt=system_prompt)
+        
+    def optimize_dax_measure(self, dax_expression, measure_name=""):
+        """
+        Optimize a DAX measure with improved formatting and documentation.
+        
+        Args:
+            dax_expression (str): The DAX expression to optimize
+            measure_name (str, optional): The name of the measure for context
+            
+        Returns:
+            str: Optimized version of the DAX expression with better formatting and documentation
+        """
+        system_prompt = """
+        You are a Power BI DAX expert specializing in code optimization and documentation.
+        
+        Your task is to optimize the provided DAX measure with a focus on:
+        1. Proper formatting and indentation for maximum readability
+        2. Clear and comprehensive inline documentation
+        3. Logical organization of the code
+        4. Consistent naming conventions
+        5. Best practices for DAX performance
+        
+        Format your response as a DAX measure definition with:
+        - Descriptive comments at the top explaining the measure's purpose
+        - Inline comments explaining complex logic
+        - Proper indentation and line breaks
+        - Consistent formatting of operators and functions
+        
+        Do not change the fundamental logic or functionality of the measure.
+        Return ONLY the optimized DAX code without any additional explanations.
+        """
+        
+        prompt = f"Measure Name: {measure_name}\n\nDAX Expression:\n{dax_expression}"
+        return self.generate_text(prompt, system_prompt=system_prompt)
+    
+    def explain_dax_measure(self, dax_expression, measure_name=""):
+        """
+        Explain a DAX measure in clear, understandable chunks.
+        
+        Args:
+            dax_expression (str): The DAX expression to explain
+            measure_name (str, optional): The name of the measure for context
+            
+        Returns:
+            str: Explanation of the DAX expression in clear, digestible chunks
+        """
+        system_prompt = """
+        You are a Power BI DAX expert with exceptional teaching skills. Your audience is business users with limited technical background.
+        
+        Your task is to explain the provided DAX measure in clear, understandable chunks that anyone can understand:
+        
+        1. Start with a high-level summary of what the measure accomplishes in business terms
+        2. Break down the measure into logical sections
+        3. For each section:
+           - Explain what that part does in simple language
+           - Relate it to business concepts rather than technical jargon
+           - Use analogies where helpful
+        4. Highlight any important business logic or assumptions
+        
+        Format your response with markdown:
+        - Use headers (##) for main sections
+        - Use bullet points for lists
+        - Use bold for important concepts
+        - Include a "Summary" section at the beginning
+        
+        Make your explanation accessible to non-technical users while still being accurate.
+        """
+        
+        prompt = f"Measure Name: {measure_name}\n\nDAX Expression:\n{dax_expression}"
+        return self.generate_text(prompt, system_prompt=system_prompt, max_tokens=2500)
     
     def suggest_measures(self, table_schema, business_question):
         """

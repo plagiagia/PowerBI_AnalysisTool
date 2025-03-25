@@ -4,6 +4,10 @@ endblock %} {% block head %}
 <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <!-- Include FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<!-- Include Showdown.js for Markdown to HTML conversion -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+<!-- Include AI features CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='lineage-ai.css') }}" />
 {% endblock %} {% block breadcrumbs %}
 <li>
   <a href="/lineage-view"><i class="fas fa-project-diagram"></i><span class="breadcrumb-text">Data Lineage</span></a>
@@ -176,53 +180,130 @@ endblock %} {% block head %}
       </div>
     </div>
 
-    <!-- Details Panel -->
-    <div class="lineage-details">
+    <!-- Measure Details Panel -->
+    <div class="measure-details">
       <div class="details-header">
         <h2 class="details-title">
-          <i class="fas fa-info-circle"></i> Lineage Details
+          <i class="fas fa-calculator"></i> Measure Details
         </h2>
         <div class="details-actions">
           <div class="search-container compact">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input type="search" id="searchLineage" placeholder="Search lineage..."
-                aria-label="Search lineage details" />
-              <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+              <input type="search" id="searchMeasure" placeholder="Search in measure..."
+                aria-label="Search measure definition" />
+              <button id="clearMeasureSearch" class="clear-search" style="display: none" aria-label="Clear search">
                 <i class="fas fa-times"></i>
               </button>
             </div>
           </div>
-          <button id="exportLineage" class="action-button outline">
+          <button id="exportMeasure" class="action-button outline">
             <i class="fas fa-download"></i> Export
           </button>
         </div>
       </div>
 
       <div class="details-content">
-        <div class="table-container">
-          <table id="lineageTable" class="data-table">
-            <thead>
-              <tr>
-                <th>Parent Measure</th>
-                <th>Child Measure</th>
-                <th>Column</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Table rows will be populated by JavaScript -->
-            </tbody>
-          </table>
+        <!-- Measure card -->
+        <div id="measureCard" class="measure-card">
+          <!-- Measure header with metadata -->
+          <div class="measure-card-header">
+            <div class="measure-info">
+              <h3 id="measureName" class="measure-name">Select a measure</h3>
+              <div class="measure-meta">
+                <span id="measureType" class="measure-type-badge">
+                  <i class="fas fa-code-branch"></i> Type
+                </span>
+                <span id="measureReferences" class="measure-references">
+                  <i class="fas fa-link"></i> <span id="referencesCount">0</span> References
+                </span>
+              </div>
+            </div>
+            <div class="measure-actions">
+              <button id="copyMeasure" class="icon-button" title="Copy measure definition">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button id="expandCollapseAll" class="icon-button" title="Expand/collapse all">
+                <i class="fas fa-expand-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Measure tabs -->
+          <div class="measure-tabs">
+            <button id="originalTab" class="measure-tab active">
+              <i class="fas fa-code"></i> Original Definition
+            </button>
+            <button id="expandedTab" class="measure-tab">
+              <i class="fas fa-expand"></i> Expanded Definition
+            </button>
+            <button id="optimizedTab" class="measure-tab">
+              <i class="fas fa-magic"></i> Optimized
+            </button>
+            <button id="explanationTab" class="measure-tab">
+              <i class="fas fa-book-open"></i> Explanation
+            </button>
+          </div>
+
+          <!-- Measure content -->
+          <div class="measure-content">
+            <!-- Original definition tab content -->
+            <div id="originalDefinition" class="tab-content active">
+              <div class="code-container">
+                <pre><code id="originalCode" class="language-dax">Select a measure to view its definition</code></pre>
+              </div>
+            </div>
+
+            <!-- Expanded definition tab content -->
+            <div id="expandedDefinition" class="tab-content">
+              <div class="code-container">
+                <pre><code id="expandedCode" class="language-dax">Select a measure to view its expanded definition</code></pre>
+              </div>
+            </div>
+            
+            <!-- Optimized definition tab content -->
+            <div id="optimizedDefinition" class="tab-content">
+              <div class="code-container">
+                <pre><code id="optimizedCode" class="language-dax">Select a measure to view its optimized definition</code></pre>
+              </div>
+              <div class="ai-loading" id="optimizedLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI is optimizing the measure...</div>
+              </div>
+            </div>
+            
+            <!-- Explanation tab content -->
+            <div id="explanationDefinition" class="tab-content">
+              <div class="explanation-container" id="explanationContent">
+                <div class="placeholder-text">Select a measure to view its explanation</div>
+              </div>
+              <div class="ai-loading" id="explanationLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI is generating explanation...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Referenced measures section -->
+          <div id="referencedMeasuresSection" class="referenced-measures-section">
+            <h4 class="section-title">
+              <i class="fas fa-link"></i> Referenced Measures
+              <span class="section-count" id="referencedMeasuresCount">0</span>
+            </h4>
+            <div id="referencedMeasuresList" class="referenced-measures-list">
+              <!-- Referenced measures will be populated by JavaScript -->
+            </div>
+          </div>
         </div>
 
-        <!-- Empty state for when no data is available -->
-        <div id="noDataMessage" class="empty-state" style="display: none">
+        <!-- Empty state for when no measure is selected -->
+        <div id="noMeasureSelected" class="empty-state">
           <div class="empty-state-icon">
-            <i class="fas fa-info-circle"></i>
+            <i class="fas fa-calculator"></i>
           </div>
-          <h3 class="empty-state-title">No details to display</h3>
+          <h3 class="empty-state-title">No measure selected</h3>
           <p class="empty-state-message">
-            Select a node in the diagram to view its relationships.
+            Select a measure in the diagram to view its details.
           </p>
         </div>
       </div>
@@ -232,6 +313,9 @@ endblock %} {% block head %}
 {% endblock %} {% block scripts %}
 <!-- Include Vis Network JS -->
 <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+
+<!-- Include AI features JS -->
+<script src="{{ url_for('static', filename='lineage-ai.js') }}"></script>
 
 <!-- Data for the network diagram -->
 <script>
@@ -315,25 +399,25 @@ endblock %} {% block head %}
           size: 16,
           font: {
             size: 12,
-            face: "Inter, Segoe UI, sans-serif",
+            face: "Inter, Segoe UI, sans-serif"
           },
           borderWidth: 2,
-          shadow: true,
+          shadow: true
         },
         edges: {
           width: 1,
           color: {
             color: "#aaa",
-            highlight: "#3498db",
+            highlight: "#3498db"
           },
           arrows: {
-            to: { enabled: true, scaleFactor: 0.5 },
+            to: { enabled: true, scaleFactor: 0.5 }
           },
           smooth: {
             enabled: true,
             type: "dynamic",
-            roundness: 0.5,
-          },
+            roundness: 0.5
+          }
         },
         physics: {
           enabled: true,
@@ -342,16 +426,16 @@ endblock %} {% block head %}
             centralGravity: 0.1,
             springLength: 95,
             springConstant: 0.04,
-            damping: 0.09,
+            damping: 0.09
           },
           stabilization: {
             enabled: true,
             iterations: 1000,
-            updateInterval: 100,
-          },
+            updateInterval: 100
+          }
         },
         layout: {
-          improvedLayout: true,
+          improvedLayout: true
         },
         interaction: {
           hover: true,
@@ -360,16 +444,16 @@ endblock %} {% block head %}
           navigationButtons: false,
           keyboard: {
             enabled: true,
-            speed: { x: 10, y: 10, zoom: 0.1 },
+            speed: { x: 10, y: 10, zoom: 0.1 }
           },
-          zoomView: true,
-        },
+          zoomView: true
+        }
       };
 
       // Create the network
       const data = {
         nodes: nodeDataset,
-        edges: edgeDataset,
+        edges: edgeDataset
       };
 
       network = new vis.Network(networkContainer, data, options);
@@ -386,12 +470,22 @@ endblock %} {% block head %}
         }
       });
 
-      // Handle node selection for details table
+      // Handle node selection for measure details
       network.on("selectNode", function (params) {
         if (params.nodes.length > 0) {
           const nodeId = params.nodes[0];
           currentSelection = nodeId;
-          updateDetailsTable(nodeId);
+
+          // Get the selected node
+          const selectedNode = nodesArray.find(node => node.id === nodeId);
+
+          // Only show measure details for non-column nodes
+          if (selectedNode && selectedNode.type !== "column") {
+            updateMeasureDetails(selectedNode);
+          } else {
+            // For columns, just show empty state
+            hideMeasureDetails();
+          }
         }
       });
 
@@ -400,7 +494,7 @@ endblock %} {% block head %}
         if (params.nodes.length === 0) {
           // Clicked on empty space
           currentSelection = null;
-          populateDetailsTable(edgesArray); // Show all relationships
+          hideMeasureDetails();
         }
       });
 
@@ -1065,7 +1159,7 @@ endblock %} {% block head %}
         isFullscreen = true;
 
         // Resize network after transition
-        setTimeout(() => {
+        setTimeout(function () {
           if (network) {
             network.redraw();
             network.fit();
@@ -1161,6 +1255,504 @@ endblock %} {% block head %}
           }
         }, 16);
       });
+    }
+
+    // Measure Details Card Functionality
+
+    // DOM Elements for Measure Details
+    const measureCard = document.getElementById("measureCard");
+    const noMeasureSelected = document.getElementById("noMeasureSelected");
+    const measureName = document.getElementById("measureName");
+    const measureType = document.getElementById("measureType");
+    const referencesCount = document.getElementById("referencesCount");
+    const originalTab = document.getElementById("originalTab");
+    const expandedTab = document.getElementById("expandedTab");
+    const originalDefinition = document.getElementById("originalDefinition");
+    const expandedDefinition = document.getElementById("expandedDefinition");
+    const originalCode = document.getElementById("originalCode");
+    const expandedCode = document.getElementById("expandedCode");
+    const referencedMeasuresSection = document.getElementById("referencedMeasuresSection");
+    const referencedMeasuresList = document.getElementById("referencedMeasuresList");
+    const referencedMeasuresCount = document.getElementById("referencedMeasuresCount");
+    const copyMeasure = document.getElementById("copyMeasure");
+    const expandCollapseAll = document.getElementById("expandCollapseAll");
+    const searchMeasure = document.getElementById("searchMeasure");
+    const clearMeasureSearch = document.getElementById("clearMeasureSearch");
+    const exportMeasure = document.getElementById("exportMeasure");
+
+    // Set up event listeners for measure details
+    if (originalTab) {
+      originalTab.addEventListener("click", function () {
+        window.LineageAI.switchTab("original");
+      });
+    }
+
+    if (expandedTab) {
+      expandedTab.addEventListener("click", function () {
+        window.LineageAI.switchTab("expanded");
+      });
+    }
+
+    if (copyMeasure) {
+      copyMeasure.addEventListener("click", function () {
+        copyMeasureDefinition();
+      });
+    }
+
+    if (expandCollapseAll) {
+      expandCollapseAll.addEventListener("click", function () {
+        toggleExpandCollapse();
+      });
+    }
+
+    if (searchMeasure) {
+      searchMeasure.addEventListener("input", function () {
+        searchInMeasure(this.value);
+      });
+    }
+
+    if (clearMeasureSearch) {
+      clearMeasureSearch.addEventListener("click", function () {
+        if (searchMeasure) {
+          searchMeasure.value = "";
+          searchMeasure.focus();
+          clearMeasureSearch.style.display = "none";
+          searchInMeasure("");
+        }
+      });
+    }
+
+    if (exportMeasure) {
+      exportMeasure.addEventListener("click", function () {
+        exportMeasureDefinition();
+      });
+    }
+
+    /**
+     * Switch between tabs in the measure details card
+     * @param {string} tabName - Name of the tab to switch to
+     */
+    function switchTab(tabName) {
+      // Remove active class from all tabs and content
+      originalTab.classList.remove("active");
+      expandedTab.classList.remove("active");
+      optimizedTab.classList.remove("active");
+      explanationTab.classList.remove("active");
+      
+      originalDefinition.classList.remove("active");
+      expandedDefinition.classList.remove("active");
+      optimizedDefinition.classList.remove("active");
+      explanationDefinition.classList.remove("active");
+      
+      // Add active class to selected tab and content
+      if (tabName === "original") {
+        originalTab.classList.add("active");
+        originalDefinition.classList.add("active");
+      } else if (tabName === "expanded") {
+        expandedTab.classList.add("active");
+        expandedDefinition.classList.add("active");
+      } else if (tabName === "optimized") {
+        optimizedTab.classList.add("active");
+        optimizedDefinition.classList.add("active");
+      } else if (tabName === "explanation") {
+        explanationTab.classList.add("active");
+        explanationDefinition.classList.add("active");
+      }
+    }
+    
+    /**
+     * Load optimized definition using AI
+     */
+    function loadOptimizedDefinition() {
+      if (!optimizedCode || !optimizedLoading || !measureName) return;
+      
+      const currentMeasureName = measureName.textContent;
+      const daxExpression = originalCode.textContent;
+      
+      if (!daxExpression || daxExpression.includes("Select a measure")) {
+        return;
+      }
+      
+      // Show loading indicator
+      optimizedLoading.style.display = "flex";
+      optimizedCode.textContent = "Optimizing...";
+      
+      // Call the API to optimize the DAX
+      fetch('/api/optimize-dax', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dax: daxExpression,
+          measureName: currentMeasureName
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Hide loading indicator
+        optimizedLoading.style.display = "none";
+        
+        // Update the optimized code
+        if (data.optimized_dax) {
+          optimizedCode.textContent = data.optimized_dax;
+        } else {
+          optimizedCode.textContent = "Failed to optimize the measure.";
+        }
+      })
+      .catch(error => {
+        console.error('Error optimizing DAX:', error);
+        optimizedLoading.style.display = "none";
+        optimizedCode.textContent = "Error: Failed to optimize the measure. Please try again.";
+      });
+    }
+    
+    /**
+     * Load explanation using AI
+     */
+    function loadExplanation() {
+      if (!explanationContent || !explanationLoading || !measureName) return;
+      
+      const currentMeasureName = measureName.textContent;
+      const daxExpression = originalCode.textContent;
+      
+      if (!daxExpression || daxExpression.includes("Select a measure")) {
+        return;
+      }
+      
+      // Show loading indicator
+      explanationLoading.style.display = "flex";
+      explanationContent.innerHTML = "<div class='loading-text'>Generating explanation...</div>";
+      
+      // Call the API to explain the DAX
+      fetch('/api/explain-dax', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dax: daxExpression,
+          measureName: currentMeasureName
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Hide loading indicator
+        explanationLoading.style.display = "none";
+        
+        // Update the explanation content
+        if (data.explanation) {
+          // Convert markdown to HTML
+          const converter = new showdown.Converter();
+          const html = converter.makeHtml(data.explanation);
+          explanationContent.innerHTML = html;
+        } else {
+          explanationContent.innerHTML = "<div class='error-text'>Failed to generate explanation.</div>";
+        }
+      })
+      .catch(error => {
+        console.error('Error explaining DAX:', error);
+        explanationLoading.style.display = "none";
+        explanationContent.innerHTML = "<div class='error-text'>Error: Failed to generate explanation. Please try again.</div>";
+      });
+    }
+
+    /**
+     * Update the measure details card with the selected measure
+     * @param {Object} node - The selected node
+     */
+    function updateMeasureDetails(node) {
+      if (!measureCard || !noMeasureSelected) return;
+
+      // Show measure card, hide empty state
+      measureCard.style.display = "flex";
+      noMeasureSelected.style.display = "none";
+
+      // Update measure name
+      if (measureName) {
+        measureName.textContent = node.label;
+      }
+
+      // Determine measure type
+      let type = "Unknown";
+      let typeClass = "";
+
+      if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
+        // Pure parent
+        type = "Parent Measure";
+        typeClass = "parent";
+      } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+        // Pure child - final measure
+        type = "Final Measure";
+        typeClass = "final";
+      } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
+        // Both parent and child
+        type = "Parent Measure";
+        typeClass = "parent";
+      }
+
+      // Update measure type badge
+      if (measureType) {
+        measureType.textContent = type;
+        measureType.className = "measure-type-badge " + typeClass;
+        measureType.innerHTML = `<i class="fas fa-code-branch"></i> ${type}`;
+      }
+
+      // Find referenced measures (parents)
+      const parentEdges = edgesArray.filter(edge => edge.to === node.id);
+      const parentNodes = parentEdges
+        .map(edge => nodesArray.find(n => n.id === edge.from))
+        .filter(n => n && n.type !== "column");
+
+      // Find measures that reference this one (children)
+      const childEdges = edgesArray.filter(edge => edge.from === node.id);
+      const childNodes = childEdges
+        .map(edge => nodesArray.find(n => n.id === edge.to))
+        .filter(n => n);
+
+      // Update references count
+      const totalReferences = parentNodes.length + childNodes.length;
+      if (referencesCount) {
+        referencesCount.textContent = totalReferences;
+      }
+
+      // Update DAX code
+      if (originalCode && node.dax) {
+        originalCode.textContent = node.dax;
+      }
+
+      // Generate expanded definition
+      if (expandedCode) {
+        expandedCode.textContent = generateExpandedDefinition(node);
+      }
+
+      // Update referenced measures list
+      if (referencedMeasuresList) {
+        referencedMeasuresList.innerHTML = "";
+
+        // Add parent measures
+        parentNodes.forEach(parent => {
+          const referenceElement = document.createElement("div");
+          referenceElement.className = "measure-reference parent";
+          referenceElement.textContent = parent.label;
+          referenceElement.setAttribute("data-id", parent.id);
+          referenceElement.addEventListener("click", function () {
+            // Select this measure in the network
+            if (network) {
+              network.selectNodes([parent.id]);
+              updateMeasureDetails(parent);
+            }
+          });
+          referencedMeasuresList.appendChild(referenceElement);
+        });
+
+        // Add child measures
+        childNodes.forEach(child => {
+          const referenceElement = document.createElement("div");
+          referenceElement.className = "measure-reference final";
+          referenceElement.textContent = child.label;
+          referenceElement.setAttribute("data-id", child.id);
+          referenceElement.addEventListener("click", function () {
+            // Select this measure in the network
+            if (network) {
+              network.selectNodes([child.id]);
+              updateMeasureDetails(child);
+            }
+          });
+          referencedMeasuresList.appendChild(referenceElement);
+        });
+
+        // Update count
+        if (referencedMeasuresCount) {
+          referencedMeasuresCount.textContent = parentNodes.length + childNodes.length;
+        }
+
+        // Show/hide referenced measures section
+        if (referencedMeasuresSection) {
+          referencedMeasuresSection.style.display =
+            (parentNodes.length + childNodes.length) > 0 ? "block" : "none";
+        }
+      }
+    }
+
+    /**
+     * Generate expanded definition by recursively replacing parent measure references
+     * @param {Object} node - The measure node
+     * @returns {string} Expanded definition
+     */
+    function generateExpandedDefinition(node) {
+      if (!node || !node.dax) return "No definition available";
+
+      let expandedDax = node.dax;
+
+      // Find all parent measures
+      const parentEdges = edgesArray.filter(edge => edge.to === node.id);
+      const parentNodes = parentEdges
+        .map(edge => nodesArray.find(n => n.id === edge.from))
+        .filter(n => n && n.type !== "column");
+
+      // Replace each parent measure reference with its definition
+      parentNodes.forEach(parent => {
+        // Simple replacement - in a real implementation, you would need more sophisticated
+        // parsing to correctly identify and replace measure references
+        const regex = new RegExp(`\\b${escapeRegExp(parent.label)}\\b`, "g");
+        expandedDax = expandedDax.replace(regex, `/* ${parent.label} */ (${parent.dax})`);
+      });
+
+      return expandedDax;
+    }
+
+    /**
+     * Hide measure details and show empty state
+     */
+    function hideMeasureDetails() {
+      if (!measureCard || !noMeasureSelected) return;
+
+      measureCard.style.display = "none";
+      noMeasureSelected.style.display = "flex";
+    }
+
+    /**
+     * Copy measure definition to clipboard
+     */
+    function copyMeasureDefinition() {
+      const activeTab = document.querySelector(".measure-tab.active");
+      let textToCopy = "";
+
+      if (activeTab.id === "originalTab" && originalCode) {
+        textToCopy = originalCode.textContent;
+      } else if (activeTab.id === "expandedTab" && expandedCode) {
+        textToCopy = expandedCode.textContent;
+      }
+
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy).then(
+          function () {
+            // Show notification
+            if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+              window.PowerBIExplorer.showNotification(
+                "Measure definition copied to clipboard",
+                "success"
+              );
+            }
+          },
+          function (err) {
+            console.error("Could not copy text: ", err);
+          }
+        );
+      }
+    }
+
+    /**
+     * Toggle expand/collapse all in the expanded definition
+     */
+    function toggleExpandCollapse() {
+      // This would be implemented for a more complex UI with collapsible sections
+      // For now, we just toggle the icon
+      if (expandCollapseAll) {
+        const icon = expandCollapseAll.querySelector("i");
+        if (icon.classList.contains("fa-expand-alt")) {
+          icon.classList.remove("fa-expand-alt");
+          icon.classList.add("fa-compress-alt");
+          expandCollapseAll.setAttribute("title", "Collapse all");
+        } else {
+          icon.classList.remove("fa-compress-alt");
+          icon.classList.add("fa-expand-alt");
+          expandCollapseAll.setAttribute("title", "Expand all");
+        }
+      }
+    }
+
+    /**
+     * Search within the measure definition
+     * @param {string} term - Search term
+     */
+    function searchInMeasure(term) {
+      // Show/hide clear button
+      if (clearMeasureSearch) {
+        clearMeasureSearch.style.display = term ? "block" : "none";
+      }
+
+      // Get active code element
+      const activeTab = document.querySelector(".measure-tab.active");
+      let codeElement = null;
+
+      if (activeTab.id === "originalTab" && originalCode) {
+        codeElement = originalCode;
+      } else if (activeTab.id === "expandedTab" && expandedCode) {
+        codeElement = expandedCode;
+      }
+
+      if (!codeElement) return;
+
+      if (!term) {
+        // Reset to original text without highlights
+        codeElement.innerHTML = codeElement.textContent;
+        return;
+      }
+
+      // Highlight matches
+      const text = codeElement.textContent;
+      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+      codeElement.innerHTML = text.replace(
+        regex,
+        '<span class="search-highlight">$1</span>'
+      );
+    }
+
+    /**
+     * Export measure definition to a file
+     */
+    function exportMeasureDefinition() {
+      const activeTab = document.querySelector(".measure-tab.active");
+      let textToExport = "";
+      let fileName = "";
+
+      if (measureName) {
+        fileName = measureName.textContent.replace(/\s+/g, "_") + ".dax";
+      } else {
+        fileName = "measure_definition.dax";
+      }
+
+      if (activeTab.id === "originalTab" && originalCode) {
+        textToExport = originalCode.textContent;
+      } else if (activeTab.id === "expandedTab" && expandedCode) {
+        textToExport = expandedCode.textContent;
+      }
+
+      if (textToExport) {
+        // Create and trigger download
+        const blob = new Blob([textToExport], { type: "text/plain;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.display = "none";
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Show notification
+        if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+          window.PowerBIExplorer.showNotification(
+            "Measure definition exported to file",
+            "success"
+          );
+        }
+      }
     }
   });
 </script>
