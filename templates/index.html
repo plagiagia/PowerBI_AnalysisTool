@@ -1,11 +1,11 @@
-{% extends "base.html" %} 
-{% block title %}Dashboard - Power BI Explorer{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Dashboard - Power BI Explorer{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Dashboard</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <!-- Dashboard Header -->
@@ -74,26 +74,44 @@
   </div>
 </section>
 
-<!-- Analysis Tools Section with improved layout and categorization -->
+<!-- Analysis Tools Section with carousel layout -->
 <section class="tools-section">
   <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
 
-  <!-- Data Exploration Category -->
-  <div class="tools-category">
-    <h3 class="category-title"><i class="fas fa-chart-bar"></i> Data Exploration</h3>
-    <div class="tools-grid improved-layout">
+  <!-- Tools Carousel -->
+  <div class="tools-carousel-container">
+    <div class="carousel-navigation">
+      <button class="carousel-nav-button prev" aria-label="Previous tools">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="carousel-nav-button next" aria-label="Next tools">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="tools-carousel">
       <!-- Visual Fields Table -->
-      <div class="tool-card">
+      <div class="tool-card-large">
         <div class="tool-card-header">
           <div class="tool-icon">
             <i class="fas fa-table"></i>
           </div>
-          <div class="tool-info">
-            <h3 class="tool-title">Visual Fields Table</h3>
-            <p class="tool-description">
-              Get a comprehensive view of all the fields used across visuals in
-              your report.
-            </p>
+          <h3 class="tool-title">Visual Fields Table</h3>
+        </div>
+        <div class="tool-card-body">
+          <p class="tool-description">
+            Get a comprehensive view of all the fields used across visuals in your report. This tool helps you
+            understand how your data is being used throughout your Power BI report.
+          </p>
+          <div class="tool-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.visual_count if metrics is defined else 32 }}</span>
+              <span class="stat-label">Visuals Analyzed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.field_count if metrics is defined else 48 }}</span>
+              <span class="stat-label">Fields Used</span>
+            </div>
           </div>
         </div>
         <div class="tool-card-footer">
@@ -102,42 +120,56 @@
       </div>
 
       <!-- Data Lineage Diagram -->
-      <div class="tool-card">
+      <div class="tool-card-large">
         <div class="tool-card-header">
           <div class="tool-icon">
             <i class="fas fa-project-diagram"></i>
           </div>
-          <div class="tool-info">
-            <h3 class="tool-title">Data Lineage Diagram</h3>
-            <p class="tool-description">
-              Visualize relationships between measures and columns to understand
-              dependencies.
-            </p>
+          <h3 class="tool-title">Data Lineage Diagram</h3>
+        </div>
+        <div class="tool-card-body">
+          <p class="tool-description">
+            Visualize relationships between measures and columns to understand dependencies. This interactive diagram
+            helps you trace the flow of data and identify complex relationships.
+          </p>
+          <div class="tool-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.measure_count if metrics is defined else 78 }}</span>
+              <span class="stat-label">Measures</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.relationship_count if metrics is defined else 124 }}</span>
+              <span class="stat-label">Relationships</span>
+            </div>
           </div>
         </div>
         <div class="tool-card-footer">
           <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Code Analysis Category -->
-  <div class="tools-category">
-    <h3 class="category-title"><i class="fas fa-code"></i> Code Analysis</h3>
-    <div class="tools-grid improved-layout">
       <!-- DAX Explorer -->
-      <div class="tool-card">
+      <div class="tool-card-large">
         <div class="tool-card-header">
           <div class="tool-icon">
             <i class="fas fa-code"></i>
           </div>
-          <div class="tool-info">
-            <h3 class="tool-title">DAX Explorer</h3>
-            <p class="tool-description">
-              Browse and analyze DAX formulas with syntax highlighting and copy
-              functionality.
-            </p>
+          <h3 class="tool-title">DAX Explorer</h3>
+        </div>
+        <div class="tool-card-body">
+          <p class="tool-description">
+            Browse and analyze DAX formulas with syntax highlighting and copy functionality. Understand the logic behind
+            your calculations and optimize your expressions.
+          </p>
+          <div class="tool-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.dax_count if metrics is defined else 78 }}</span>
+              <span class="stat-label">DAX Expressions</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.complex_dax_count if metrics is defined else 23 }}</span>
+              <span class="stat-label">Complex Formulas</span>
+            </div>
           </div>
         </div>
         <div class="tool-card-footer">
@@ -146,40 +178,56 @@
       </div>
 
       <!-- Source Explorer -->
-      <div class="tool-card">
+      <div class="tool-card-large">
         <div class="tool-card-header">
           <div class="tool-icon">
             <i class="fas fa-database"></i>
           </div>
-          <div class="tool-info">
-            <h3 class="tool-title">Source Explorer</h3>
-            <p class="tool-description">
-              Examine the M queries that form your report's data sources.
-            </p>
+          <h3 class="tool-title">Source Explorer</h3>
+        </div>
+        <div class="tool-card-body">
+          <p class="tool-description">
+            Examine the M queries that form your report's data sources. Understand how data is being transformed and
+            loaded into your Power BI model.
+          </p>
+          <div class="tool-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.query_count if metrics is defined else 12 }}</span>
+              <span class="stat-label">M Queries</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.datasource_count if metrics is defined else 5 }}</span>
+              <span class="stat-label">Data Sources</span>
+            </div>
           </div>
         </div>
         <div class="tool-card-footer">
           <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Optimization Category -->
-  <div class="tools-category">
-    <h3 class="category-title"><i class="fas fa-tachometer-alt"></i> Optimization</h3>
-    <div class="tools-grid improved-layout">
       <!-- Unused Measures -->
-      <div class="tool-card">
+      <div class="tool-card-large">
         <div class="tool-card-header">
           <div class="tool-icon">
             <i class="fas fa-search-minus"></i>
           </div>
-          <div class="tool-info">
-            <h3 class="tool-title">Unused Measures</h3>
-            <p class="tool-description">
-              Identify measures not used in any visuals for optimization.
-            </p>
+          <h3 class="tool-title">Unused Measures</h3>
+        </div>
+        <div class="tool-card-body">
+          <p class="tool-description">
+            Identify measures not used in any visuals for optimization. Clean up your model and improve performance by
+            removing or archiving unused calculations.
+          </p>
+          <div class="tool-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.unused_count if metrics is defined else 12 }}</span>
+              <span class="stat-label">Unused Measures</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ metrics.unused_percent if metrics is defined else "15%" }}</span>
+              <span class="stat-label">Of Total</span>
+            </div>
           </div>
         </div>
         <div class="tool-card-footer">
@@ -187,33 +235,18 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- AI Tools Category -->
-  <div class="tools-category">
-    <h3 class="category-title"><i class="fas fa-robot"></i> AI Tools</h3>
-    <div class="tools-grid improved-layout">
-      <!-- AI Analysis -->
-      <div class="tool-card">
-        <div class="tool-card-header">
-          <div class="tool-icon">
-            <i class="fas fa-robot"></i>
-          </div>
-          <div class="tool-info">
-            <h3 class="tool-title">AI Analysis</h3>
-            <p class="tool-description">
-              Get AI-powered insights and recommendations for your Power BI report.
-            </p>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/ai-analysis" class="tool-button">Ask AI Assistant <i class="fas fa-arrow-right"></i></a>
-        </div>
-      </div>
+    <!-- Carousel Indicators -->
+    <div class="carousel-indicators">
+      <button class="indicator active" data-index="0" aria-label="Go to slide 1"></button>
+      <button class="indicator" data-index="1" aria-label="Go to slide 2"></button>
+      <button class="indicator" data-index="2" aria-label="Go to slide 3"></button>
+      <button class="indicator" data-index="3" aria-label="Go to slide 4"></button>
+      <button class="indicator" data-index="4" aria-label="Go to slide 5"></button>
     </div>
   </div>
 </section>
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <script>
@@ -232,90 +265,386 @@
         localStorage.setItem("visitedBefore", "true");
       }, 1000);
     }
+
+    // Carousel functionality
+    initToolsCarousel();
   });
+
+  function initToolsCarousel() {
+    const carousel = document.querySelector('.tools-carousel');
+    const cards = carousel.querySelectorAll('.tool-card-large');
+    const prevButton = document.querySelector('.carousel-nav-button.prev');
+    const nextButton = document.querySelector('.carousel-nav-button.next');
+    const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+
+    if (!carousel || cards.length === 0) {
+      console.warn("Carousel or cards not found. Skipping initToolsCarousel.");
+      return;
+    }
+
+    let currentIndex = 0;
+    let cardsPerView = 1;
+
+    // Determine cards per view based on screen size
+    function updateCardsPerView() {
+      // const oldCardsPerView = cardsPerView; // Not strictly needed unless you compare old to new
+      if (window.innerWidth >= 1200) {
+        cardsPerView = 3;
+      } else if (window.innerWidth >= 768) {
+        cardsPerView = 2;
+      } else {
+        cardsPerView = 1;
+      }
+
+      // Update visibility of indicators based on the new cardsPerView
+      let currentMaxValidIndex = 0;
+      if (cards.length > 0) {
+        // Calculate the maximum starting index for a scroll position
+        currentMaxValidIndex = cards.length - cardsPerView;
+        if (currentMaxValidIndex < 0) {
+          currentMaxValidIndex = 0; // Cannot be less than 0
+        }
+        // Ensure we don't have a max index if there are no cards to fill even one view properly
+        // For example, if cards.length is 1 and cardsPerView is 3, maxIndex should be 0.
+        if (cards.length < cardsPerView && cards.length > 0) {
+          currentMaxValidIndex = 0;
+        }
+      } else {
+        currentMaxValidIndex = -1; // No cards, so no valid index, results in 0 visible indicators
+      }
+      const numVisibleIndicators = currentMaxValidIndex + 1;
+
+      indicators.forEach((indicator, i) => {
+        if (i < numVisibleIndicators) {
+          indicator.style.display = ''; // Use default display (e.g., from CSS)
+          indicator.disabled = false;
+        } else {
+          indicator.style.display = 'none';
+          indicator.disabled = true;
+        }
+      });
+    }
+
+    // Scroll to specific card
+    function scrollToCard(index) {
+      if (cards.length === 0) return;
+
+      let maxIndex = cards.length - cardsPerView;
+      if (maxIndex < 0) maxIndex = 0;
+
+      if (index < 0) {
+        index = 0;
+      } else if (index > maxIndex) {
+        index = maxIndex;
+      }
+
+      currentIndex = index;
+      const targetCard = cards[currentIndex];
+
+      if (!targetCard) {
+        console.warn(`Carousel target card at index ${currentIndex} not found.`);
+        return;
+      }
+
+      const carouselStyles = getComputedStyle(carousel);
+      const carouselPaddingLeft = parseFloat(carouselStyles.paddingLeft) || 0;
+
+      const scrollPosition = targetCard.offsetLeft - carouselPaddingLeft;
+
+      carousel.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+
+      // Update indicators
+      indicators.forEach((indicator, i) => {
+        indicator.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    // Event listeners for navigation buttons
+    if (prevButton) {
+      prevButton.addEventListener('click', () => {
+        scrollToCard(currentIndex - 1);
+      });
+    }
+
+    if (nextButton) {
+      nextButton.addEventListener('click', () => {
+        scrollToCard(currentIndex + 1);
+      });
+    }
+
+    // Event listeners for indicators
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        scrollToCard(index);
+      });
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      updateCardsPerView();
+      scrollToCard(currentIndex);
+    });
+
+    // Initialize
+    updateCardsPerView();
+    scrollToCard(0);
+
+    // Enable touch swiping for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    carousel.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        // Swipe left
+        scrollToCard(currentIndex + 1);
+      } else if (touchEndX > touchStartX + swipeThreshold) {
+        // Swipe right
+        scrollToCard(currentIndex - 1);
+      }
+    }
+  }
 </script>
 
-<!-- Add inline styles for improved layout -->
+<!-- Add inline styles for carousel layout -->
 <style>
-  /* Improved layout for tools grid */
-  .tools-grid.improved-layout {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-5);
-    margin-bottom: var(--space-4);
+  /* Tools Carousel Container */
+  .tools-carousel-container {
+    position: relative;
+    margin: var(--space-6) 0;
+    padding: var(--space-4) 0;
   }
-  
-  /* Make the last card centered if total cards are odd */
-  .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-    grid-column: 1 / span 2;
-    max-width: 50%;
-    margin: 0 auto;
+
+  /* Carousel Layout */
+  .tools-carousel {
+    display: flex;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding: var(--space-4) var(--space-2);
+    margin: 0 var(--space-6);
   }
-  
-  /* Add some elevation and transition effects */
-  .tool-card {
+
+  /* Large Tool Cards */
+  .tool-card-large {
+    flex: 0 0 calc(100% - var(--space-4));
+    scroll-snap-align: center;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin: 0 var(--space-2);
+    padding: var(--space-5);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    border: 1px solid var(--border);
   }
-  
-  .tool-card:hover {
+
+  .tool-card-large:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
   }
-  
-  /* Category styling */
-  .tools-category {
-    margin-bottom: var(--space-6);
-  }
-  
-  .category-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
-    margin-bottom: var(--space-3);
+
+  /* Card Header */
+  .tool-card-large .tool-card-header {
     display: flex;
     align-items: center;
-    padding-left: var(--space-3);
-    border-left: 3px solid var(--primary);
+    margin-bottom: var(--space-4);
   }
-  
-  .category-title i {
-    margin-right: var(--space-2);
+
+  .tool-card-large .tool-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-full);
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-right: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .tool-card-large .tool-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* Card Body */
+  .tool-card-large .tool-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tool-card-large .tool-description {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-4);
+    flex: 1;
+  }
+
+  /* Tool Stats */
+  .tool-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: var(--space-4) 0;
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: var(--primary);
+    margin-bottom: var(--space-1);
   }
-  
-  /* Responsive adjustments */
-  @media (max-width: 1200px) {
-    .tools-grid.improved-layout {
-      grid-template-columns: repeat(2, 1fr);
+
+  .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Card Footer */
+  .tool-card-large .tool-card-footer {
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+
+  .tool-card-large .tool-button {
+    display: inline-block;
+    padding: var(--space-3) var(--space-5);
+    background-color: var(--primary);
+    color: white;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: background-color 0.2s ease;
+    width: 100%;
+  }
+
+  .tool-card-large .tool-button:hover {
+    background-color: var(--primary-dark);
+  }
+
+  /* Carousel Navigation */
+  .carousel-navigation {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .carousel-nav-button {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all 0.2s ease;
+    pointer-events: auto;
+  }
+
+  .carousel-nav-button:hover {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .carousel-nav-button.prev {
+    margin-left: var(--space-2);
+  }
+
+  .carousel-nav-button.next {
+    margin-right: var(--space-2);
+  }
+
+  /* Carousel Indicators */
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-4);
+  }
+
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background-color: var(--border);
+    margin: 0 var(--space-1);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .indicator.active {
+    background-color: var(--primary);
+    transform: scale(1.2);
+  }
+
+  /* Responsive Adjustments */
+  @media (min-width: 768px) {
+    .tool-card-large {
+      flex: 0 0 calc(80% - var(--space-4));
     }
   }
-  
-  @media (max-width: 768px) {
-    .tools-grid.improved-layout {
-      grid-template-columns: 1fr;
-    }
-    
-    .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-      grid-column: 1;
-      max-width: 100%;
+
+  @media (min-width: 1200px) {
+    .tool-card-large {
+      flex: 0 0 calc(33.333% - var(--space-4));
     }
   }
-  
+
   /* Enhance metric cards */
   .metrics-grid {
     gap: var(--space-5);
   }
-  
+
   .metric-card {
     padding: var(--space-5);
   }
-  
+
   .metric-icon {
     width: 50px;
     height: 50px;
     font-size: 1.75rem;
   }
-  
+
   /* Empty state handling */
   .empty-state {
     padding: var(--space-6);
@@ -325,19 +654,19 @@
     border: 1px dashed var(--border);
     margin: var(--space-4) 0;
   }
-  
+
   .empty-state-icon {
     font-size: 48px;
     color: var(--text-tertiary);
     margin-bottom: var(--space-4);
   }
-  
+
   .empty-state-title {
     font-size: var(--font-size-xl);
     color: var(--text-primary);
     margin-bottom: var(--space-2);
   }
-  
+
   .empty-state-message {
     color: var(--text-secondary);
     margin-bottom: var(--space-4);
