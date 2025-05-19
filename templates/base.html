@@ -57,12 +57,12 @@
             <span>Dashboard</span>
           </a>
         </li>
-        
+
         <!-- Data Exploration Section -->
         <li class="nav-section">
           <span class="nav-section-title">Data Exploration</span>
         </li>
-        
+
         <li class="nav-item{% if request.path == '/table-view' %} active{% endif %}">
           <a href="/table-view" class="nav-link"
             aria-current="{{ 'page' if request.path == '/table-view' else 'false' }}">
@@ -77,12 +77,12 @@
             <span>Data Lineage</span>
           </a>
         </li>
-        
+
         <!-- Code Analysis Section -->
         <li class="nav-section">
           <span class="nav-section-title">Code Analysis</span>
         </li>
-        
+
         <li class="nav-item{% if request.path == '/dax-expressions' %} active{% endif %}">
           <a href="/dax-expressions" class="nav-link"
             aria-current="{{ 'page' if request.path == '/dax-expressions' else 'false' }}">
@@ -97,12 +97,12 @@
             <span>Sources</span>
           </a>
         </li>
-        
+
         <!-- Optimization Section -->
         <li class="nav-section">
           <span class="nav-section-title">Optimization</span>
         </li>
-        
+
         <li class="nav-item{% if request.path == '/unused-measures' %} active{% endif %}">
           <a href="/unused-measures" class="nav-link"
             aria-current="{{ 'page' if request.path == '/unused-measures' else 'false' }}">
@@ -110,19 +110,7 @@
             <span>Unused Measures</span>
           </a>
         </li>
-        
-        <!-- AI Tools Section -->
-        <li class="nav-section">
-          <span class="nav-section-title">AI Tools</span>
-        </li>
-        
-        <li class="nav-item{% if request.path == '/ai-analysis' %} active{% endif %}">
-          <a href="/ai-analysis" class="nav-link"
-            aria-current="{{ 'page' if request.path == '/ai-analysis' else 'false' }}">
-            <i class="fas fa-robot"></i>
-            <span>AI Analysis</span>
-          </a>
-        </li>
+
       </ul>
     </nav>
 
