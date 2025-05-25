@@ -25,6 +25,15 @@ def create_app(config_object=None) -> Flask:
 
     app.config.from_object(config_object)
 
+    # Security headers
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        return response
+
     # No need to set default paths - they are already in the config file
 
     @app.teardown_appcontext
@@ -38,6 +47,11 @@ def create_app(config_object=None) -> Flask:
         Retrieve or create the DataProcessor instance for this request.
         """
         if not hasattr(g, 'data_processor'):
+            # Check if required file exists
+            if not os.path.exists(app.config['REPORT_JSON_PATH']):
+                current_app.logger.error(f"Report JSON file not found: {app.config['REPORT_JSON_PATH']}")
+                abort(500, description="Report data file not found. Please check your data directory.")
+            
             dp = DataProcessor(app.config['REPORT_JSON_PATH'])
             dp.process_json()
             g.data_processor = dp

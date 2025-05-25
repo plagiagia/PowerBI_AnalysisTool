@@ -8,241 +8,300 @@
 {% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<section class="dashboard-header">
-  <h1 class="dashboard-title">Power BI Visuals Explorer</h1>
-  <p class="dashboard-description">
-    Explore and analyze your Power BI reports with advanced visualization and
-    diagnostics tools.
-  </p>
-</section>
-
-<!-- Metrics Section with improved layout -->
-<section class="metrics-section">
-  <div class="metrics-grid">
-    <!-- Total Visuals Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-chart-bar"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Total Visuals</div>
-        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 32 }}">
-          0
-        </div>
-      </div>
+<!-- Modern Dashboard Header -->
+<section class="modern-dashboard-header">
+  <div class="header-background">
+    <div class="header-gradient"></div>
+    <div class="header-pattern"></div>
+  </div>
+  <div class="header-content">
+    <div class="header-main">
+      <h1 class="modern-title">
+        <span class="title-icon">
+          <i class="fas fa-chart-line"></i>
+        </span>
+        <span class="title-text">Power BI Analytics Hub</span>
+      </h1>
+      <p class="modern-subtitle">
+        Advanced analytics and insights for your Power BI reports with AI-powered recommendations
+      </p>
     </div>
-
-    <!-- Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-calculator"></i>
+    <div class="header-stats">
+      <div class="quick-stat">
+        <span class="stat-number">{{ metrics.visual_count if metrics is defined else 121 }}</span>
+        <span class="stat-label">Active Visuals</span>
       </div>
-      <div class="metric-info">
-        <div class="metric-title">Measures</div>
-        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 78 }}">
-          0
-        </div>
-      </div>
-    </div>
-
-    <!-- Pages Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Pages</div>
-        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 5 }}">
-          0
-        </div>
-      </div>
-    </div>
-
-    <!-- Unused Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Unused Measures</div>
-        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 12 }}">
-          0
-        </div>
+      <div class="quick-stat">
+        <span class="stat-number">{{ metrics.measure_count if metrics is defined else 258 }}</span>
+        <span class="stat-label">Total Measures</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Analysis Tools Section with carousel layout -->
-<section class="tools-section">
-  <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
-
-  <!-- Tools Carousel -->
-  <div class="tools-carousel-container">
-    <div class="carousel-navigation">
-      <button class="carousel-nav-button prev" aria-label="Previous tools">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <button class="carousel-nav-button next" aria-label="Next tools">
-        <i class="fas fa-chevron-right"></i>
-      </button>
+<!-- Enhanced Metrics Section -->
+<section class="enhanced-metrics-section">
+  <div class="metrics-container">
+    <!-- Visual Analytics Card -->
+    <div class="metric-card-enhanced primary">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 121 }}">0</div>
+        <div class="metric-label">Total Visuals</div>
+      </div>
+      <div class="card-glow"></div>
     </div>
 
-    <div class="tools-carousel">
-      <!-- Visual Fields Table -->
-      <div class="tool-card-large">
-        <div class="tool-card-header">
-          <div class="tool-icon">
-            <i class="fas fa-table"></i>
-          </div>
-          <h3 class="tool-title">Visual Fields Table</h3>
-        </div>
-        <div class="tool-card-body">
-          <p class="tool-description">
-            Get a comprehensive view of all the fields used across visuals in your report. This tool helps you
-            understand how your data is being used throughout your Power BI report.
-          </p>
-          <div class="tool-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.visual_count if metrics is defined else 32 }}</span>
-              <span class="stat-label">Visuals Analyzed</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.field_count if metrics is defined else 48 }}</span>
-              <span class="stat-label">Fields Used</span>
-            </div>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/table-view" class="tool-button">Explore Fields <i class="fas fa-arrow-right"></i></a>
+    <!-- Measures Card -->
+    <div class="metric-card-enhanced secondary">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-calculator"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 258 }}">0</div>
+        <div class="metric-label">DAX Measures</div>
+      </div>
+      <div class="card-glow"></div>
+    </div>
 
-      <!-- Data Lineage Diagram -->
-      <div class="tool-card-large">
-        <div class="tool-card-header">
-          <div class="tool-icon">
-            <i class="fas fa-project-diagram"></i>
-          </div>
-          <h3 class="tool-title">Data Lineage Diagram</h3>
-        </div>
-        <div class="tool-card-body">
-          <p class="tool-description">
-            Visualize relationships between measures and columns to understand dependencies. This interactive diagram
-            helps you trace the flow of data and identify complex relationships.
-          </p>
-          <div class="tool-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.measure_count if metrics is defined else 78 }}</span>
-              <span class="stat-label">Measures</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.relationship_count if metrics is defined else 124 }}</span>
-              <span class="stat-label">Relationships</span>
-            </div>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
+    <!-- Pages Card -->
+    <div class="metric-card-enhanced accent">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-file-alt"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 18 }}">0</div>
+        <div class="metric-label">Report Pages</div>
+      </div>
+      <div class="card-glow"></div>
+    </div>
 
-      <!-- DAX Explorer -->
-      <div class="tool-card-large">
-        <div class="tool-card-header">
-          <div class="tool-icon">
+    <!-- Performance Card -->
+    <div class="metric-card-enhanced warning">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 4 }}">0</div>
+        <div class="metric-label">Unused Measures</div>
+      </div>
+      <div class="card-glow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Modern Analysis Tools Section -->
+<section class="modern-tools-section">
+  <div class="section-header">
+    <h2 class="section-title">
+      <span class="title-icon">
+        <i class="fas fa-tools"></i>
+      </span>
+      Analysis Toolkit
+    </h2>
+    <div class="section-description">
+      Powerful tools to analyze, optimize, and understand your Power BI reports
+    </div>
+  </div>
+
+  <!-- Enhanced Tools Grid -->
+  <div class="modern-tools-grid">
+    <!-- Visual Fields Explorer -->
+    <div class="modern-tool-card" data-category="exploration">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-table"></i>
+        </div>
+        <div class="tool-badge">Core</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Visual Fields Explorer</h3>
+        <p class="tool-description">Deep dive into field usage across all visuals with advanced filtering and search
+          capabilities</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-search"></i>
+            Smart Search
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-filter"></i>
+            Advanced Filters
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/table-view" class="modern-button primary">
+          <span>Explore Fields</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- Data Lineage -->
+    <div class="modern-tool-card" data-category="analysis">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="tool-badge">Advanced</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Data Lineage Diagram</h3>
+        <p class="tool-description">Visualize complex relationships and dependencies between measures and columns</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-share-alt"></i>
+            Interactive Graph
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-eye"></i>
+            Dependency Tracking
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/lineage-view" class="modern-button secondary">
+          <span>View Diagram</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- DAX Explorer -->
+    <div class="modern-tool-card" data-category="optimization">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-code"></i>
+        </div>
+        <div class="tool-badge">AI-Powered</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">DAX Code Analyzer</h3>
+        <p class="tool-description">Browse, analyze, and optimize DAX formulas with AI-powered suggestions</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-brain"></i>
+            AI Analysis
+          </span>
+          <span class="feature-tag">
             <i class="fas fa-code"></i>
-          </div>
-          <h3 class="tool-title">DAX Explorer</h3>
-        </div>
-        <div class="tool-card-body">
-          <p class="tool-description">
-            Browse and analyze DAX formulas with syntax highlighting and copy functionality. Understand the logic behind
-            your calculations and optimize your expressions.
-          </p>
-          <div class="tool-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.dax_count if metrics is defined else 78 }}</span>
-              <span class="stat-label">DAX Expressions</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.complex_dax_count if metrics is defined else 23 }}</span>
-              <span class="stat-label">Complex Formulas</span>
-            </div>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/dax-expressions" class="tool-button">Browse DAX <i class="fas fa-arrow-right"></i></a>
+            Syntax Highlighting
+          </span>
         </div>
       </div>
-
-      <!-- Source Explorer -->
-      <div class="tool-card-large">
-        <div class="tool-card-header">
-          <div class="tool-icon">
-            <i class="fas fa-database"></i>
-          </div>
-          <h3 class="tool-title">Source Explorer</h3>
-        </div>
-        <div class="tool-card-body">
-          <p class="tool-description">
-            Examine the M queries that form your report's data sources. Understand how data is being transformed and
-            loaded into your Power BI model.
-          </p>
-          <div class="tool-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.query_count if metrics is defined else 12 }}</span>
-              <span class="stat-label">M Queries</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.datasource_count if metrics is defined else 5 }}</span>
-              <span class="stat-label">Data Sources</span>
-            </div>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
-        </div>
+      <div class="tool-footer">
+        <a href="/dax-expressions" class="modern-button accent">
+          <span>Analyze DAX</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
-
-      <!-- Unused Measures -->
-      <div class="tool-card-large">
-        <div class="tool-card-header">
-          <div class="tool-icon">
-            <i class="fas fa-search-minus"></i>
-          </div>
-          <h3 class="tool-title">Unused Measures</h3>
-        </div>
-        <div class="tool-card-body">
-          <p class="tool-description">
-            Identify measures not used in any visuals for optimization. Clean up your model and improve performance by
-            removing or archiving unused calculations.
-          </p>
-          <div class="tool-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.unused_count if metrics is defined else 12 }}</span>
-              <span class="stat-label">Unused Measures</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ metrics.unused_percent if metrics is defined else "15%" }}</span>
-              <span class="stat-label">Of Total</span>
-            </div>
-          </div>
-        </div>
-        <div class="tool-card-footer">
-          <a href="/unused-measures" class="tool-button">Find Unused Measures <i class="fas fa-arrow-right"></i></a>
-        </div>
-      </div>
+      <div class="card-highlight"></div>
     </div>
 
-    <!-- Carousel Indicators -->
-    <div class="carousel-indicators">
-      <button class="indicator active" data-index="0" aria-label="Go to slide 1"></button>
-      <button class="indicator" data-index="1" aria-label="Go to slide 2"></button>
-      <button class="indicator" data-index="2" aria-label="Go to slide 3"></button>
-      <button class="indicator" data-index="3" aria-label="Go to slide 4"></button>
-      <button class="indicator" data-index="4" aria-label="Go to slide 5"></button>
+    <!-- Source Explorer -->
+    <div class="modern-tool-card" data-category="exploration">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-database"></i>
+        </div>
+        <div class="tool-badge">Pro</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Source Query Explorer</h3>
+        <p class="tool-description">Examine M queries and data transformation logic with intelligent insights</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-magic"></i>
+            M Query Analysis
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-cogs"></i>
+            Transformation Tracking
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/source-explorer" class="modern-button info">
+          <span>Explore Sources</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- Performance Optimizer -->
+    <div class="modern-tool-card" data-category="optimization">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <div class="tool-badge">Optimizer</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Performance Optimizer</h3>
+        <p class="tool-description">Identify unused measures and optimization opportunities to improve report
+          performance</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-search-minus"></i>
+            Unused Detection
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-rocket"></i>
+            Performance Tips
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/unused-measures" class="modern-button warning">
+          <span>Optimize Now</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="modern-tool-card" data-category="ai">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="tool-badge ai">AI Assistant</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Power BI AI Assistant</h3>
+        <p class="tool-description">Get intelligent insights and recommendations powered by advanced AI analysis</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-brain"></i>
+            Smart Insights
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-lightbulb"></i>
+            Recommendations
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="#" class="modern-button ai">
+          <span>Ask AI</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
     </div>
   </div>
 </section>
@@ -251,428 +310,175 @@
 {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Show welcome notification on first visit
-    const firstVisit = !localStorage.getItem("visitedBefore");
-    if (firstVisit) {
-      setTimeout(() => {
-        if (window.PowerBIExplorer) {
-          window.PowerBIExplorer.showNotification(
-            "Welcome to the new Power BI Explorer interface!",
-            "info",
-            5000
-          );
-        }
-        localStorage.setItem("visitedBefore", "true");
-      }, 1000);
-    }
-
-    // Carousel functionality
-    initToolsCarousel();
+    // Initialize modern dashboard
+    initModernDashboard();
   });
 
-  function initToolsCarousel() {
-    const carousel = document.querySelector('.tools-carousel');
-    const cards = carousel.querySelectorAll('.tool-card-large');
-    const prevButton = document.querySelector('.carousel-nav-button.prev');
-    const nextButton = document.querySelector('.carousel-nav-button.next');
-    const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+  function initModernDashboard() {
+    // Animate metric values
+    animateCounters();
 
-    if (!carousel || cards.length === 0) {
-      console.warn("Carousel or cards not found. Skipping initToolsCarousel.");
-      return;
-    }
+    // Add modern hover effects
+    initHoverEffects();
 
-    let currentIndex = 0;
-    let cardsPerView = 1;
+    // Initialize mobile menu if needed
+    initMobileMenu();
+  }
 
-    // Determine cards per view based on screen size
-    function updateCardsPerView() {
-      // const oldCardsPerView = cardsPerView; // Not strictly needed unless you compare old to new
-      if (window.innerWidth >= 1200) {
-        cardsPerView = 3;
-      } else if (window.innerWidth >= 768) {
-        cardsPerView = 2;
-      } else {
-        cardsPerView = 1;
-      }
+  function animateCounters() {
+    const counters = document.querySelectorAll('.metric-value[data-value]');
 
-      // Update visibility of indicators based on the new cardsPerView
-      let currentMaxValidIndex = 0;
-      if (cards.length > 0) {
-        // Calculate the maximum starting index for a scroll position
-        currentMaxValidIndex = cards.length - cardsPerView;
-        if (currentMaxValidIndex < 0) {
-          currentMaxValidIndex = 0; // Cannot be less than 0
-        }
-        // Ensure we don't have a max index if there are no cards to fill even one view properly
-        // For example, if cards.length is 1 and cardsPerView is 3, maxIndex should be 0.
-        if (cards.length < cardsPerView && cards.length > 0) {
-          currentMaxValidIndex = 0;
-        }
-      } else {
-        currentMaxValidIndex = -1; // No cards, so no valid index, results in 0 visible indicators
-      }
-      const numVisibleIndicators = currentMaxValidIndex + 1;
+    const observerOptions = {
+      threshold: 0.5,
+      rootMargin: '0px'
+    };
 
-      indicators.forEach((indicator, i) => {
-        if (i < numVisibleIndicators) {
-          indicator.style.display = ''; // Use default display (e.g., from CSS)
-          indicator.disabled = false;
-        } else {
-          indicator.style.display = 'none';
-          indicator.disabled = true;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const counter = entry.target;
+          const target = parseInt(counter.getAttribute('data-value')) || 0;
+          animateCounter(counter, target);
+          observer.unobserve(counter);
         }
       });
-    }
+    }, observerOptions);
 
-    // Scroll to specific card
-    function scrollToCard(index) {
-      if (cards.length === 0) return;
+    counters.forEach(counter => observer.observe(counter));
+  }
 
-      let maxIndex = cards.length - cardsPerView;
-      if (maxIndex < 0) maxIndex = 0;
-
-      if (index < 0) {
-        index = 0;
-      } else if (index > maxIndex) {
-        index = maxIndex;
+  function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 50; // 50 steps
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        current = target;
+        clearInterval(timer);
       }
+      element.textContent = Math.floor(current);
+    }, 40); // 2 second total animation
+  }
 
-      currentIndex = index;
-      const targetCard = cards[currentIndex];
-
-      if (!targetCard) {
-        console.warn(`Carousel target card at index ${currentIndex} not found.`);
-        return;
-      }
-
-      const carouselStyles = getComputedStyle(carousel);
-      const carouselPaddingLeft = parseFloat(carouselStyles.paddingLeft) || 0;
-
-      const scrollPosition = targetCard.offsetLeft - carouselPaddingLeft;
-
-      carousel.scrollTo({
-        left: scrollPosition,
-        behavior: 'smooth'
+  function initHoverEffects() {
+    // Tool cards
+    const toolCards = document.querySelectorAll('.modern-tool-card');
+    toolCards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-8px)';
       });
 
-      // Update indicators
-      indicators.forEach((indicator, i) => {
-        indicator.classList.toggle('active', i === currentIndex);
-      });
-    }
-
-    // Event listeners for navigation buttons
-    if (prevButton) {
-      prevButton.addEventListener('click', () => {
-        scrollToCard(currentIndex - 1);
-      });
-    }
-
-    if (nextButton) {
-      nextButton.addEventListener('click', () => {
-        scrollToCard(currentIndex + 1);
-      });
-    }
-
-    // Event listeners for indicators
-    indicators.forEach((indicator, index) => {
-      indicator.addEventListener('click', () => {
-        scrollToCard(index);
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
       });
     });
 
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      updateCardsPerView();
-      scrollToCard(currentIndex);
+    // Modern buttons with ripple effect
+    const buttons = document.querySelectorAll('.modern-button');
+    buttons.forEach(button => {
+      button.addEventListener('click', createRipple);
     });
+  }
 
-    // Initialize
-    updateCardsPerView();
-    scrollToCard(0);
+  function createRipple(e) {
+    const button = e.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
 
-    // Enable touch swiping for mobile
-    let touchStartX = 0;
-    let touchEndX = 0;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    ripple.classList.add('ripple');
 
-    carousel.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+    button.appendChild(ripple);
 
-    carousel.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, { passive: true });
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
 
-    function handleSwipe() {
-      const swipeThreshold = 50;
-      if (touchEndX < touchStartX - swipeThreshold) {
-        // Swipe left
-        scrollToCard(currentIndex + 1);
-      } else if (touchEndX > touchStartX + swipeThreshold) {
-        // Swipe right
-        scrollToCard(currentIndex - 1);
-      }
+  function initMobileMenu() {
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 &&
+          !sidebar.contains(e.target) &&
+          !sidebarToggle.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      });
     }
   }
 </script>
 
-<!-- Add inline styles for carousel layout -->
 <style>
-  /* Tools Carousel Container */
-  .tools-carousel-container {
-    position: relative;
-    margin: var(--space-6) 0;
-    padding: var(--space-4) 0;
-  }
-
-  /* Carousel Layout */
-  .tools-carousel {
-    display: flex;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    padding: var(--space-4) var(--space-2);
-    margin: 0 var(--space-6);
-  }
-
-  /* Large Tool Cards */
-  .tool-card-large {
-    flex: 0 0 calc(100% - var(--space-4));
-    scroll-snap-align: center;
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    margin: 0 var(--space-2);
-    padding: var(--space-5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    min-height: 400px;
-    border: 1px solid var(--border);
-  }
-
-  .tool-card-large:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  /* Card Header */
-  .tool-card-large .tool-card-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--space-4);
-  }
-
-  .tool-card-large .tool-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: var(--radius-full);
-    background-color: var(--primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    margin-right: var(--space-4);
-    flex-shrink: 0;
-  }
-
-  .tool-card-large .tool-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  /* Card Body */
-  .tool-card-large .tool-card-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tool-card-large .tool-description {
-    font-size: var(--font-size-md);
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--space-4);
-    flex: 1;
-  }
-
-  /* Tool Stats */
-  .tool-stats {
-    display: flex;
-    justify-content: space-around;
-    margin: var(--space-4) 0;
-    padding: var(--space-4) 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stat-item {
-    text-align: center;
-  }
-
-  .stat-value {
-    display: block;
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary);
-    margin-bottom: var(--space-1);
-  }
-
-  .stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  /* Card Footer */
-  .tool-card-large .tool-card-footer {
-    margin-top: var(--space-4);
-    text-align: center;
-  }
-
-  .tool-card-large .tool-button {
-    display: inline-block;
-    padding: var(--space-3) var(--space-5);
-    background-color: var(--primary);
-    color: white;
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    font-weight: var(--font-weight-medium);
-    transition: background-color 0.2s ease;
-    width: 100%;
-  }
-
-  .tool-card-large .tool-button:hover {
-    background-color: var(--primary-dark);
-  }
-
-  /* Carousel Navigation */
-  .carousel-navigation {
+  /* Ripple Effect */
+  .ripple {
     position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: space-between;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
     pointer-events: none;
-    z-index: 10;
   }
 
-  .carousel-nav-button {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--radius-full);
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: var(--shadow-md);
-    transition: all 0.2s ease;
-    pointer-events: auto;
-  }
-
-  .carousel-nav-button:hover {
-    background-color: var(--primary);
-    color: white;
-  }
-
-  .carousel-nav-button.prev {
-    margin-left: var(--space-2);
-  }
-
-  .carousel-nav-button.next {
-    margin-right: var(--space-2);
-  }
-
-  /* Carousel Indicators */
-  .carousel-indicators {
-    display: flex;
-    justify-content: center;
-    margin-top: var(--space-4);
-  }
-
-  .indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: var(--radius-full);
-    background-color: var(--border);
-    margin: 0 var(--space-1);
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .indicator.active {
-    background-color: var(--primary);
-    transform: scale(1.2);
-  }
-
-  /* Responsive Adjustments */
-  @media (min-width: 768px) {
-    .tool-card-large {
-      flex: 0 0 calc(80% - var(--space-4));
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
     }
   }
 
-  @media (min-width: 1200px) {
-    .tool-card-large {
-      flex: 0 0 calc(33.333% - var(--space-4));
+  /* Smooth transitions */
+  .modern-tool-card,
+  .metric-card-enhanced,
+  .insight-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Loading animation for metrics */
+  .metric-value {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
     }
   }
 
-  /* Enhance metric cards */
-  .metrics-grid {
-    gap: var(--space-5);
+  /* Focus styles for accessibility */
+  .modern-button:focus,
+  .modern-tool-card:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 
-  .metric-card {
-    padding: var(--space-5);
-  }
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .sidebar {
+      transition: transform 0.3s ease;
+    }
 
-  .metric-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.75rem;
-  }
-
-  /* Empty state handling */
-  .empty-state {
-    padding: var(--space-6);
-    text-align: center;
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px dashed var(--border);
-    margin: var(--space-4) 0;
-  }
-
-  .empty-state-icon {
-    font-size: 48px;
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-4);
-  }
-
-  .empty-state-title {
-    font-size: var(--font-size-xl);
-    color: var(--text-primary);
-    margin-bottom: var(--space-2);
-  }
-
-  .empty-state-message {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-4);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    .sidebar.open {
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
   }
 </style>
 {% endblock %}

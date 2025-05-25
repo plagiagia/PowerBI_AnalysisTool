@@ -57,6 +57,11 @@ class ProductionConfig(Config):
     # In production, set this from environment variable
     SECRET_KEY = os.environ.get('SECRET_KEY')
     
+    def __init__(self):
+        # Ensure SECRET_KEY is set in production
+        if not self.SECRET_KEY:
+            raise ValueError("SECRET_KEY environment variable must be set in production")
+
 
 # Configuration dictionary to easily select environment
 config = {
