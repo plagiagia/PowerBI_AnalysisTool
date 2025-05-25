@@ -1,6 +1,21 @@
 {% extends "base.html" %} 
 {% block title %}Visual Fields - Power BI Explorer{% endblock %} 
 
+{% block header_icon %}<i class="fas fa-table"></i>{% endblock %}
+{% block header_title %}Visual Fields Explorer{% endblock %}
+{% block header_subtitle %}Explore all fields used across visuals in your Power BI report with advanced filtering and search capabilities{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ table_data|length if table_data else 0 }}</span>
+  <span class="stat-label">Total Visuals</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ unique_pages|length if unique_pages else 0 }}</span>
+  <span class="stat-label">Report Pages</span>
+</div>
+{% endblock %}
+
 {% block head %}
 <!-- Add any page-specific head content here -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />

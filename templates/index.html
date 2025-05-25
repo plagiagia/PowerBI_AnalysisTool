@@ -8,36 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- Modern Dashboard Header -->
-<section class="modern-dashboard-header">
-  <div class="header-background">
-    <div class="header-gradient"></div>
-    <div class="header-pattern"></div>
-  </div>
-  <div class="header-content">
-    <div class="header-main">
-      <h1 class="modern-title">
-        <span class="title-icon">
-          <i class="fas fa-chart-line"></i>
-        </span>
-        <span class="title-text">Power BI Analytics Hub</span>
-      </h1>
-      <p class="modern-subtitle">
-        Advanced analytics and insights for your Power BI reports with AI-powered recommendations
-      </p>
-    </div>
-    <div class="header-stats">
-      <div class="quick-stat">
-        <span class="stat-number">{{ metrics.visual_count if metrics is defined else 121 }}</span>
-        <span class="stat-label">Active Visuals</span>
-      </div>
-      <div class="quick-stat">
-        <span class="stat-number">{{ metrics.measure_count if metrics is defined else 258 }}</span>
-        <span class="stat-label">Total Measures</span>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Enhanced Metrics Section -->
 <section class="enhanced-metrics-section">

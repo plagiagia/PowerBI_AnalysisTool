@@ -1,11 +1,29 @@
-{% extends "base.html" %} 
-{% block title %}Unused Measures - Power BI Explorer{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Unused Measures - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-exclamation-triangle"></i>{% endblock %}
+{% block header_title %}Unused Measures Optimizer{% endblock %}
+{% block header_subtitle %}Identify and manage measures not used in any visuals to optimize your Power BI model
+performance{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ unused_measures|length if unused_measures else 0 }}</span>
+  <span class="stat-label">Unused Measures</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ ((unused_measures|length / (unused_measures|length + (metrics.measure_count if metrics is
+    defined else 258))) * 100)|round|int if unused_measures else 0 }}%</span>
+  <span class="stat-label">Cleanup Potential</span>
+</div>
+{% endblock %}
 
 {% block breadcrumbs %}
 <li>
-  <a href="/unused-measures"><i class="fas fa-exclamation-triangle"></i><span class="breadcrumb-text">Unused Measures</span></a>
+  <a href="/unused-measures"><i class="fas fa-exclamation-triangle"></i><span class="breadcrumb-text">Unused
+      Measures</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -21,19 +39,14 @@
   <div class="search-container">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
-      <input
-        type="search"
-        id="searchMeasures"
-        placeholder="Search measures..."
-        aria-label="Search unused measures"
-      />
+      <input type="search" id="searchMeasures" placeholder="Search measures..." aria-label="Search unused measures" />
       <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
         <i class="fas fa-times"></i>
       </button>
     </div>
     <div class="search-count" aria-live="polite"></div>
   </div>
-  
+
   <div class="filter-actions">
     <button id="exportMeasures" class="action-button outline">
       <i class="fas fa-download"></i> Export Measures
@@ -125,7 +138,7 @@
   <p class="section-description">
     You can use this C# script in Tabular Editor to help manage unused measures.
   </p>
-  
+
   <div class="code-container">
     <pre><code class="language-csharp" id="tabularScript">// C# script for Tabular Editor
 var unusedMeasures = new List&lt;string&gt; {
@@ -146,14 +159,15 @@ foreach (var measureName in unusedMeasures)
       <i class="fas fa-copy"></i> Copy
     </button>
   </div>
-  
+
   <div class="script-alert">
     <i class="fas fa-info-circle"></i>
-    <p>The above script will prepend a dot to unused measure names, making them easier to identify and potentially remove.</p>
+    <p>The above script will prepend a dot to unused measure names, making them easier to identify and potentially
+      remove.</p>
   </div>
 </div>
 
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
@@ -161,7 +175,7 @@ foreach (var measureName in unusedMeasures)
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-csharp.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // DOM Elements
     const searchMeasures = document.getElementById("searchMeasures");
     const clearSearch = document.getElementById("clearSearch");
@@ -177,31 +191,31 @@ foreach (var measureName in unusedMeasures)
     const searchCount = document.querySelector(".search-count");
     const selectAll = document.getElementById("selectAll");
     const unselectAll = document.getElementById("unselectAll");
-    
+
     // State tracking
     let currentVisibleItems = tableRows.length;
     let selectedMeasures = new Set();
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     /**
      * Set up event listeners for interactive elements
      */
     function setupEventListeners() {
       // Search input
       if (searchMeasures) {
-        searchMeasures.addEventListener("input", function() {
+        searchMeasures.addEventListener("input", function () {
           if (clearSearch) {
             clearSearch.style.display = this.value ? "block" : "none";
           }
           performSearch();
         });
       }
-      
+
       // Clear search button
       if (clearSearch) {
-        clearSearch.addEventListener("click", function() {
+        clearSearch.addEventListener("click", function () {
           if (searchMeasures) {
             searchMeasures.value = "";
             clearSearch.style.display = "none";
@@ -210,10 +224,10 @@ foreach (var measureName in unusedMeasures)
           }
         });
       }
-      
+
       // Clear empty state button
       if (clearEmptyState) {
-        clearEmptyState.addEventListener("click", function() {
+        clearEmptyState.addEventListener("click", function () {
           if (searchMeasures) {
             searchMeasures.value = "";
             if (clearSearch) clearSearch.style.display = "none";
@@ -221,37 +235,37 @@ foreach (var measureName in unusedMeasures)
           }
         });
       }
-      
+
       // Copy script buttons
       if (copyScript) {
         copyScript.addEventListener("click", copyCode);
       }
-      
+
       if (copyCodeButton) {
         copyCodeButton.addEventListener("click", copyCode);
       }
-      
+
       // Export measures button
       if (exportMeasures) {
         exportMeasures.addEventListener("click", exportMeasuresToCSV);
       }
-      
+
       // Select all button
       if (selectAll) {
         selectAll.addEventListener("click", selectAllMeasures);
       }
-      
+
       // Unselect all button
       if (unselectAll) {
         unselectAll.addEventListener("click", unselectAllMeasures);
       }
-      
+
       // Mark measure buttons
       document.querySelectorAll(".mark-measure").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
           const row = this.closest("tr");
           const measureName = row.getAttribute("data-measure");
-          
+
           if (selectedMeasures.has(measureName)) {
             selectedMeasures.delete(measureName);
             this.innerHTML = '<i class="far fa-square"></i>';
@@ -261,28 +275,28 @@ foreach (var measureName in unusedMeasures)
             this.innerHTML = '<i class="fas fa-check-square"></i>';
             row.classList.add("selected");
           }
-          
+
           updateTabularScript();
         });
       });
-      
+
       // Sortable headers
       document.querySelectorAll("th.sortable").forEach(header => {
-        header.addEventListener("click", function() {
+        header.addEventListener("click", function () {
           sortTable(this.getAttribute("data-sort"));
         });
       });
     }
-    
+
     /**
      * Perform search on measures
      */
     function performSearch() {
       if (!searchMeasures) return;
-      
+
       const searchValue = searchMeasures.value.toLowerCase();
       let visibleItems = 0;
-      
+
       // Remove previous search highlights
       document.querySelectorAll(".search-highlight").forEach(el => {
         const text = el.textContent;
@@ -291,19 +305,19 @@ foreach (var measureName in unusedMeasures)
         parent.replaceChild(textNode, el);
         parent.normalize();
       });
-      
+
       // Filter table rows
       if (tableRows) {
         tableRows.forEach(row => {
           const cell = row.querySelector("td:nth-child(2)");
           const text = cell.textContent.toLowerCase();
-          
+
           const isVisible = !searchValue || text.includes(searchValue);
           row.style.display = isVisible ? "" : "none";
-          
+
           if (isVisible) {
             visibleItems++;
-            
+
             // Highlight match if searching
             if (searchValue) {
               highlightSearchTerm(cell, searchValue);
@@ -311,28 +325,28 @@ foreach (var measureName in unusedMeasures)
           }
         });
       }
-      
+
       // Update visible count
       currentVisibleItems = visibleItems;
-      
+
       // Update count display
       if (resultCount) {
         resultCount.textContent = visibleItems;
       }
-      
+
       // Update search count display
       if (searchCount && searchValue) {
         searchCount.textContent = `${visibleItems} matches`;
       } else if (searchCount) {
         searchCount.textContent = "";
       }
-      
+
       // Show/hide empty state
       if (emptyState) {
         emptyState.style.display = visibleItems === 0 ? "flex" : "none";
       }
     }
-    
+
     /**
      * Highlight search term in an element
      * @param {HTMLElement} element - Element containing text
@@ -343,7 +357,7 @@ foreach (var measureName in unusedMeasures)
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
       element.innerHTML = originalText.replace(regex, '<span class="search-highlight">$1</span>');
     }
-    
+
     /**
      * Escape special regex characters
      * @param {string} string - String to escape
@@ -352,7 +366,7 @@ foreach (var measureName in unusedMeasures)
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
-    
+
     /**
      * Sort the table by a column
      * @param {string} column - Column to sort by ('name')
@@ -360,32 +374,32 @@ foreach (var measureName in unusedMeasures)
     function sortTable(column) {
       const table = document.getElementById("measuresTable");
       if (!table) return;
-      
+
       const header = document.querySelector(`th[data-sort="${column}"]`);
       const isAscending = !header.classList.contains("sort-asc");
-      
+
       // Update sort indicators
       document.querySelectorAll("th.sortable").forEach(th => {
         th.classList.remove("sort-asc", "sort-desc");
       });
-      
+
       header.classList.add(isAscending ? "sort-asc" : "sort-desc");
-      
+
       // Get table rows and sort
       const tbody = table.querySelector("tbody");
       const rows = Array.from(tbody.querySelectorAll("tr"));
-      
+
       rows.sort((a, b) => {
         const valA = a.querySelector("td:nth-child(2)").textContent.toLowerCase();
         const valB = b.querySelector("td:nth-child(2)").textContent.toLowerCase();
-        
+
         return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
       });
-      
+
       // Re-append rows in sorted order
       rows.forEach(row => tbody.appendChild(row));
     }
-    
+
     /**
      * Select all measures
      */
@@ -394,43 +408,43 @@ foreach (var measureName in unusedMeasures)
         if (row.style.display !== "none") {
           const measureName = row.getAttribute("data-measure");
           const button = row.querySelector(".mark-measure");
-          
+
           selectedMeasures.add(measureName);
           if (button) button.innerHTML = '<i class="fas fa-check-square"></i>';
           row.classList.add("selected");
         }
       });
-      
+
       updateTabularScript();
     }
-    
+
     /**
      * Unselect all measures
      */
     function unselectAllMeasures() {
       selectedMeasures.clear();
-      
+
       tableRows.forEach(row => {
         const button = row.querySelector(".mark-measure");
         if (button) button.innerHTML = '<i class="far fa-square"></i>';
         row.classList.remove("selected");
       });
-      
+
       updateTabularScript();
     }
-    
+
     /**
      * Update tabular script based on selected measures
      */
     function updateTabularScript() {
       if (!tabularScript) return;
-      
+
       if (selectedMeasures.size === 0) {
         // Default script with all unused measures
         const allMeasures = Array.from(tableRows)
           .map(row => row.getAttribute("data-measure"))
           .filter(Boolean);
-          
+
         const script = `// C# script for Tabular Editor
 var unusedMeasures = new List<string> {
     ${allMeasures.map(m => `"${m}"`).join(",\n    ")}
@@ -444,7 +458,7 @@ foreach (var measureName in unusedMeasures)
         measure.Name = "." + measure.Name; // Prepend a dot to the measure name
     }
 }`;
-        
+
         tabularScript.textContent = script;
       } else {
         // Script with selected measures only
@@ -461,30 +475,30 @@ foreach (var measureName in selectedMeasures)
         measure.Name = "." + measure.Name; // Prepend a dot to the measure name
     }
 }`;
-        
+
         tabularScript.textContent = script;
       }
-      
+
       // Highlight the code
       Prism.highlightElement(tabularScript);
     }
-    
+
     /**
      * Copy code to clipboard
      */
     function copyCode() {
       if (!tabularScript) return;
-      
+
       const textToCopy = tabularScript.textContent;
-      
+
       // Show animation on both buttons
       const buttons = [copyScript, copyCodeButton].filter(Boolean);
       const originalHTML = buttons.map(button => button.innerHTML);
-      
+
       buttons.forEach(button => {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Copying...';
       });
-      
+
       // Try to use Clipboard API first
       if (navigator.clipboard) {
         navigator.clipboard.writeText(textToCopy)
@@ -492,13 +506,13 @@ foreach (var measureName in selectedMeasures)
             buttons.forEach(button => {
               button.innerHTML = '<i class="fas fa-check"></i> Copied!';
             });
-            
+
             setTimeout(() => {
               buttons.forEach((button, index) => {
                 button.innerHTML = originalHTML[index];
               });
             }, 2000);
-            
+
             // Show notification if available
             if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
               window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
@@ -511,7 +525,7 @@ foreach (var measureName in selectedMeasures)
         fallbackCopy(textToCopy, buttons, originalHTML);
       }
     }
-    
+
     /**
      * Fallback method for copying to clipboard
      * @param {string} text - Text to copy
@@ -525,21 +539,21 @@ foreach (var measureName in selectedMeasures)
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
+
       let success = false;
       try {
         success = document.execCommand("copy");
       } catch (err) {
         console.error("Could not copy text: ", err);
       }
-      
+
       document.body.removeChild(textArea);
-      
+
       if (success) {
         buttons.forEach(button => {
           button.innerHTML = '<i class="fas fa-check"></i> Copied!';
         });
-        
+
         // Show notification if available
         if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
           window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
@@ -549,43 +563,43 @@ foreach (var measureName in selectedMeasures)
           button.innerHTML = '<i class="fas fa-times"></i> Failed';
         });
       }
-      
+
       setTimeout(() => {
         buttons.forEach((button, index) => {
           button.innerHTML = originalHTML[index];
         });
       }, 2000);
     }
-    
+
     /**
      * Export measures to CSV
      */
     function exportMeasuresToCSV() {
       // Get visible measures
       const measures = [];
-      
+
       tableRows.forEach(row => {
         if (row.style.display !== "none") {
           const measureName = row.getAttribute("data-measure");
           const isSelected = selectedMeasures.has(measureName);
-          
+
           measures.push({
             name: measureName,
             selected: isSelected
           });
         }
       });
-      
+
       // Create CSV content
       const headers = ["Measure Name", "Selected"];
       const csvRows = [headers.join(",")];
-      
+
       measures.forEach(measure => {
         csvRows.push(`"${measure.name}",${measure.selected}`);
       });
-      
+
       const csvContent = csvRows.join("\n");
-      
+
       // Create and trigger download
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -594,12 +608,12 @@ foreach (var measureName in selectedMeasures)
       link.setAttribute("download", "unused_measures.csv");
       link.style.display = "none";
       document.body.appendChild(link);
-      
+
       link.click();
-      
+
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       // Show notification if available
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification("Measures exported to CSV", "success");
@@ -613,11 +627,11 @@ foreach (var measureName in selectedMeasures)
   tr.selected {
     background-color: rgba(33, 115, 70, 0.1);
   }
-  
+
   tr.selected:hover {
     background-color: rgba(33, 115, 70, 0.15);
   }
-  
+
   /* Search highlight */
   .search-highlight {
     background-color: rgba(255, 185, 0, 0.4);
@@ -625,7 +639,7 @@ foreach (var measureName in selectedMeasures)
     border-radius: 2px;
     font-weight: var(--font-weight-medium);
   }
-  
+
   /* Script section */
   .script-section {
     margin-top: var(--space-6);
@@ -634,7 +648,7 @@ foreach (var measureName in selectedMeasures)
     border: 1px solid var(--border);
     padding: var(--space-4);
   }
-  
+
   .section-title {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
@@ -642,17 +656,17 @@ foreach (var measureName in selectedMeasures)
     display: flex;
     align-items: center;
   }
-  
+
   .section-title i {
     margin-right: var(--space-2);
     color: var(--primary);
   }
-  
+
   .section-description {
     color: var(--text-secondary);
     margin-bottom: var(--space-4);
   }
-  
+
   .code-container {
     position: relative;
     margin: 0;
@@ -688,7 +702,7 @@ foreach (var measureName in selectedMeasures)
   .copy-button:hover {
     background-color: rgba(0, 0, 0, 0.2);
   }
-  
+
   .script-alert {
     display: flex;
     align-items: flex-start;
@@ -697,13 +711,13 @@ foreach (var measureName in selectedMeasures)
     border-radius: var(--radius-md);
     border-left: 4px solid #1976d2;
   }
-  
+
   .script-alert i {
     margin-right: var(--space-3);
     color: #1976d2;
     margin-top: 3px;
   }
-  
+
   .script-alert p {
     margin: 0;
     color: var(--text-secondary);

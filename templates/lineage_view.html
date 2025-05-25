@@ -1,5 +1,27 @@
-{% extends "base.html" %} {% block title %}Data Lineage - Power BI Explorer{%
-endblock %} {% block head %}
+{% extends "base.html" %}
+{% block title %}Data Lineage - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-project-diagram"></i>{% endblock %}
+{% block header_title %}Data Lineage Diagram{% endblock %}
+{% block header_subtitle %}Visualize complex relationships and dependencies between measures and columns to understand
+data lineage{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number" id="header-parent-measures">0</span>
+  <span class="stat-label">Parent Measures</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number" id="header-final-measures">0</span>
+  <span class="stat-label">Final Measures</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number" id="header-columns">0</span>
+  <span class="stat-label">Columns</span>
+</div>
+{% endblock %}
+
+{% block head %}
 <!-- Include Vis Network CSS -->
 <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <!-- Include FontAwesome for icons -->
@@ -260,7 +282,7 @@ endblock %} {% block head %}
                 <pre><code id="expandedCode" class="language-dax">Select a measure to view its expanded definition</code></pre>
               </div>
             </div>
-            
+
             <!-- Optimized definition tab content -->
             <div id="optimizedDefinition" class="tab-content">
               <div class="code-container">
@@ -271,7 +293,7 @@ endblock %} {% block head %}
                 <div class="loading-text">AI is optimizing the measure...</div>
               </div>
             </div>
-            
+
             <!-- Explanation tab content -->
             <div id="explanationDefinition" class="tab-content">
               <div class="explanation-container" id="explanationContent">
@@ -1338,12 +1360,12 @@ endblock %} {% block head %}
       expandedTab.classList.remove("active");
       optimizedTab.classList.remove("active");
       explanationTab.classList.remove("active");
-      
+
       originalDefinition.classList.remove("active");
       expandedDefinition.classList.remove("active");
       optimizedDefinition.classList.remove("active");
       explanationDefinition.classList.remove("active");
-      
+
       // Add active class to selected tab and content
       if (tabName === "original") {
         originalTab.classList.add("active");
@@ -1359,24 +1381,24 @@ endblock %} {% block head %}
         explanationDefinition.classList.add("active");
       }
     }
-    
+
     /**
      * Load optimized definition using AI
      */
     function loadOptimizedDefinition() {
       if (!optimizedCode || !optimizedLoading || !measureName) return;
-      
+
       const currentMeasureName = measureName.textContent;
       const daxExpression = originalCode.textContent;
-      
+
       if (!daxExpression || daxExpression.includes("Select a measure")) {
         return;
       }
-      
+
       // Show loading indicator
       optimizedLoading.style.display = "flex";
       optimizedCode.textContent = "Optimizing...";
-      
+
       // Call the API to optimize the DAX
       fetch('/api/optimize-dax', {
         method: 'POST',
@@ -1388,47 +1410,47 @@ endblock %} {% block head %}
           measureName: currentMeasureName
         }),
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Hide loading indicator
-        optimizedLoading.style.display = "none";
-        
-        // Update the optimized code
-        if (data.optimized_dax) {
-          optimizedCode.textContent = data.optimized_dax;
-        } else {
-          optimizedCode.textContent = "Failed to optimize the measure.";
-        }
-      })
-      .catch(error => {
-        console.error('Error optimizing DAX:', error);
-        optimizedLoading.style.display = "none";
-        optimizedCode.textContent = "Error: Failed to optimize the measure. Please try again.";
-      });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Hide loading indicator
+          optimizedLoading.style.display = "none";
+
+          // Update the optimized code
+          if (data.optimized_dax) {
+            optimizedCode.textContent = data.optimized_dax;
+          } else {
+            optimizedCode.textContent = "Failed to optimize the measure.";
+          }
+        })
+        .catch(error => {
+          console.error('Error optimizing DAX:', error);
+          optimizedLoading.style.display = "none";
+          optimizedCode.textContent = "Error: Failed to optimize the measure. Please try again.";
+        });
     }
-    
+
     /**
      * Load explanation using AI
      */
     function loadExplanation() {
       if (!explanationContent || !explanationLoading || !measureName) return;
-      
+
       const currentMeasureName = measureName.textContent;
       const daxExpression = originalCode.textContent;
-      
+
       if (!daxExpression || daxExpression.includes("Select a measure")) {
         return;
       }
-      
+
       // Show loading indicator
       explanationLoading.style.display = "flex";
       explanationContent.innerHTML = "<div class='loading-text'>Generating explanation...</div>";
-      
+
       // Call the API to explain the DAX
       fetch('/api/explain-dax', {
         method: 'POST',
@@ -1440,31 +1462,31 @@ endblock %} {% block head %}
           measureName: currentMeasureName
         }),
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Hide loading indicator
-        explanationLoading.style.display = "none";
-        
-        // Update the explanation content
-        if (data.explanation) {
-          // Convert markdown to HTML
-          const converter = new showdown.Converter();
-          const html = converter.makeHtml(data.explanation);
-          explanationContent.innerHTML = html;
-        } else {
-          explanationContent.innerHTML = "<div class='error-text'>Failed to generate explanation.</div>";
-        }
-      })
-      .catch(error => {
-        console.error('Error explaining DAX:', error);
-        explanationLoading.style.display = "none";
-        explanationContent.innerHTML = "<div class='error-text'>Error: Failed to generate explanation. Please try again.</div>";
-      });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Hide loading indicator
+          explanationLoading.style.display = "none";
+
+          // Update the explanation content
+          if (data.explanation) {
+            // Convert markdown to HTML
+            const converter = new showdown.Converter();
+            const html = converter.makeHtml(data.explanation);
+            explanationContent.innerHTML = html;
+          } else {
+            explanationContent.innerHTML = "<div class='error-text'>Failed to generate explanation.</div>";
+          }
+        })
+        .catch(error => {
+          console.error('Error explaining DAX:', error);
+          explanationLoading.style.display = "none";
+          explanationContent.innerHTML = "<div class='error-text'>Error: Failed to generate explanation. Please try again.</div>";
+        });
     }
 
     /**

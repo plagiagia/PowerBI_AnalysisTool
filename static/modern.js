@@ -27,6 +27,9 @@
       enableDarkMode();
     }
 
+    // Initialize datetime display
+    initDateTime();
+
     // Add loaded class for animation purposes
     setTimeout(() => {
       body.classList.add("app-loaded");
@@ -47,8 +50,43 @@
       helpButton.addEventListener("click", showHelp);
     }
 
+    // Sidebar toggle
+    const sidebarToggle = document.querySelector(".sidebar-toggle");
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", toggleSidebar);
+    }
+
     // Initialize counters
     initCounters();
+  }
+
+  /**
+   * Initialize and start the datetime display
+   */
+  function initDateTime() {
+    updateDateTime();
+    // Update every second
+    setInterval(updateDateTime, 1000);
+  }
+
+  /**
+   * Update the current date and time display
+   */
+  function updateDateTime() {
+    const datetimeElement = document.getElementById('current-datetime');
+    if (datetimeElement) {
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      datetimeElement.textContent = now.toLocaleDateString('en-US', options);
+    }
   }
 
   /**
@@ -86,6 +124,15 @@
     if (themeToggle) {
       themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
       themeToggle.setAttribute("aria-label", "Switch to dark mode");
+    }
+  }
+
+  /**
+   * Toggle sidebar visibility (mobile)
+   */
+  function toggleSidebar() {
+    if (sidebar) {
+      sidebar.classList.toggle("open");
     }
   }
 

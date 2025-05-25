@@ -1,6 +1,21 @@
 {% extends "base.html" %} 
 {% block title %}Source Explorer - Power BI Analysis Tool{% endblock %} 
 
+{% block header_icon %}<i class="fas fa-database"></i>{% endblock %}
+{% block header_title %}Source Explorer{% endblock %}
+{% block header_subtitle %}Examine and analyze the M queries that form your report's data sources with AI-powered insights{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ m_queries_info|length if m_queries_info else 0 }}</span>
+  <span class="stat-label">Data Sources</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if m_queries_info else 0 }}</span>
+  <span class="stat-label">Total Lines (K)</span>
+</div>
+{% endblock %}
+
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
