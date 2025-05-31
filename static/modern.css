@@ -41,10 +41,11 @@
   /* Border & Shadow */
   --border: var(--gray-200);
   --border-light: var(--gray-100);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.2);
+  /* Softer Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); /* Softer */
+  --shadow: 0 3px 6px rgba(0, 0, 0, 0.07);  /* Softer */
+  --shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.09); /* Softer */
+  --shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.1); /* Softer */
 
   /* Spacing */
   --space-1: 0.25rem;
@@ -76,6 +77,11 @@
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-full: 9999px;
+  /* Standardized Radii (already fairly consistent, but ensuring these are the primary ones used) */
+  /* --radius-sm: 0.25rem; (Good for small elements like field-item) */
+  /* --radius: 0.375rem; (Good for general use like badges, some buttons) */
+  /* --radius-md: 0.5rem; (Good for primary buttons, inputs, cards) */
+  /* --radius-lg: 0.75rem; (Good for larger containers like control-panel, table-container) */
 
   /* Layout */
   --sidebar-width: 280px;
@@ -84,14 +90,37 @@
   /* Transitions */
   --transition: all 0.2s ease-in-out;
   --transition-fast: all 0.15s ease-out;
+
+  /* Darker shades for button hovers (Light Mode) */
+  --primary-darker: #004c99;
+  --primary-light-rgb-01: rgba(var(--primary-rgb), 0.08); /* For table hover */
+  --accent-dark: #128293;
+  --success-dark: #1f8336;
+  --warning-darker: #cc9a00; /* Renamed to avoid conflict if warning-dark exists */
+  --danger-dark: #b02a37;
+  --secondary-darker: #545b62; /* For gray buttons */
+
 }
 
 body.dark-mode {
   --primary: #3384db; /* Potentially adjust primary for dark mode */
   --primary-light: #5fa0e6;
-  --primary-dark: #1a6ebd;
+  --primary-dark: #1a6ebd; /* This is the main dark shade for primary */
   --secondary: #8a939b; /* Lighter gray for secondary elements */
   --accent: #22b8cf; /* Slightly adjusted accent */
+
+  /* Darker shades for button hovers (Dark Mode) */
+  --primary-darker: #125ca0; /* Darker version of dark mode primary */
+  --accent-dark: #19a1b5;
+  --success-dark: #29b547; /* Lighter success for dark mode, so hover is darker */
+  --warning-darker: #ffca2c;/* Lighter warning for dark mode, so hover is darker */
+  --danger-dark: #e54848;  /* Lighter danger for dark mode, so hover is darker */
+  --secondary-darker: #61686d;
+  /* --primary-light-rgb-01 will use the :root --primary-rgb which should be updated in dark mode by JS if needed,
+     or we can define a specific dark mode version if --primary-rgb itself doesn't change */
+  /* Forcing a specific dark mode table hover for now */
+  --table-row-hover-bg: rgba(51, 132, 219, 0.15); /* Based on dark mode --primary */
+
 
   /* Neutral Colors - Inverted for dark mode */
   --white: #000000; /* Effectively black */
@@ -124,8 +153,8 @@ body.dark-mode {
   --border-light: #2c2c2c; /* Lighter border, or for subtle divisions */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3); /* Darker shadows */
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 6px 12px rgba(0, 0, 0, 0.35); /* Adjusted dark mode shadows */
+  --shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.4);  /* Adjusted dark mode shadows */
 }
 
 body.dark-mode .sidebar {
@@ -207,6 +236,44 @@ body {
 /* ===== LAYOUT ===== */
 
 /* ===== Enhanced Sidebar ===== */
+
+/* Page Specific Layout Improvements for Table View (Holistic Polish) */
+.page-header {
+  margin-bottom: var(--space-8); /* Increased space below page header */
+}
+
+.page-title {
+  font-size: var(--font-size-3xl); /* Larger page title */
+  font-weight: 700; /* Bolder */
+  color: var(--text-primary);
+  margin-bottom: var(--space-3); /* More space below title */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-description {
+  font-size: var(--font-size-lg); /* Slightly larger description */
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin-bottom: var(--space-6); /* More space below description */
+  line-height: 1.65; /* Improved line height for readability */
+}
+
+.control-panel {
+  margin-bottom: var(--space-8); /* Increased margin after control panel */
+  gap: var(--space-5); /* Adjusted gap slightly for internal control panel sections */
+}
+
+.table-section {
+  margin-top: var(--space-8); /* Increased space above table section (matches control panel bottom margin) */
+}
+
+.pagination-container {
+  margin-top: var(--space-6); /* Increased space above pagination */
+}
+/* End of Holistic Polish for Page Header & Major Section Spacing */
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -417,24 +484,222 @@ body {
   margin-bottom: var(--space-2);
 }
 
+/* General Action Button Styling (e.g., for sidebar footer, misc icon buttons) */
 .action-button {
   background: none;
-  border: none;
+  border: 1px solid transparent; /* Maintain layout consistency, useful if hover adds border */
   color: var(--text-muted);
   cursor: pointer;
-  padding: var(--space-2);
-  border-radius: var(--radius);
+  padding: var(--space-2); /* Default padding, can be overridden by more specific rules */
+  border-radius: var(--radius-md); /* Consistent with other refined buttons */
   transition: all var(--transition-fast);
-  width: 36px;
-  height: 36px;
-  display: flex;
+  width: 38px; /* Slightly larger for easier tap/click */
+  height: 38px; /* Slightly larger for easier tap/click */
+  display: inline-flex; /* Use inline-flex for better control if text/icon is added */
   align-items: center;
   justify-content: center;
+  line-height: 1; /* Ensure icon is centered if it's the only content */
+  text-decoration: none; /* Remove underline if it's an <a> tag styled as a button */
 }
 
 .action-button:hover {
   color: var(--primary);
-  background: rgba(59, 130, 246, 0.1);
+  background-color: var(--bg-tertiary); /* Softer hover */
+  border-color: var(--border-light); /* Subtle border on hover, if needed */
+}
+
+.action-button:active {
+  background-color: var(--gray-200); /* Pressed state */
+  transform: translateY(1px); /* Subtle press effect */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.action-button:disabled,
+.action-button.disabled { /* Common class for disabling */
+  color: var(--gray-400) !important; /* Ensure override */
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.dark-mode .action-button:hover {
+  color: var(--primary-light);
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+
+body.dark-mode .action-button:active {
+  background-color: var(--gray-600);
+}
+
+body.dark-mode .action-button:disabled,
+body.dark-mode .action-button.disabled {
+  color: var(--gray-600) !important;
+  background-color: var(--gray-800) !important;
+  border-color: var(--gray-700) !important;
+}
+
+/* Pagination Buttons */
+.pagination-button { /* Prev/Next buttons */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: var(--space-2);
+  min-height: 38px; /* Consistent height */
+  box-shadow: var(--shadow-sm);
+}
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.pagination-button:active:not(:disabled) {
+  background-color: var(--gray-300);
+  transform: translateY(0px);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+.pagination-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-page { /* Individual page number buttons */
+  padding: var(--space-2); /* Adjusted padding for a more square look if just a number */
+  width: 38px; /* Consistent width */
+  height: 38px; /* Consistent height */
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent; /* For spacing, hover will add border */
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: var(--transition-fast);
+  line-height: 1; /* Ensure text is centered */
+}
+.pagination-page:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active:hover {
+  background-color: var(--primary-darker);
+  border-color: var(--primary-darker);
+}
+
+/* Dark Mode for Pagination Buttons */
+body.dark-mode .pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-button:active:not(:disabled) {
+  background-color: var(--gray-600);
+}
+body.dark-mode .pagination-page:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-page.active {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: var(--gray-900); /* Ensure contrast on light primary */
+}
+body.dark-mode .pagination-page.active:hover {
+  background-color: var(--primary); /* Darken to the base dark primary */
+  border-color: var(--primary);
+}
+
+/* Toolbar Buttons (e.g., global header actions) */
+.toolbar-button {
+  background: none;
+  border: 1px solid transparent; /* Maintain layout consistency */
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md); /* Consistent radius */
+  transition: all var(--transition-fast);
+  position: relative;
+  width: 38px; /* Consistent size with .action-button */
+  height: 38px; /* Consistent size with .action-button */
+  display: inline-flex; /* Use inline-flex */
+  align-items: center;
+  justify-content: center;
+  line-height: 1; /* Ensure icon is centered */
+}
+
+.toolbar-button:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary); /* Softer hover, consistent with .action-button */
+  border-color: var(--border-light); /* Subtle border on hover */
+}
+
+.toolbar-button:active {
+  background-color: var(--gray-200); /* Pressed state */
+  transform: translateY(1px); /* Subtle press effect */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.toolbar-button:disabled,
+.toolbar-button.disabled {
+  color: var(--gray-400) !important;
+  background-color: transparent !important; /* Or var(--bg-secondary) if needs a fill */
+  border-color: transparent !important; /* No border for disabled icon buttons unless specified */
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; /* Adjusted opacity for disabled icon buttons */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Dark Mode for Toolbar Buttons (consistent with .action-button dark mode) */
+body.dark-mode .toolbar-button:hover {
+  color: var(--primary-light);
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:active {
+  background-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:disabled,
+body.dark-mode .toolbar-button.disabled {
+  color: var(--gray-600) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .app-version {
@@ -443,6 +708,321 @@ body {
   text-align: center;
   font-weight: 500;
 }
+
+/* ===== Comprehensive Table Styles ===== */
+
+.table-container {
+  overflow-x: auto;
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border-light); /* Softer border for the container */
+}
+
+.data-table { /* Using a more specific class from table_view.html */
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+/* General th, td styling */
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4); /* Vertical: space-3, Horizontal: space-4 */
+  text-align: left;
+  border-bottom: 1px solid var(--border-light); /* Lighter borders for rows */
+  vertical-align: middle; /* Better for mixed content */
+}
+
+/* Table Header */
+.data-table thead th {
+  background-color: var(--bg-secondary); /* Lighter header background */
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-sm); /* Slightly reduced from base */
+  text-transform: capitalize; /* Softer than uppercase */
+  letter-spacing: 0.03em; /* Slightly reduced letter spacing */
+  border-top: none; /* Container has border, so header doesn't need one */
+  border-bottom: 2px solid var(--primary); /* Accent border */
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); /* Softer shadow for sticky header */
+}
+
+.data-table thead th .fas.fa-sort {
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  opacity: 0.6; /* More subtle default sort icon */
+  transition: opacity var(--transition-fast);
+}
+.data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 0.9;
+}
+.data-table thead th.sort-asc .fas.fa-sort,
+.data-table thead th.sort-desc .fas.fa-sort {
+  opacity: 1;
+  color: var(--primary);
+}
+
+
+/* Table Body */
+.data-table tbody tr {
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--border-light);
+}
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--bg-secondary); /* Zebra striping */
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--primary-light-rgb-01); /* Defined as rgba(var(--primary-rgb), 0.08) */
+}
+
+.data-table tbody td {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Ensure last row's tds have no bottom border (redundant if tr:last-child has no border, but safe) */
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Dark Mode Table Styles */
+body.dark-mode .table-container {
+  border-color: var(--gray-700);
+}
+
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  border-bottom-color: var(--gray-700);
+}
+
+body.dark-mode .data-table thead th {
+  background-color: var(--gray-800);
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+body.dark-mode .data-table thead th .fas.fa-sort {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 1;
+}
+body.dark-mode .data-table thead th.sort-asc .fas.fa-sort,
+body.dark-mode .data-table thead th.sort-desc .fas.fa-sort {
+  color: var(--primary-light);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(even) {
+  background-color: var(--gray-800);
+}
+
+body.dark-mode .data-table tbody tr:hover {
+  background-color: var(--table-row-hover-bg); /* rgba(var(--primary-rgb), 0.15) or specific dark var */
+}
+
+body.dark-mode .data-table tbody td {
+  color: var(--text-secondary);
+}
+
+/* Styling for elements within tables (Cell Content Focus) - Appended */
+
+/* General .badge style within .data-table */
+.data-table .badge {
+  padding: 0.2em var(--space-2); /* Slightly reduced padding */
+  border-radius: var(--radius-sm); /* Softer radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+  line-height: 1.3; /* Adjusted line height */
+  border: 1px solid transparent; /* Base border */
+}
+
+/* Specific badge colors within tables */
+.data-table .badge-success {
+  background-color: rgba(var(--success-rgb), 0.1);
+  color: var(--success-dark);
+  border-color: rgba(var(--success-rgb), 0.2);
+}
+
+.data-table .badge-warning {
+  background-color: rgba(var(--warning-rgb), 0.1);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.2);
+}
+
+.data-table .badge-danger {
+  background-color: rgba(var(--danger-rgb), 0.1);
+  color: var(--danger-dark);
+  border-color: rgba(var(--danger-rgb), 0.2);
+}
+
+.data-table .badge-info {
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.2);
+}
+
+/* Field List and Field Items */
+.field-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2); /* Slightly more gap for less density */
+  align-items: center;
+}
+.field-item {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.2rem var(--space-2); /* Adjusted padding */
+  border-radius: var(--radius); /* Slightly larger radius */
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border); /* Standard border */
+  line-height: 1.4;
+}
+/* Specific field item types */
+.field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.08);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.15);
+}
+.field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.08);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.15);
+}
+.field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.05);
+  color: var(--primary-dark);
+  border-color: rgba(var(--primary-rgb), 0.1);
+}
+
+/* Visual Type Badge (specific to table_view.html) */
+.visual-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2); /* Good gap */
+  padding: var(--space-1) var(--space-3); /* Increased horizontal padding */
+  border-radius: var(--radius-md); /* Consistent medium radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background-color: var(--surface); /* Use surface, with a border */
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.visual-type-badge i {
+  color: var(--text-muted);
+  font-size: 1em; /* Icon same size as text */
+  /* margin-right is handled by gap */
+}
+
+
+/* General table icons (if used outside of badges) */
+.data-table .table-icon {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+
+/* Table action links */
+.data-table .action-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+.data-table .action-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Empty value styling */
+.empty-value {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Dark Mode for Cell Content */
+body.dark-mode .data-table .badge-success {
+  color: var(--success-light); /* Need to define --success-light etc. or use lighter grays */
+  background-color: rgba(var(--success-rgb), 0.25);
+  border-color: rgba(var(--success-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-warning {
+  color: var(--warning-light);
+  background-color: rgba(var(--warning-rgb), 0.25);
+  border-color: rgba(var(--warning-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-danger {
+  color: var(--danger-light);
+  background-color: rgba(var(--danger-rgb), 0.25);
+  border-color: rgba(var(--danger-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-info {
+  color: var(--accent-light);
+  background-color: rgba(var(--accent-rgb), 0.25);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+body.dark-mode .field-item {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-light);
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+body.dark-mode .field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.15);
+  color: var(--warning-light);
+  border-color: rgba(var(--warning-rgb), 0.25);
+}
+body.dark-mode .field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary-light);
+  border-color: rgba(var(--primary-rgb), 0.2);
+}
+
+body.dark-mode .visual-type-badge {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .visual-type-badge i {
+  color: var(--gray-500);
+}
+
+body.dark-mode .data-table .table-icon {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table .action-link {
+  color: var(--primary-light);
+}
+body.dark-mode .data-table .action-link:hover {
+  color: var(--primary);
+}
+body.dark-mode .empty-value {
+  color: var(--gray-500);
+}
+/* End of Appended Cell Content Styling */
+
+/* Ensure RGB variables are defined for badge opacity (if not already) */
+/* These :root level variables were already present and are fine. */
+/* The more specific .data-table .badge-* rules will take precedence. */
+/* The generic table .badge, .table-icon, .action-link rules that were previously here are now removed as they are superseded by .data-table scoped versions. */
 
 /* ===== Legacy CSS Removed - Now using modern-dashboard-header ===== */
 
@@ -749,26 +1329,9 @@ body.dark-mode .filter-actions .action-button.secondary:hover {
   gap: var(--space-3);
 }
 
-.toolbar-button {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: var(--space-2);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-  position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.toolbar-button:hover {
-  color: var(--primary);
-  background: rgba(59, 130, 246, 0.1);
-}
+/* Styles for .toolbar-button were already updated by the previous step using a broader anchor. */
+/* No changes needed here if the previous step correctly updated them. */
+/* This block is now just for confirmation. */
 
 .notification-badge {
   position: absolute;
@@ -1310,43 +1873,289 @@ main {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  width: 100%;
+  width: 100%; /* Default to full-width, can be overridden by parent or utility class */
   padding: var(--space-3) var(--space-5);
   background: var(--primary);
   color: var(--text-inverse);
-  border: none;
+  border: 1px solid var(--primary); /* Consistent border */
   border-radius: var(--radius-md);
-  font-weight: 500;
+  font-weight: 600; /* Bolder for primary actions */
+  font-size: var(--font-size-base);
   text-decoration: none;
   cursor: pointer;
   transition: var(--transition);
+  text-align: center;
+  min-height: 44px; /* Consistent tap height */
+  line-height: 1.5;
+  display: inline-flex; /* To allow gap and icon alignment */
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
 }
 
 .modern-button:hover {
-  background: var(--primary-dark);
+  background: var(--primary-darker); /* Use -darker variant */
+  border-color: var(--primary-darker);
   transform: translateY(-1px);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
-.modern-button.secondary {
-  background: var(--accent);
+.modern-button:active {
+  background: var(--primary-darker);
+  border-color: var(--primary-darker);
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.modern-button.accent {
-  background: var(--success);
+.modern-button:disabled,
+.modern-button.disabled {
+  background-color: var(--gray-200) !important;
+  border-color: var(--gray-200) !important;
+  color: var(--gray-500) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.8 !important;
 }
 
-.modern-button.info {
+/* Variants for .modern-button */
+.modern-button.secondary { /* Was accent color, now using secondary for consistency */
   background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--text-inverse);
 }
+.modern-button.secondary:hover { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+.modern-button.secondary:active { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+
+.modern-button.accent { /* Using accent color */
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+}
+.modern-button.accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.modern-button.accent:active { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+.modern-button.success {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-inverse);
+}
+.modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+.modern-button.success:active { background: var(--success-dark); border-color: var(--success-dark); }
 
 .modern-button.warning {
   background: var(--warning);
-  color: var(--gray-800);
+  border-color: var(--warning);
+  color: var(--gray-900); /* Dark text for light warning */
 }
+.modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+.modern-button.warning:active { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+.modern-button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-inverse);
+}
+.modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+.modern-button.danger:active { background: var(--danger-dark); border-color: var(--danger-dark); }
+
 
 .modern-button.ai {
   background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+}
+.modern-button.ai:hover { background: linear-gradient(45deg, #5a6fcf, #673ca0); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.modern-button.ai:active { background: linear-gradient(45deg, #5a6fcf, #673ca0); transform: translateY(0); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+
+
+/* Outline variant for modern-button */
+.modern-button.outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+.modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.05); /* Lighter hover for outline */
+  color: var(--primary-darker);
+  border-color: var(--primary-darker);
+  box-shadow: none;
+}
+.modern-button.outline:active {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+.modern-button.outline:disabled,
+.modern-button.outline.disabled {
+  background: transparent !important;
+  border-color: var(--gray-300) !important;
+  color: var(--gray-400) !important;
+}
+
+/* Dark Mode for modern-button variants */
+body.dark-mode .modern-button:disabled,
+body.dark-mode .modern-button.disabled {
+  background-color: var(--gray-700) !important;
+  border-color: var(--gray-700) !important;
+  color: var(--gray-500) !important;
+}
+
+body.dark-mode .modern-button.secondary {
+  background: var(--gray-600); border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .modern-button.secondary:hover { background: var(--gray-500); border-color: var(--gray-500); }
+
+body.dark-mode .modern-button.accent {
+  /* Accent may need specific dark mode color if contrast is an issue */
+}
+body.dark-mode .modern-button.success {
+  background: var(--success); /* Use base success, hover to darker */
+  border-color: var(--success);
+}
+body.dark-mode .modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+
+
+body.dark-mode .modern-button.warning {
+  background: var(--warning); /* Use base warning, hover to darker */
+  border-color: var(--warning);
+  color: var(--gray-900); /* Still dark text on yellow */
+}
+body.dark-mode .modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+body.dark-mode .modern-button.danger {
+   background: var(--danger);
+   border-color: var(--danger);
+}
+body.dark-mode .modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+
+
+body.dark-mode .modern-button.outline {
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+}
+body.dark-mode .modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.15); /* Use primary-rgb for dark mode (which is lighter) */
+  color: var(--primary); /* Lighter text on hover */
+  border-color: var(--primary);
+}
+body.dark-mode .modern-button.outline:disabled,
+body.dark-mode .modern-button.outline.disabled {
+  border-color: var(--gray-600) !important;
+  color: var(--gray-500) !important;
+}
+
+/* Pagination Buttons */
+.pagination-button { /* Prev/Next buttons */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: var(--space-2);
+  min-height: 38px; /* Consistent height */
+  box-shadow: var(--shadow-sm);
+}
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
+  box-shadow: var(--shadow); /* Slightly more pronounced shadow on hover */
+  transform: translateY(-1px);
+}
+.pagination-button:active:not(:disabled) {
+  background-color: var(--gray-300); /* Darker for active state */
+  transform: translateY(0px); /* Reset transform or give a slight press down */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); /* Inset shadow for pressed look */
+}
+.pagination-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-page { /* Individual page number buttons */
+  padding: var(--space-2);
+  width: 38px; /* Consistent width */
+  height: 38px; /* Consistent height */
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent; /* Transparent border for layout, color on hover/active */
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: var(--transition-fast);
+  line-height: 1; /* Ensure text is centered */
+}
+.pagination-page:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active:hover {
+  background-color: var(--primary-darker);
+  border-color: var(--primary-darker);
+}
+
+/* Dark Mode for Pagination Buttons */
+body.dark-mode .pagination-button {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-secondary);
+}
+body.dark-mode .pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-600);
+  border-color: var(--gray-500);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-button:active:not(:disabled) {
+  background-color: var(--gray-500);
+}
+body.dark-mode .pagination-button:disabled {
+  background-color: var(--gray-700); /* Ensure disabled has a background in dark mode */
+  border-color: var(--gray-600);
+  opacity: 0.5;
+}
+
+body.dark-mode .pagination-page:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-page.active {
+  background-color: var(--primary-dark); /* Use darker primary for active in dark mode */
+  border-color: var(--primary-dark);
+  color: var(--text-inverse); /* Text should be light on dark primary */
+}
+body.dark-mode .pagination-page.active:hover {
+  background-color: var(--primary-darker); /* Even darker shade for hover on active */
+  border-color: var(--primary-darker);
 }
 
 /* Insights Section */
@@ -1439,104 +2248,322 @@ main {
 }
 
 /* Table Styles */
+/* Comprehensive Table Overhaul */
+
 .table-container {
-  overflow-x: auto; /* For responsive tables */
+  overflow-x: auto;
   background-color: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   margin-bottom: var(--space-6);
+  border: 1px solid var(--border-light); /* Softer border for the container */
 }
 
-table {
+.data-table { /* Using a more specific class from table_view.html */
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
 }
 
-th, td {
-  padding: var(--space-4); /* Consistent padding */
+/* General th, td styling */
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4); /* Vertical: space-3, Horizontal: space-4 */
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-light); /* Lighter borders for rows */
+  vertical-align: middle; /* Better for mixed content */
 }
 
 /* Table Header */
-thead th {
-  background-color: var(--bg-tertiary); /* Light gray background */
+.data-table thead th {
+  background-color: var(--bg-secondary); /* Lighter header background */
   color: var(--text-primary);
-  font-weight: 600; /* Bolder font for headers */
-  font-size: var(--font-size-base);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-top: 1px solid var(--border); /* Top border for header */
-  border-bottom-width: 2px; /* Thicker bottom border for header */
+  font-weight: 600;
+  font-size: var(--font-size-sm); /* Slightly reduced from base */
+  text-transform: capitalize; /* Softer than uppercase */
+  letter-spacing: 0.03em; /* Slightly reduced letter spacing */
+  border-top: none; /* Container has border, so header doesn't need one */
+  border-bottom: 2px solid var(--primary); /* Accent border */
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); /* Softer shadow for sticky header */
 }
+
+.data-table thead th .fas.fa-sort {
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  opacity: 0.6; /* More subtle default sort icon */
+  transition: opacity var(--transition-fast);
+}
+.data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 0.9;
+}
+.data-table thead th.sort-asc .fas.fa-sort,
+.data-table thead th.sort-desc .fas.fa-sort {
+  opacity: 1;
+  color: var(--primary);
+}
+
 
 /* Table Body */
-tbody tr {
+.data-table tbody tr {
   transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--border-light);
+}
+.data-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-tbody tr:hover {
-  background-color: var(--surface-hover); /* Hover effect for rows */
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--bg-secondary); /* Zebra striping */
 }
 
-tbody td {
+.data-table tbody tr:hover {
+  background-color: var(--primary-light-rgb-01); /* Defined as rgba(var(--primary-rgb), 0.08) */
+}
+
+.data-table tbody td {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Ensure last row's tds have no bottom border (redundant if tr:last-child has no border, but safe) */
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Dark Mode Table Styles */
+body.dark-mode .table-container {
+  border-color: var(--gray-700);
+}
+
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  border-bottom-color: var(--gray-700);
+}
+
+body.dark-mode .data-table thead th {
+  background-color: var(--gray-800);
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+body.dark-mode .data-table thead th .fas.fa-sort {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 1;
+}
+body.dark-mode .data-table thead th.sort-asc .fas.fa-sort,
+body.dark-mode .data-table thead th.sort-desc .fas.fa-sort {
+  color: var(--primary-light);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(even) {
+  background-color: var(--gray-800);
+}
+
+body.dark-mode .data-table tbody tr:hover {
+  background-color: var(--table-row-hover-bg); /* rgba(var(--primary-rgb), 0.15) or specific dark var */
+}
+
+body.dark-mode .data-table tbody td {
   color: var(--text-secondary);
 }
 
-tbody tr:last-child td {
-  border-bottom: none; /* Remove border for the last row */
+/* Styling for elements within tables */
+
+/* General .badge style within tables (if used directly, prefer specific ones below) */
+.data-table .badge { /* Scoped to data-table */
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md); /* Consistent radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500; /* Slightly less heavy */
+  text-transform: capitalize; /* Softer than uppercase */
+  display: inline-block; /* Ensure it behaves well in flow */
+  line-height: 1.4; /* Adjust for small font */
 }
 
-/* Styling for elements within tables */
-table .badge {
+/* Specific badge colors within tables */
+.data-table .badge-success {
+  background-color: rgba(var(--success-rgb), 0.15); /* Slightly more opacity */
+  color: var(--success-dark); /* Use darker success for better contrast on light bg */
+  border: 1px solid rgba(var(--success-rgb), 0.2);
+}
+
+.data-table .badge-warning {
+  background-color: rgba(var(--warning-rgb), 0.15);
+  color: var(--warning-darker); /* Use darker warning for better contrast */
+  border: 1px solid rgba(var(--warning-rgb), 0.2);
+}
+
+.data-table .badge-danger {
+  background-color: rgba(var(--danger-rgb), 0.15);
+  color: var(--danger-dark); /* Use darker danger for better contrast */
+  border: 1px solid rgba(var(--danger-rgb), 0.2);
+}
+
+.data-table .badge-info { /* Was accent */
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-dark); /* Use darker accent for better contrast */
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+/* Field List and Field Items */
+.field-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1); /* Reduced gap for tighter packing */
+  align-items: center;
+}
+.field-item {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.15rem var(--space-2); /* Fine-tuned padding */
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-light);
+  line-height: 1.4;
+}
+.field-item.filter-field { /* Example for specific field types */
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.2);
+}
+.field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.1);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.2);
+}
+.field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary-dark);
+  border-color: rgba(var(--primary-rgb), 0.15);
+}
+
+/* Visual Type Badge (specific to table_view.html) */
+.visual-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius);
   font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 500;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light); /* Softer border */
+  white-space: nowrap; /* Prevent wrapping if possible */
+}
+.visual-type-badge i {
+  color: var(--text-muted);
+  font-size: 0.9em; /* Slightly smaller icon relative to text */
+  margin-right: var(--space-1); /* Ensure space if gap is not enough */
 }
 
-table .badge-success {
-  background-color: rgba(var(--success-rgb), 0.1); /* Using RGB for opacity */
-  color: var(--success);
-}
 
-table .badge-warning {
-  background-color: rgba(var(--warning-rgb), 0.1);
-  color: var(--warning);
-}
-
-table .badge-danger {
-  background-color: rgba(var(--danger-rgb), 0.1);
-  color: var(--danger);
-}
-
-table .badge-info {
-  background-color: rgba(var(--accent-rgb), 0.1);
-  color: var(--accent);
-}
-
-table .table-icon {
-  font-size: var(--font-size-lg);
+/* General table icons */
+.data-table .table-icon { /* Scoped to data-table */
+  font-size: var(--font-size-base); /* Adjusted size */
   color: var(--text-muted);
   margin-right: var(--space-2);
-  vertical-align: middle;
+  vertical-align: middle; /* Keep this */
 }
 
-table .action-link {
+/* Table action links */
+.data-table .action-link {
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
   transition: color var(--transition-fast);
 }
-
-table .action-link:hover {
+.data-table .action-link:hover {
   color: var(--primary-dark);
   text-decoration: underline;
 }
 
+/* Empty value styling */
+.empty-value {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Dark Mode for Cell Content */
+body.dark-mode .data-table .badge-success {
+  color: var(--success); /* Lighter success text for dark bg */
+  background-color: rgba(var(--success-rgb), 0.2);
+  border-color: rgba(var(--success-rgb), 0.3);
+}
+body.dark-mode .data-table .badge-warning {
+  color: var(--warning);
+  background-color: rgba(var(--warning-rgb), 0.2);
+  border-color: rgba(var(--warning-rgb), 0.3);
+}
+body.dark-mode .data-table .badge-danger {
+  color: var(--danger);
+  background-color: rgba(var(--danger-rgb), 0.2);
+  border-color: rgba(var(--danger-rgb), 0.3);
+}
+body.dark-mode .data-table .badge-info {
+  color: var(--accent);
+  background-color: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+body.dark-mode .field-item {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.15); /* Ensure accent-rgb is appropriate for dark mode */
+  color: var(--accent-light); /* Define --accent-light or use a light gray */
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+body.dark-mode .field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.15);
+  color: var(--warning-light); /* Define --warning-light or use a light gray */
+  border-color: rgba(var(--warning-rgb), 0.25);
+}
+body.dark-mode .field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.1); /* Ensure primary-rgb is appropriate */
+  color: var(--primary-light);
+  border-color: rgba(var(--primary-rgb), 0.2);
+}
+
+body.dark-mode .visual-type-badge {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .visual-type-badge i {
+  color: var(--gray-500);
+}
+
+body.dark-mode .data-table .table-icon {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table .action-link {
+  color: var(--primary-light);
+}
+body.dark-mode .data-table .action-link:hover {
+  color: var(--primary);
+}
+body.dark-mode .empty-value {
+  color: var(--gray-500);
+}
+
 /* Ensure RGB variables are defined for badge opacity (if not already) */
+/* These :root level variables were already present and are fine. */
+/* The more specific .data-table .badge-* rules will take precedence. */
+/* The generic table .badge, .table-icon, .action-link rules that were previously here are now removed as they are superseded by .data-table scoped versions. */
+
+/* The :root variables for *-rgb were already present and confirmed earlier. */
+/* No change needed to this specific :root block that defines them. */
+/* Just ensuring the comment reflects that the old table.* rules are gone. */
+
 :root {
   --success-rgb: 40, 167, 69;
   --warning-rgb: 255, 193, 7;
