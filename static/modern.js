@@ -9,55 +9,36 @@
   // DOM Elements
   const body = document.body;
   const sidebar = document.querySelector(".sidebar");
-  const themeToggle = document.querySelector(".theme-toggle");
   const helpButton = document.querySelector(".help-button");
-
-  // State
-  let darkMode = localStorage.getItem("darkMode") === "true";
 
   /**
    * Initialize the application
    */
   function init() {
-    // Set up event listeners
-    setupEventListeners();
+    console.log("Modern Analytics UI initialized");
 
-    // Initialize dark mode if needed
-    if (darkMode) {
-      enableDarkMode();
-    }
-
-    // Initialize datetime display
+    // Initialize dynamic features
     initDateTime();
+    initCounters();
 
-    // Add loaded class for animation purposes
-    setTimeout(() => {
-      body.classList.add("app-loaded");
-    }, 100);
+    // Setup event listeners
+    setupEventListeners();
   }
 
   /**
-   * Set up event listeners for interactive elements
+   * Setup event listeners for interactive elements
    */
   function setupEventListeners() {
-    // Theme toggle
-    if (themeToggle) {
-      themeToggle.addEventListener("click", toggleDarkMode);
+    // Sidebar toggle for mobile
+    const sidebarToggle = document.querySelector(".sidebar-toggle");
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", toggleSidebar);
     }
 
     // Help button
     if (helpButton) {
       helpButton.addEventListener("click", showHelp);
     }
-
-    // Sidebar toggle
-    const sidebarToggle = document.querySelector(".sidebar-toggle");
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener("click", toggleSidebar);
-    }
-
-    // Initialize counters
-    initCounters();
   }
 
   /**
@@ -90,47 +71,10 @@
   }
 
   /**
-   * Toggle dark mode
-   */
-  function toggleDarkMode() {
-    darkMode = !darkMode;
-    localStorage.setItem("darkMode", darkMode);
-
-    if (darkMode) {
-      enableDarkMode();
-    } else {
-      disableDarkMode();
-    }
-  }
-
-  /**
-   * Enable dark mode
-   */
-  function enableDarkMode() {
-    body.classList.add("dark-mode");
-
-    if (themeToggle) {
-      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-      themeToggle.setAttribute("aria-label", "Switch to light mode");
-    }
-  }
-
-  /**
-   * Disable dark mode
-   */
-  function disableDarkMode() {
-    body.classList.remove("dark-mode");
-
-    if (themeToggle) {
-      themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-      themeToggle.setAttribute("aria-label", "Switch to dark mode");
-    }
-  }
-
-  /**
    * Toggle sidebar visibility (mobile)
    */
   function toggleSidebar() {
+    const sidebar = document.querySelector(".sidebar");
     if (sidebar) {
       sidebar.classList.toggle("open");
     }

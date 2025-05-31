@@ -418,7 +418,7 @@ data lineage{% endblock %}
     const columnNodeIds = new Set();
 
     // Initialize the network with nodes and edges
-    initializeNetwork(document.body.classList.contains('dark-mode'));
+    initializeNetwork();
 
     // Setup event listeners
     setupEventListeners();
@@ -426,35 +426,13 @@ data lineage{% endblock %}
     // Update statistics
     updateStatistics();
 
-    // Listen for theme changes from base.html
-    document.addEventListener('themeChanged', function (event) {
-      if (network) { // Check if network is initialized
-        const isDarkMode = event.detail.theme === 'dark';
-        const optionsToSet = getVisOptions(isDarkMode);
-        network.setOptions(optionsToSet);
-
-        // Update node colors directly as setOptions might not refresh them from dataset
-        if (nodeDataset) {
-          const allNodes = nodeDataset.get({ returnType: 'Array' });
-          const updatedNodes = allNodes.map(node => {
-            // Ensure node.nodeType is used, which is set in processNodesAndEdges
-            const newColors = getNodeColor(node, isDarkMode);
-            return { ...node, id: node.id, color: newColors }; // Ensure id is part of the update object
-          });
-          if (updatedNodes.length > 0) {
-            nodeDataset.update(updatedNodes);
-          }
-        }
-      }
-    });
-
     function getCSSVariable(variableName, defaultValue = '#000000') {
       if (typeof window === 'undefined') return defaultValue; // Guard for server-side or pre-DOM environments
       const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
       return value || defaultValue;
     }
 
-    function getVisOptions(isDarkMode) {
+    function getVisOptions() {
       const commonNodeOptions = {
         shape: "dot",
         size: 16,
@@ -495,49 +473,27 @@ data lineage{% endblock %}
 
       const commonLayoutOptions = {
         improvedLayout: true,
-        // Hierarchical settings are applied conditionally in applyHierarchicalLayout / applyForceDirectedLayout
       };
 
-      if (isDarkMode) {
-        return {
-          nodes: {
-            ...commonNodeOptions,
-            font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#e0e0e0') }
-          },
-          edges: {
-            ...commonEdgeOptions,
-            color: {
-              color: getCSSVariable('--gray-500', '#6f6f6f'),
-              highlight: getCSSVariable('--primary-light', '#5fa0e6')
-            }
-          },
-          physics: commonPhysicsOptions,
-          layout: commonLayoutOptions,
-          interaction: commonInteractionOptions,
-          // Canvas background for Vis.js is typically handled by styling the container div.
-          // Ensure #mynetwork or .network-container background is themed via CSS.
-        };
-      } else { // Light Mode
-        return {
-          nodes: {
-            ...commonNodeOptions,
-            font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#212529') }
-          },
-          edges: {
-            ...commonEdgeOptions,
-            color: {
-              color: "#aaa",
-              highlight: "#3498db"
-            }
-          },
-          physics: commonPhysicsOptions,
-          layout: commonLayoutOptions,
-          interaction: commonInteractionOptions
-        };
-      }
+      return {
+        nodes: {
+          ...commonNodeOptions,
+          font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#212529') }
+        },
+        edges: {
+          ...commonEdgeOptions,
+          color: {
+            color: "#aaa",
+            highlight: "#3498db"
+          }
+        },
+        physics: commonPhysicsOptions,
+        layout: commonLayoutOptions,
+        interaction: commonInteractionOptions
+      };
     }
 
-    function getNodeColor(node, isDarkMode) {
+    function getNodeColor(node) {
       let baseColors;
       // node.type comes from backend (Python: self.nodes.append({'id': ..., 'type': 'column'})
       // node.nodeType is a JS-assigned property for more detailed classification.
@@ -545,20 +501,15 @@ data lineage{% endblock %}
       const type = node.nodeType || (node.type === "column" ? "column" : "unknown");
 
       if (type === "column") {
-        baseColors = isDarkMode ? { background: getCSSVariable('--accent', '#17a2b8'), border: getCSSVariable('--primary-dark', '#0052a3') }
-          : { background: "#ADD8E6", border: "#87CEEB" };
+        baseColors = { background: "#ADD8E6", border: "#87CEEB" };
       } else if (type === "parent") { // Pure parent or intermediate treated as parent for color
-        baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
-          : { background: "#F1C83B", border: "#DAA520" };
+        baseColors = { background: "#F1C83B", border: "#DAA520" };
       } else if (type === "final") { // Pure child
-        baseColors = isDarkMode ? { background: getCSSVariable('--success', '#28a745'), border: getCSSVariable('--primary-dark', '#0052a3') }
-          : { background: "#23C4A7", border: "#20B2AA" };
+        baseColors = { background: "#23C4A7", border: "#20B2AA" };
       } else if (type === "intermediate") { // Explicit intermediate if ever needed (currently same as parent)
-        baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
-          : { background: "#F1C83B", border: "#DAA520" };
+        baseColors = { background: "#F1C83B", border: "#DAA520" };
       } else { // Isolated or unknown
-        baseColors = isDarkMode ? { background: getCSSVariable('--gray-600', '#495057'), border: getCSSVariable('--gray-700', '#343a40') }
-          : { background: "#CCCCCC", border: "#999999" };
+        baseColors = { background: "#CCCCCC", border: "#999999" };
       }
       return baseColors;
     }
@@ -566,17 +517,17 @@ data lineage{% endblock %}
     /**
      * Initialize the network diagram
      */
-    function initializeNetwork(isDarkMode) {
+    function initializeNetwork() {
       if (networkLoading) {
         networkLoading.style.display = "flex";
       }
 
-      processNodesAndEdges(isDarkMode);
+      processNodesAndEdges();
 
       nodeDataset = new vis.DataSet(nodesArray);
       edgeDataset = new vis.DataSet(edgesArray);
 
-      const options = getVisOptions(isDarkMode);
+      const options = getVisOptions();
 
       const data = {
         nodes: nodeDataset,
@@ -630,7 +581,7 @@ data lineage{% endblock %}
     /**
      * Process nodes and edges to identify node types
      */
-    function processNodesAndEdges(isDarkMode) {
+    function processNodesAndEdges() {
       edgesArray.forEach((edge) => {
         parentNodeIds.add(edge.from);
         childNodeIds.add(edge.to);
@@ -650,7 +601,7 @@ data lineage{% endblock %}
         } else {
           node.nodeType = "isolated";
         }
-        node.color = getNodeColor(node, isDarkMode);
+        node.color = getNodeColor(node);
       });
     }
 
