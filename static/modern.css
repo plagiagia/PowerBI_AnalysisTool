@@ -86,6 +86,100 @@
   --transition-fast: all 0.15s ease-out;
 }
 
+body.dark-mode {
+  --primary: #3384db; /* Potentially adjust primary for dark mode */
+  --primary-light: #5fa0e6;
+  --primary-dark: #1a6ebd;
+  --secondary: #8a939b; /* Lighter gray for secondary elements */
+  --accent: #22b8cf; /* Slightly adjusted accent */
+
+  /* Neutral Colors - Inverted for dark mode */
+  --white: #000000; /* Effectively black */
+  --gray-50: #1e1e1e;
+  --gray-100: #2c2c2c;
+  --gray-200: #3a3a3a;
+  --gray-300: #535353;
+  --gray-400: #6f6f6f;
+  --gray-500: #8a939b; /* Same as secondary */
+  --gray-600: #a0a0a0;
+  --gray-700: #b0b0b0;
+  --gray-800: #c9c9c9;
+  --gray-900: #e0e0e0; /* Lightest gray, almost white */
+
+  /* Background Colors */
+  --bg-primary: #121212; /* Main dark background */
+  --bg-secondary: #1e1e1e; /* Slightly lighter background */
+  --bg-tertiary: #2c2c2c; /* Even lighter, for cards or distinct sections */
+  --surface: #1e1e1e; /* Surface color for elements like cards, modals */
+  --surface-hover: #2c2c2c; /* Hover state for surfaces */
+
+  /* Text Colors */
+  --text-primary: #e0e0e0; /* Primary text color (light gray) */
+  --text-secondary: #b0b0b0; /* Secondary text color (medium gray) */
+  --text-muted: #888888; /* Muted text (darker gray) */
+  --text-inverse: #121212; /* Text on light backgrounds (e.g., buttons) */
+
+  /* Border & Shadow */
+  --border: #3a3a3a; /* Border color for dark mode */
+  --border-light: #2c2c2c; /* Lighter border, or for subtle divisions */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3); /* Darker shadows */
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-mode .sidebar {
+  background: linear-gradient(180deg, var(--gray-800) 0%, var(--gray-900) 100%);
+  /* Or use a solid color: background-color: var(--gray-800); */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25); /* Adjusted shadow for dark bg */
+}
+
+body.dark-mode .logo-icon {
+  /* Ensure logo icon text remains light if its background becomes very dark */
+  color: #FFFFFF; /* Force white for the icon text itself */
+}
+
+body.dark-mode .nav-item.active .nav-link {
+  /* Ensure text is light on active dark background */
+  color: #e0e0e0; /* Using a light gray from dark theme variables */
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); /* Adjusted gradient */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Darker shadow for active item */
+}
+
+body.dark-mode .nav-link:hover {
+  background: rgba(59, 130, 246, 0.15); /* Slightly more opaque hover for better visibility */
+  color: var(--primary-light);
+}
+
+body.dark-mode .nav-item.active .nav-icon {
+  background: rgba(255, 255, 255, 0.1); /* Slightly less opaque for dark mode */
+}
+
+body.dark-mode .user-section {
+  background: rgba(59, 130, 246, 0.1); /* Adjusted alpha for dark mode */
+}
+
+body.dark-mode .user-avatar {
+  color: #FFFFFF; /* Ensure avatar icon/text is white */
+}
+
+
+body.dark-mode .modern-dashboard-header::before {
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3; /* Adjusted opacity for darker stroke */
+}
+
+body.dark-mode .tool-badge.ai {
+  background: linear-gradient(45deg, var(--accent), var(--primary-dark));
+}
+
+/* Ensure notification badge text is readable on dark backgrounds if it ever appears on one */
+body.dark-mode .notification-badge {
+  color: #FFFFFF; /* Ensure text is white */
+  border: 1px solid var(--bg-primary); /* Add a border to distinguish from dark backgrounds */
+}
+
+
 /* Reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -210,7 +304,7 @@ body {
 
 .nav-item.active .nav-link {
   background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
-  color: white;
+  color: white; /* Base color for light mode */
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
@@ -294,7 +388,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: white; /* Base color for light mode */
   font-size: 14px;
 }
 
@@ -560,7 +654,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>'); /* Default for light mode */
   opacity: 0.2;
   z-index: 1;
 }
@@ -909,7 +1003,7 @@ main {
 }
 
 .tool-badge.ai {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #667eea, #764ba2); /* Default for light mode */
   animation: pulse 2s infinite;
 }
 

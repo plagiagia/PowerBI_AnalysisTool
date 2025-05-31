@@ -29,7 +29,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <!-- Main CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" id="prismLightTheme" />
+  <!-- Prism.js Tomorrow Night theme (Dark) - Initially disabled -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prismDarkTheme" disabled />
 
   <title>{% block title %}Power BI Explorer{% endblock %}</title>
 
@@ -157,14 +159,14 @@
         </div>
       </div>
       <div class="footer-actions">
-        <button class="action-button theme-toggle" aria-label="Toggle dark mode">
+        <button id="themeSwitcher" class="action-button theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
           <i class="fas fa-moon"></i>
         </button>
         <button class="action-button settings-button" aria-label="Settings">
           <i class="fas fa-cog"></i>
         </button>
       </div>
-      <div class="app-version">v2.0.0</div>
+      <div class="app-version">v{{ app_version }}</div>
     </div>
   </aside>
 
@@ -236,6 +238,80 @@
 
   <!-- Page-specific scripts -->
   {% block scripts %}{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const body = document.body;
+    const moonIconClass = 'fa-moon';
+    const sunIconClass = 'fa-sun';
+    const prismLightTheme = document.getElementById('prismLightTheme'); // Assuming modern.css contains or implies light prism theme
+    const prismDarkTheme = document.getElementById('prismDarkTheme');
+
+    // Function to update icon
+    function updateIcon(isDarkMode) {
+        if (themeSwitcher) {
+            const icon = themeSwitcher.querySelector('i');
+            if (isDarkMode) {
+                icon.classList.remove(moonIconClass);
+                icon.classList.add(sunIconClass);
+                themeSwitcher.title = "Switch to Light Mode";
+            } else {
+                icon.classList.remove(sunIconClass);
+                icon.classList.add(moonIconClass);
+                themeSwitcher.title = "Switch to Dark Mode";
+            }
+        }
+    }
+
+    // Function to enable dark mode
+    function enableDarkMode() {
+        body.classList.add('dark-mode');
+        if (prismDarkTheme) prismDarkTheme.disabled = false;
+        // if (prismLightTheme) prismLightTheme.disabled = true; // Only disable if it's exclusively a light theme
+        localStorage.setItem('theme', 'dark');
+        updateIcon(true);
+        // Dispatch event for other components (like Vis.js)
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'dark' } }));
+    }
+
+    // Function to disable dark mode
+    function disableDarkMode() {
+        body.classList.remove('dark-mode');
+        if (prismDarkTheme) prismDarkTheme.disabled = true;
+        // if (prismLightTheme) prismLightTheme.disabled = false; // Re-enable light theme
+        localStorage.setItem('theme', 'light');
+        updateIcon(false);
+        // Dispatch event for other components (like Vis.js)
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'light' } }));
+    }
+
+    // Event listener for the switcher
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', () => {
+            if (body.classList.contains('dark-mode')) {
+                disableDarkMode();
+            } else {
+                enableDarkMode();
+            }
+        });
+    }
+
+    // Apply theme on initial load
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'dark') {
+        enableDarkMode();
+    } else if (savedTheme === 'light') {
+        disableDarkMode();
+    } else if (systemPrefersDark) {
+        enableDarkMode(); // Default to system preference if no saved theme
+    } else {
+        disableDarkMode(); // Default to light if no saved and no system preference for dark
+    }
+});
+</script>
 </body>
 
 </html>

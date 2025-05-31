@@ -116,14 +116,15 @@
 }
 
 /* Dark mode adjustments */
+/* The styles below will apply when body.dark-mode is active,
+   inheriting variables from modern.css */
 .dark-mode .explanation-container {
-  background-color: var(--dark-bg-secondary);
+  /* Uses --bg-secondary from modern.css dark-mode variables */
 }
 
 .dark-mode .explanation-container code,
 .dark-mode .explanation-container pre {
-  background-color: var(--dark-bg-tertiary);
-  border-color: var(--dark-border);
+  /* Uses --bg-tertiary and --border from modern.css dark-mode variables */
 }
 
 /* Responsive adjustments */
