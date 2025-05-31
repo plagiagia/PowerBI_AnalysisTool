@@ -12,6 +12,13 @@
   --warning: #ffc107;
   --danger: #dc3545;
 
+  /* RGB Variables for opacity usage */
+  --primary-rgb: 0, 102, 204;
+  --success-rgb: 40, 167, 69;
+  --warning-rgb: 255, 193, 7;
+  --danger-rgb: 220, 53, 69;
+  --accent-rgb: 23, 162, 184;
+
   /* Neutral Colors */
   --white: #ffffff;
   --gray-50: #f8f9fa;
@@ -108,6 +115,13 @@ body.dark-mode {
   --primary-dark: #1a6ebd; /* This is the main dark shade for primary */
   --secondary: #8a939b; /* Lighter gray for secondary elements */
   --accent: #22b8cf; /* Slightly adjusted accent */
+
+  /* RGB Variables for dark mode */
+  --primary-rgb: 51, 132, 219;
+  --success-rgb: 40, 167, 69;
+  --warning-rgb: 255, 193, 7;
+  --danger-rgb: 220, 53, 69;
+  --accent-rgb: 34, 184, 207;
 
   /* Darker shades for button hovers (Dark Mode) */
   --primary-darker: #125ca0; /* Darker version of dark mode primary */
@@ -1475,7 +1489,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>'); /* Default for light mode */
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>'); /* Default for light mode */
   opacity: 0.2;
   z-index: 1;
 }
@@ -2066,13 +2080,13 @@ body.dark-mode .modern-button.outline.disabled {
   background-color: var(--gray-200);
   border-color: var(--gray-300);
   color: var(--text-primary);
-  box-shadow: var(--shadow); /* Slightly more pronounced shadow on hover */
+  box-shadow: var(--shadow);
   transform: translateY(-1px);
 }
 .pagination-button:active:not(:disabled) {
-  background-color: var(--gray-300); /* Darker for active state */
-  transform: translateY(0px); /* Reset transform or give a slight press down */
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); /* Inset shadow for pressed look */
+  background-color: var(--gray-300);
+  transform: translateY(0px);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
 }
 .pagination-button:disabled {
   opacity: 0.6;
@@ -2088,13 +2102,13 @@ body.dark-mode .modern-button.outline.disabled {
 }
 
 .pagination-page { /* Individual page number buttons */
-  padding: var(--space-2);
+  padding: var(--space-2); /* Adjusted padding for a more square look if just a number */
   width: 38px; /* Consistent width */
   height: 38px; /* Consistent height */
   border-radius: var(--radius-md); /* Consistent radius */
   background-color: transparent;
   color: var(--text-secondary);
-  border: 1px solid transparent; /* Transparent border for layout, color on hover/active */
+  border: 1px solid transparent; /* For spacing, hover will add border */
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -2124,131 +2138,94 @@ body.dark-mode .modern-button.outline.disabled {
 }
 
 /* Dark Mode for Pagination Buttons */
-body.dark-mode .pagination-button {
+body.dark-mode .pagination-button:hover:not(:disabled) {
   background-color: var(--gray-700);
   border-color: var(--gray-600);
-  color: var(--text-secondary);
-}
-body.dark-mode .pagination-button:hover:not(:disabled) {
-  background-color: var(--gray-600);
-  border-color: var(--gray-500);
   color: var(--text-primary);
 }
 body.dark-mode .pagination-button:active:not(:disabled) {
-  background-color: var(--gray-500);
+  background-color: var(--gray-600);
 }
-body.dark-mode .pagination-button:disabled {
-  background-color: var(--gray-700); /* Ensure disabled has a background in dark mode */
-  border-color: var(--gray-600);
-  opacity: 0.5;
-}
-
 body.dark-mode .pagination-page:hover {
   background-color: var(--gray-700);
   border-color: var(--gray-600);
   color: var(--text-primary);
 }
 body.dark-mode .pagination-page.active {
-  background-color: var(--primary-dark); /* Use darker primary for active in dark mode */
-  border-color: var(--primary-dark);
-  color: var(--text-inverse); /* Text should be light on dark primary */
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: var(--gray-900); /* Ensure contrast on light primary */
 }
 body.dark-mode .pagination-page.active:hover {
-  background-color: var(--primary-darker); /* Even darker shade for hover on active */
-  border-color: var(--primary-darker);
+  background-color: var(--primary); /* Darken to the base dark primary */
+  border-color: var(--primary);
 }
 
-/* Insights Section */
-.insights-section {
-  margin-bottom: var(--space-8);
-}
-
-.insights-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-6);
-}
-
-.insight-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  transition: var(--transition);
-}
-
-.insight-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-}
-
-.insight-icon {
-  width: 50px;
-  height: 50px;
-  background: var(--primary);
-  color: var(--text-inverse);
-  border-radius: var(--radius-lg);
-  display: flex;
+/* Toolbar Buttons (e.g., global header actions) */
+.toolbar-button {
+  background: none;
+  border: 1px solid transparent; /* Maintain layout consistency */
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md); /* Consistent radius */
+  transition: all var(--transition-fast);
+  position: relative;
+  width: 38px; /* Consistent size with .action-button */
+  height: 38px; /* Consistent size with .action-button */
+  display: inline-flex; /* Use inline-flex */
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-lg);
+  line-height: 1; /* Ensure icon is centered */
 }
 
-.insight-content h4 {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.score-value, .time-value {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.score-label, .time-label {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-}
-
-.rec-text {
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
-  margin-bottom: var(--space-1);
-}
-
-.rec-action {
-  font-size: var(--font-size-sm);
+.toolbar-button:hover {
   color: var(--primary);
-  cursor: pointer;
+  background-color: var(--bg-tertiary); /* Softer hover, consistent with .action-button */
+  border-color: var(--border-light); /* Subtle border on hover */
 }
 
-/* Footer */
-.app-footer {
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border);
-  padding: var(--space-4);
-  text-align: center;
-  margin-top: auto;
+.toolbar-button:active {
+  background-color: var(--gray-200); /* Pressed state */
+  transform: translateY(1px); /* Subtle press effect */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
 }
 
-.footer-content {
+.toolbar-button:disabled,
+.toolbar-button.disabled {
+  color: var(--gray-400) !important;
+  background-color: transparent !important; /* Or var(--bg-secondary) if needs a fill */
+  border-color: transparent !important; /* No border for disabled icon buttons unless specified */
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; /* Adjusted opacity for disabled icon buttons */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Dark Mode for Toolbar Buttons (consistent with .action-button dark mode) */
+body.dark-mode .toolbar-button:hover {
+  color: var(--primary-light);
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:active {
+  background-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:disabled,
+body.dark-mode .toolbar-button.disabled {
+  color: var(--gray-600) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.app-version {
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  text-align: center;
+  font-weight: 500;
 }
 
-/* Animations */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Table Styles */
-/* Comprehensive Table Overhaul */
+/* ===== Comprehensive Table Styles ===== */
 
 .table-container {
   overflow-x: auto;
@@ -2373,103 +2350,105 @@ body.dark-mode .data-table tbody td {
   color: var(--text-secondary);
 }
 
-/* Styling for elements within tables */
+/* Styling for elements within tables (Cell Content Focus) - Appended */
 
-/* General .badge style within tables (if used directly, prefer specific ones below) */
-.data-table .badge { /* Scoped to data-table */
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-md); /* Consistent radius */
+/* General .badge style within .data-table */
+.data-table .badge {
+  padding: 0.2em var(--space-2); /* Slightly reduced padding */
+  border-radius: var(--radius-sm); /* Softer radius */
   font-size: var(--font-size-xs);
-  font-weight: 500; /* Slightly less heavy */
-  text-transform: capitalize; /* Softer than uppercase */
-  display: inline-block; /* Ensure it behaves well in flow */
-  line-height: 1.4; /* Adjust for small font */
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+  line-height: 1.3; /* Adjusted line height */
+  border: 1px solid transparent; /* Base border */
 }
 
 /* Specific badge colors within tables */
 .data-table .badge-success {
-  background-color: rgba(var(--success-rgb), 0.15); /* Slightly more opacity */
-  color: var(--success-dark); /* Use darker success for better contrast on light bg */
-  border: 1px solid rgba(var(--success-rgb), 0.2);
+  background-color: rgba(var(--success-rgb), 0.1);
+  color: var(--success-dark);
+  border-color: rgba(var(--success-rgb), 0.2);
 }
 
 .data-table .badge-warning {
-  background-color: rgba(var(--warning-rgb), 0.15);
-  color: var(--warning-darker); /* Use darker warning for better contrast */
-  border: 1px solid rgba(var(--warning-rgb), 0.2);
+  background-color: rgba(var(--warning-rgb), 0.1);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.2);
 }
 
 .data-table .badge-danger {
-  background-color: rgba(var(--danger-rgb), 0.15);
-  color: var(--danger-dark); /* Use darker danger for better contrast */
-  border: 1px solid rgba(var(--danger-rgb), 0.2);
+  background-color: rgba(var(--danger-rgb), 0.1);
+  color: var(--danger-dark);
+  border-color: rgba(var(--danger-rgb), 0.2);
 }
 
-.data-table .badge-info { /* Was accent */
-  background-color: rgba(var(--accent-rgb), 0.15);
-  color: var(--accent-dark); /* Use darker accent for better contrast */
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
+.data-table .badge-info {
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.2);
 }
 
 /* Field List and Field Items */
 .field-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1); /* Reduced gap for tighter packing */
+  gap: var(--space-2); /* Slightly more gap for less density */
   align-items: center;
 }
 .field-item {
   background-color: var(--bg-tertiary);
   color: var(--text-secondary);
-  padding: 0.15rem var(--space-2); /* Fine-tuned padding */
-  border-radius: var(--radius-sm);
+  padding: 0.2rem var(--space-2); /* Adjusted padding */
+  border-radius: var(--radius); /* Slightly larger radius */
   font-size: var(--font-size-xs);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border); /* Standard border */
   line-height: 1.4;
 }
-.field-item.filter-field { /* Example for specific field types */
-  background-color: rgba(var(--accent-rgb), 0.1);
+/* Specific field item types */
+.field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.08);
   color: var(--accent-dark);
-  border-color: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(var(--accent-rgb), 0.15);
 }
 .field-item.vc-object {
-  background-color: rgba(var(--warning-rgb), 0.1);
+  background-color: rgba(var(--warning-rgb), 0.08);
   color: var(--warning-darker);
-  border-color: rgba(var(--warning-rgb), 0.2);
+  border-color: rgba(var(--warning-rgb), 0.15);
 }
 .field-item.visual-object {
-  background-color: rgba(var(--primary-rgb), 0.08);
+  background-color: rgba(var(--primary-rgb), 0.05);
   color: var(--primary-dark);
-  border-color: rgba(var(--primary-rgb), 0.15);
+  border-color: rgba(var(--primary-rgb), 0.1);
 }
 
 /* Visual Type Badge (specific to table_view.html) */
 .visual-type-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius);
+  gap: var(--space-2); /* Good gap */
+  padding: var(--space-1) var(--space-3); /* Increased horizontal padding */
+  border-radius: var(--radius-md); /* Consistent medium radius */
   font-size: var(--font-size-xs);
   font-weight: 500;
-  background-color: var(--bg-tertiary);
+  background-color: var(--surface); /* Use surface, with a border */
   color: var(--text-secondary);
-  border: 1px solid var(--border-light); /* Softer border */
-  white-space: nowrap; /* Prevent wrapping if possible */
+  border: 1px solid var(--border);
+  white-space: nowrap;
 }
 .visual-type-badge i {
   color: var(--text-muted);
-  font-size: 0.9em; /* Slightly smaller icon relative to text */
-  margin-right: var(--space-1); /* Ensure space if gap is not enough */
+  font-size: 1em; /* Icon same size as text */
+  /* margin-right is handled by gap */
 }
 
 
-/* General table icons */
-.data-table .table-icon { /* Scoped to data-table */
-  font-size: var(--font-size-base); /* Adjusted size */
+/* General table icons (if used outside of badges) */
+.data-table .table-icon {
+  font-size: var(--font-size-base);
   color: var(--text-muted);
   margin-right: var(--space-2);
-  vertical-align: middle; /* Keep this */
+  vertical-align: middle;
 }
 
 /* Table action links */
@@ -2492,24 +2471,24 @@ body.dark-mode .data-table tbody td {
 
 /* Dark Mode for Cell Content */
 body.dark-mode .data-table .badge-success {
-  color: var(--success); /* Lighter success text for dark bg */
-  background-color: rgba(var(--success-rgb), 0.2);
-  border-color: rgba(var(--success-rgb), 0.3);
+  color: var(--success-light); /* Need to define --success-light etc. or use lighter grays */
+  background-color: rgba(var(--success-rgb), 0.25);
+  border-color: rgba(var(--success-rgb), 0.35);
 }
 body.dark-mode .data-table .badge-warning {
-  color: var(--warning);
-  background-color: rgba(var(--warning-rgb), 0.2);
-  border-color: rgba(var(--warning-rgb), 0.3);
+  color: var(--warning-light);
+  background-color: rgba(var(--warning-rgb), 0.25);
+  border-color: rgba(var(--warning-rgb), 0.35);
 }
 body.dark-mode .data-table .badge-danger {
-  color: var(--danger);
-  background-color: rgba(var(--danger-rgb), 0.2);
-  border-color: rgba(var(--danger-rgb), 0.3);
+  color: var(--danger-light);
+  background-color: rgba(var(--danger-rgb), 0.25);
+  border-color: rgba(var(--danger-rgb), 0.35);
 }
 body.dark-mode .data-table .badge-info {
-  color: var(--accent);
-  background-color: rgba(var(--accent-rgb), 0.2);
-  border-color: rgba(var(--accent-rgb), 0.3);
+  color: var(--accent-light);
+  background-color: rgba(var(--accent-rgb), 0.25);
+  border-color: rgba(var(--accent-rgb), 0.35);
 }
 
 body.dark-mode .field-item {
@@ -2518,17 +2497,17 @@ body.dark-mode .field-item {
   border-color: var(--gray-600);
 }
 body.dark-mode .field-item.filter-field {
-  background-color: rgba(var(--accent-rgb), 0.15); /* Ensure accent-rgb is appropriate for dark mode */
-  color: var(--accent-light); /* Define --accent-light or use a light gray */
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-light);
   border-color: rgba(var(--accent-rgb), 0.25);
 }
 body.dark-mode .field-item.vc-object {
   background-color: rgba(var(--warning-rgb), 0.15);
-  color: var(--warning-light); /* Define --warning-light or use a light gray */
+  color: var(--warning-light);
   border-color: rgba(var(--warning-rgb), 0.25);
 }
 body.dark-mode .field-item.visual-object {
-  background-color: rgba(var(--primary-rgb), 0.1); /* Ensure primary-rgb is appropriate */
+  background-color: rgba(var(--primary-rgb), 0.1);
   color: var(--primary-light);
   border-color: rgba(var(--primary-rgb), 0.2);
 }
@@ -2554,318 +2533,2842 @@ body.dark-mode .data-table .action-link:hover {
 body.dark-mode .empty-value {
   color: var(--gray-500);
 }
+/* End of Appended Cell Content Styling */
 
 /* Ensure RGB variables are defined for badge opacity (if not already) */
 /* These :root level variables were already present and are fine. */
 /* The more specific .data-table .badge-* rules will take precedence. */
 /* The generic table .badge, .table-icon, .action-link rules that were previously here are now removed as they are superseded by .data-table scoped versions. */
 
-/* The :root variables for *-rgb were already present and confirmed earlier. */
-/* No change needed to this specific :root block that defines them. */
-/* Just ensuring the comment reflects that the old table.* rules are gone. */
+/* ===== Legacy CSS Removed - Now using modern-dashboard-header ===== */
 
-:root {
-  --success-rgb: 40, 167, 69;
-  --warning-rgb: 255, 193, 7;
-  --danger-rgb: 220, 53, 69;
-  --accent-rgb: 23, 162, 184;
+/* General Search Container - For global search if any */
+.search-container {
+  width: 100%;
+  max-width: 400px; /* Default max-width for a generic search bar */
 }
 
-body.dark-mode {
-  --success-rgb: 40, 167, 69; /* Adjust if needed for dark mode visibility */
-  --warning-rgb: 255, 193, 7;
-  --danger-rgb: 220, 53, 69;
-  --accent-rgb: 23, 162, 184;
+/* Styles for the search box that might be used globally */
+.search-box { /* This might be a more global search, not the one in control-panel */
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full); /* Typically very rounded for global search */
+  padding: var(--space-2) var(--space-4);
+  gap: var(--space-2);
+  transition: all var(--transition-fast);
+}
+
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-box i {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.search-input { /* General input style for global search */
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Control Panel Specific Styles */
+/* These styles will override the general .search-container, .search-box if they are nested within .control-panel */
+
+.control-panel {
+  background-color: var(--surface);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); /* Slightly stronger shadow for better lift */
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6); /* Increased gap for better visual separation */
+}
+
+/* Search Bar within Control Panel */
+.control-panel .search-container { /* Specific to search within control panel */
+  width: 100%;
+  max-width: none; /* Override general max-width */
+}
+
+.search-input-wrapper { /* This is the main search input for the table_view page */
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary); /* Cleaner look with primary background */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); /* Softer, larger radius for a modern feel */
+  padding: var(--space-3) var(--space-4);
+  gap: var(--space-3);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm); /* Subtle lift for the search input */
+}
+
+.search-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2), var(--shadow-sm); /* Enhanced focus shadow */
+}
+
+.search-input-wrapper i.fa-search { /* Icon within the table_view search */
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  margin-right: var(--space-1);
+}
+
+.search-input-wrapper input[type="search"] { /* Input field within table_view search */
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  height: 24px;
+  line-height: 24px;
+}
+
+.search-input-wrapper input[type="search"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+.clear-search { /* Clear button for table_view search */
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  width: 28px;
+  height: 28px;
+}
+.clear-search:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary);
+}
+.clear-search i {
+  font-size: var(--font-size-sm);
+}
+
+.search-count { /* Count display for table_view search */
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+  padding-left: var(--space-2);
+}
+
+/* Filters Section */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5); /* Increased gap between control groups and actions */
+  padding-top: var(--space-5); /* Increased padding for visual separation from search */
+  border-top: 1px solid var(--border-light); /* Clearer visual separation */
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-5); /* Increased gap between individual filter groups */
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2); /* Gap between label and input */
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600; /* Bolder for better hierarchy */
+  color: var(--text-primary); /* Stronger color for labels */
+  margin-bottom: var(--space-1); /* Add a little space below label */
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper i.fa-chevron-down {
+  position: absolute;
+  right: var(--space-4); /* More padding from the edge */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: var(--font-size-sm); /* Slightly larger dropdown arrow */
+}
+
+.filter-select,
+.filter-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4); /* Consistent padding */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md); /* Standardized radius */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  appearance: none;
+  line-height: 1.6; /* Better readability for input text */
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  min-height: 44px; /* Ensure consistent height and good tap target */
+}
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.15); /* Slightly stronger focus ring */
+}
+
+.filter-select[multiple] {
+  padding-right: var(--space-4);
+  min-height: 100px; /* Good height for multiple selections */
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-4); /* More gap between buttons */
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-light);
+}
+
+.filter-actions .action-button {
+  padding: var(--space-3) var(--space-5); /* Slightly larger buttons */
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  min-height: 44px; /* Standard tap height */
+  text-transform: capitalize; /* Softer button text */
+}
+
+.filter-actions .action-button i {
+ font-size: var(--font-size-base);
+ margin-right: var(--space-1); /* Space between icon and text */
+}
+
+.filter-actions .action-button.primary {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+.filter-actions .action-button.primary:hover {
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.filter-actions .action-button.secondary {
+  background-color: var(--bg-primary); /* Changed from bg-tertiary for more subtlety */
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.filter-actions .action-button.secondary:hover {
+  background-color: var(--bg-tertiary); /* Hover to bg-tertiary */
+  border-color: var(--gray-400);
+  color: var(--text-primary);
+}
+
+/* Dark mode specific refinements for control panel */
+body.dark-mode .control-panel { /* Already handled by general dark mode --shadow */
+  /* box-shadow: var(--shadow-lg); */
+}
+body.dark-mode .search-input-wrapper {
+  background: var(--bg-secondary);
+  border-color: var(--gray-700);
+}
+body.dark-mode .search-input-wrapper:focus-within {
+   border-color: var(--primary-light);
+   box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25), var(--shadow-sm);
+}
+body.dark-mode .filter-section {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-label {
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select,
+body.dark-mode .filter-input {
+  background-color: var(--bg-secondary);
+  border-color: var(--gray-700);
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select:focus,
+body.dark-mode .filter-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.25);
+}
+body.dark-mode .filter-actions {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-actions .action-button.secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .filter-actions .action-button.secondary:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-500);
+  color: var(--text-primary);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Styles for .toolbar-button were already updated by the previous step using a broader anchor. */
+/* No changes needed here if the previous step correctly updated them. */
+/* This block is now just for confirmation. */
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: #22c55e;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.online {
+  background: #22c55e;
+}
+
+.status-indicator.offline {
+  background: #ef4444;
+}
+
+.report-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.help-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.help-button:hover {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Breadcrumb Styles */
+.breadcrumb ol {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: var(--space-2);
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: '/';
+  color: var(--text-muted);
+  margin-left: var(--space-2);
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Main Wrapper */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 0;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  padding: var(--space-8);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== DASHBOARD COMPONENTS ===== */
+
+/* Modern Header */
+.modern-dashboard-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--text-inverse);
+  padding: var(--space-8) var(--space-8);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.modern-dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>'); /* Default for light mode */
+  opacity: 0.2;
+  z-index: 1;
+}
+
+.header-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.header-main {
+  flex: 1;
+  width: 100%;
+}
+
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.header-controls .sidebar-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-inverse);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.header-controls .sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.header-controls .header-datetime {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.modern-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--text-inverse);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.title-text {
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.title-icon {
+  background: rgba(255, 255, 255, 0.25);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 60px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title-accent {
+  background: rgba(255, 255, 255, 0.15);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-left: var(--space-2);
+}
+
+.modern-subtitle {
+  font-size: var(--font-size-lg);
+  opacity: 0.9;
+  max-width: 600px;
+}
+
+.header-stats {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.quick-stat {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+.stat-number {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+/* Enhanced Metrics */
+.enhanced-metrics-section {
+  margin-bottom: var(--space-8);
+}
+
+.metrics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.metric-card-enhanced {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card-enhanced:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.metric-card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.metric-card-enhanced:hover::before {
+  transform: scaleX(1);
+}
+
+.metric-card-enhanced.secondary::before {
+  background: var(--accent);
+}
+
+.metric-card-enhanced.accent::before {
+  background: var(--success);
+}
+
+.metric-card-enhanced.warning::before {
+  background: var(--warning);
+}
+
+.card-background {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  opacity: 0.1;
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-4);
+}
+
+.metric-card-enhanced.secondary .card-icon {
+  background: var(--accent);
+}
+
+.metric-card-enhanced.accent .card-icon {
+  background: var(--success);
+}
+
+.metric-card-enhanced.warning .card-icon {
+  background: var(--warning);
+}
+
+.metric-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.metric-label {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--space-3);
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--success);
+}
+
+.metric-trend i {
+  background: rgba(40, 167, 69, 0.1);
+  padding: var(--space-1);
+  border-radius: var(--radius-full);
+}
+
+/* Modern Tools Section */
+.modern-tools-section {
+  margin-bottom: var(--space-8);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.section-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.section-title .title-icon {
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+}
+
+.section-description {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.modern-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--space-6);
+}
+
+.modern-tool-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.modern-tool-card.featured {
+  border: 2px solid var(--primary);
+  position: relative;
+}
+
+.modern-tool-card.featured::before {
+  content: 'FEATURED';
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  z-index: 10;
+}
+
+.tool-card-header {
+  padding: var(--space-6);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tool-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+}
+
+.tool-badge {
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tool-badge.ai {
+  background: linear-gradient(45deg, #667eea, #764ba2); /* Default for light mode */
+  animation: pulse 2s infinite;
+}
+
+.tool-content {
+  padding: var(--space-6);
+  flex: 1;
+}
+
+.tool-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.tool-description {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+
+.tool-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.feature-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+}
+
+.tool-footer {
+  padding: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.modern-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%; /* Default to full-width, can be overridden by parent or utility class */
+  padding: var(--space-3) var(--space-5);
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--primary); /* Consistent border */
+  border-radius: var(--radius-md);
+  font-weight: 600; /* Bolder for primary actions */
+  font-size: var(--font-size-base);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  min-height: 44px; /* Consistent tap height */
+  line-height: 1.5;
+  display: inline-flex; /* To allow gap and icon alignment */
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.modern-button:hover {
+  background: var(--primary-darker); /* Use -darker variant */
+  border-color: var(--primary-darker);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.modern-button:active {
+  background: var(--primary-darker);
+  border-color: var(--primary-darker);
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.modern-button:disabled,
+.modern-button.disabled {
+  background-color: var(--gray-200) !important;
+  border-color: var(--gray-200) !important;
+  color: var(--gray-500) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.8 !important;
+}
+
+/* Variants for .modern-button */
+.modern-button.secondary { /* Was accent color, now using secondary for consistency */
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--text-inverse);
+}
+.modern-button.secondary:hover { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+.modern-button.secondary:active { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+
+.modern-button.accent { /* Using accent color */
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+}
+.modern-button.accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.modern-button.accent:active { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+.modern-button.success {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-inverse);
+}
+.modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+.modern-button.success:active { background: var(--success-dark); border-color: var(--success-dark); }
+
+.modern-button.warning {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: var(--gray-900); /* Dark text for light warning */
+}
+.modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+.modern-button.warning:active { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+.modern-button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-inverse);
+}
+.modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+.modern-button.danger:active { background: var(--danger-dark); border-color: var(--danger-dark); }
+
+
+.modern-button.ai {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+}
+.modern-button.ai:hover { background: linear-gradient(45deg, #5a6fcf, #673ca0); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.modern-button.ai:active { background: linear-gradient(45deg, #5a6fcf, #673ca0); transform: translateY(0); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+
+
+/* Outline variant for modern-button */
+.modern-button.outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+.modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.05); /* Lighter hover for outline */
+  color: var(--primary-darker);
+  border-color: var(--primary-darker);
+  box-shadow: none;
+}
+.modern-button.outline:active {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+.modern-button.outline:disabled,
+.modern-button.outline.disabled {
+  background: transparent !important;
+  border-color: var(--gray-300) !important;
+  color: var(--gray-400) !important;
+}
+
+/* Dark Mode for modern-button variants */
+body.dark-mode .modern-button:disabled,
+body.dark-mode .modern-button.disabled {
+  background-color: var(--gray-700) !important;
+  border-color: var(--gray-700) !important;
+  color: var(--gray-500) !important;
+}
+
+body.dark-mode .modern-button.secondary {
+  background: var(--gray-600); border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .modern-button.secondary:hover { background: var(--gray-500); border-color: var(--gray-500); }
+
+body.dark-mode .modern-button.accent {
+  /* Accent may need specific dark mode color if contrast is an issue */
+}
+body.dark-mode .modern-button.success {
+  background: var(--success); /* Use base success, hover to darker */
+  border-color: var(--success);
+}
+body.dark-mode .modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+
+
+body.dark-mode .modern-button.warning {
+  background: var(--warning); /* Use base warning, hover to darker */
+  border-color: var(--warning);
+  color: var(--gray-900); /* Still dark text on yellow */
+}
+body.dark-mode .modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+body.dark-mode .modern-button.danger {
+   background: var(--danger);
+   border-color: var(--danger);
+}
+body.dark-mode .modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+
+
+body.dark-mode .modern-button.outline {
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+}
+body.dark-mode .modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.15); /* Use primary-rgb for dark mode (which is lighter) */
+  color: var(--primary); /* Lighter text on hover */
+  border-color: var(--primary);
+}
+body.dark-mode .modern-button.outline:disabled,
+body.dark-mode .modern-button.outline.disabled {
+  border-color: var(--gray-600) !important;
+  color: var(--gray-500) !important;
+}
+
+/* Pagination Buttons */
+.pagination-button { /* Prev/Next buttons */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: var(--space-2);
+  min-height: 38px; /* Consistent height */
+  box-shadow: var(--shadow-sm);
+}
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.pagination-button:active:not(:disabled) {
+  background-color: var(--gray-300);
+  transform: translateY(0px);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+.pagination-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-page { /* Individual page number buttons */
+  padding: var(--space-2); /* Adjusted padding for a more square look if just a number */
+  width: 38px; /* Consistent width */
+  height: 38px; /* Consistent height */
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent; /* For spacing, hover will add border */
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: var(--transition-fast);
+  line-height: 1; /* Ensure text is centered */
+}
+.pagination-page:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active:hover {
+  background-color: var(--primary-darker);
+  border-color: var(--primary-darker);
+}
+
+/* Dark Mode for Pagination Buttons */
+body.dark-mode .pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-button:active:not(:disabled) {
+  background-color: var(--gray-600);
+}
+body.dark-mode .pagination-page:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-page.active {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: var(--gray-900); /* Ensure contrast on light primary */
+}
+body.dark-mode .pagination-page.active:hover {
+  background-color: var(--primary); /* Darken to the base dark primary */
+  border-color: var(--primary);
+}
+
+/* Toolbar Buttons (e.g., global header actions) */
+.toolbar-button {
+  background: none;
+  border: 1px solid transparent; /* Maintain layout consistency */
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md); /* Consistent radius */
+  transition: all var(--transition-fast);
+  position: relative;
+  width: 38px; /* Consistent size with .action-button */
+  height: 38px; /* Consistent size with .action-button */
+  display: inline-flex; /* Use inline-flex */
+  align-items: center;
+  justify-content: center;
+  line-height: 1; /* Ensure icon is centered */
+}
+
+.toolbar-button:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary); /* Softer hover, consistent with .action-button */
+  border-color: var(--border-light); /* Subtle border on hover */
+}
+
+.toolbar-button:active {
+  background-color: var(--gray-200); /* Pressed state */
+  transform: translateY(1px); /* Subtle press effect */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.toolbar-button:disabled,
+.toolbar-button.disabled {
+  color: var(--gray-400) !important;
+  background-color: transparent !important; /* Or var(--bg-secondary) if needs a fill */
+  border-color: transparent !important; /* No border for disabled icon buttons unless specified */
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; /* Adjusted opacity for disabled icon buttons */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Dark Mode for Toolbar Buttons (consistent with .action-button dark mode) */
+body.dark-mode .toolbar-button:hover {
+  color: var(--primary-light);
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:active {
+  background-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:disabled,
+body.dark-mode .toolbar-button.disabled {
+  color: var(--gray-600) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.app-version {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ===== Comprehensive Table Styles ===== */
+
+.table-container {
+  overflow-x: auto;
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border-light); /* Softer border for the container */
+}
+
+.data-table { /* Using a more specific class from table_view.html */
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+/* General th, td styling */
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4); /* Vertical: space-3, Horizontal: space-4 */
+  text-align: left;
+  border-bottom: 1px solid var(--border-light); /* Lighter borders for rows */
+  vertical-align: middle; /* Better for mixed content */
+}
+
+/* Table Header */
+.data-table thead th {
+  background-color: var(--bg-secondary); /* Lighter header background */
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-sm); /* Slightly reduced from base */
+  text-transform: capitalize; /* Softer than uppercase */
+  letter-spacing: 0.03em; /* Slightly reduced letter spacing */
+  border-top: none; /* Container has border, so header doesn't need one */
+  border-bottom: 2px solid var(--primary); /* Accent border */
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); /* Softer shadow for sticky header */
+}
+
+.data-table thead th .fas.fa-sort {
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  opacity: 0.6; /* More subtle default sort icon */
+  transition: opacity var(--transition-fast);
+}
+.data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 0.9;
+}
+.data-table thead th.sort-asc .fas.fa-sort,
+.data-table thead th.sort-desc .fas.fa-sort {
+  opacity: 1;
+  color: var(--primary);
 }
 
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .header-content {
-    flex-direction: column;
-    text-align: center;
-    gap: var(--space-6);
-  }
-  
-  .modern-tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  }
-
-  /* Table View Responsive Adjustments for 1024px */
-  .control-panel {
-    /* No change needed here from previous attempt, already flex-column by default */
-  }
-
-  .filter-controls {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjust filter columns */
-  }
-
-  .table-toolbar {
-    flex-direction: column; /* Stack toolbar items */
-    align-items: flex-start; /* Align to start */
-    gap: var(--space-3); /* Reduce gap */
-  }
-
-  .pagination-container {
-    flex-direction: column; /* Stack pagination elements */
-    align-items: flex-start; /* Align to start */
-    gap: var(--space-3); /* Reduce gap */
-  }
-  .pagination-controls {
-    order: 1;
-  }
-  .pagination-info {
-    order: 2;
-  }
-  .pagination-size {
-    order: 3;
-    width: 100%;
-  }
-  .pagination-size .select-wrapper {
-    width: auto;
-    min-width: 120px; /* Give it a bit more space */
-  }
+/* Table Body */
+.data-table tbody tr {
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--border-light);
+}
+.data-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-    position: fixed;
-    z-index: 1000;
-  }
-  
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  
-  .header-controls .sidebar-toggle {
-    display: block;
-  }
-  
-  .main-wrapper {
-    margin-left: 0;
-  }
-  
-  main {
-    padding: var(--space-4);
-  }
-
-  .header-controls .header-datetime {
-    font-size: 0.75rem;
-    padding: var(--space-1) var(--space-2);
-  }
-  
-  .modern-dashboard-header {
-    padding: var(--space-8) var(--space-4);
-  }
-  
-  .modern-title {
-    font-size: var(--font-size-2xl);
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-  
-  .header-stats {
-    flex-direction: column;
-    gap: var(--space-3);
-    width: 100%;
-  }
-  
-  .metrics-container {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-  
-  .modern-tools-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-  
-  .insights-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .insight-card {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  /* Table View Responsive Adjustments for 768px */
-  .control-panel {
-    padding: var(--space-4); /* Reduce padding */
-  }
-
-  .filter-controls {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Further adjust filter columns */
-  }
-
-  .filter-actions {
-    flex-wrap: wrap; /* Ensure buttons wrap */
-    gap: var(--space-2);
-  }
-  .filter-actions .action-button {
-    flex-grow: 1; /* Allow buttons to grow and fill space */
-  }
-
-  .table-container table {
-      min-width: 600px; /* Ensure table can scroll horizontally */
-  }
-
-  /* Reduce font sizes for table view elements */
-  .page-title {
-    font-size: var(--font-size-xl);
-  }
-  .page-description,
-  .filter-label,
-  .filter-select,
-  .filter-input,
-  .table-info .results-count,
-  .pagination-info,
-  .pagination-button,
-  .pagination-page,
-  .pagination-size label {
-    font-size: var(--font-size-sm);
-  }
-  table { /* Affects table content */
-    font-size: var(--font-size-xs);
-  }
-  th, td {
-    padding: var(--space-3); /* Reduce padding in table cells */
-  }
-  .field-item {
-    padding: var(--space-1) var(--space-1);
-    font-size: 0.7rem;
-  }
-  .visual-type-badge {
-    font-size: var(--font-size-xs);
-    padding: var(--space-1);
-  }
-  .visual-type-badge i {
-    font-size: 0.8em; /* Make icon slightly smaller within badge */
-  }
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--bg-secondary); /* Zebra striping */
 }
 
-@media (max-width: 480px) {
-  .modern-dashboard-header {
-    padding: var(--space-6) var(--space-3);
-  }
-  
-  .metric-card-enhanced,
-  .modern-tool-card,
-  .insight-card {
-    padding: var(--space-4);
-  }
-  
-  .tool-card-header,
-  .tool-content,
-  .tool-footer {
-    padding: var(--space-4);
-  }
+.data-table tbody tr:hover {
+  background-color: var(--primary-light-rgb-01); /* Defined as rgba(var(--primary-rgb), 0.08) */
+}
 
-  .header-controls {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-  
-  .header-controls .header-datetime {
-    font-size: 0.7rem;
-    padding: var(--space-1) var(--space-2);
-  }
-  
-  .modern-title {
-    font-size: var(--font-size-xl);
-  }
-  
-  .header-stats {
-    gap: var(--space-3);
-  }
+.data-table tbody td {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
 
-  /* Table View Responsive Adjustments for 480px */
-  .control-panel {
-    padding: var(--space-3);
-  }
-  .search-input-wrapper {
-    padding: var(--space-2) var(--space-3);
-  }
-  .search-input-wrapper input[type="search"] {
-    font-size: var(--font-size-sm);
-  }
+/* Ensure last row's tds have no bottom border (redundant if tr:last-child has no border, but safe) */
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
 
-  .filter-controls {
-    grid-template-columns: 1fr; /* Stack all filters */
-  }
-  .filter-actions {
-    flex-direction: column;
-  }
-  .filter-actions .action-button {
-    width: 100%;
-  }
+/* Dark Mode Table Styles */
+body.dark-mode .table-container {
+  border-color: var(--gray-700);
+}
 
-  .table-toolbar {
-    padding: var(--space-3);
-    gap: var(--space-2);
-  }
-  .table-actions .action-button.outline {
-    width: 100%;
-    justify-content: center;
-    padding: var(--space-3); /* Make tap target larger */
-  }
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  border-bottom-color: var(--gray-700);
+}
 
-  .pagination-container {
-    padding: var(--space-3);
-    gap: var(--space-3);
-  }
-  .pagination-controls {
-    flex-direction: column;
-    width: 100%;
-    gap: var(--space-3);
-  }
-  .pagination-button { /* Prev/Next buttons */
-    width: 100%;
-    justify-content: center;
-    padding: var(--space-3); /* Make tap target larger */
-  }
-  .pagination-pages {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-  }
-  .pagination-page {
-    padding: var(--space-2);
-  }
-  .pagination-size {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
-  .pagination-size .select-wrapper {
-    width: 100%;
-  }
-  .pagination-size .filter-select {
-    padding-top: var(--space-2);
-    padding-bottom: var(--space-2);
-  }
+body.dark-mode .data-table thead th {
+  background-color: var(--gray-800);
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+body.dark-mode .data-table thead th .fas.fa-sort {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 1;
+}
+body.dark-mode .data-table thead th.sort-asc .fas.fa-sort,
+body.dark-mode .data-table thead th.sort-desc .fas.fa-sort {
+  color: var(--primary-light);
+}
 
-  .page-title {
-    font-size: var(--font-size-lg);
-    gap: var(--space-2);
-  }
-  .page-description {
-    font-size: var(--font-size-xs);
-  }
-  th, td { /* Table cells */
-    padding: var(--space-2);
-    white-space: normal; /* Allow text wrapping */
-  }
-  /* Override sticky header white-space for mobile if needed, but generally keep it */
-  .data-table thead th {
-     /* white-space: normal; */ /* Uncomment if headers are too wide and break layout */
-  }
-  .visual-type-badge {
-    white-space: normal; /* Allow badge text to wrap */
-    text-align: center;
-  }
-  .field-list {
+body.dark-mode .data-table tbody tr:nth-child(even) {
+  background-color: var(--gray-800);
+}
+
+body.dark-mode .data-table tbody tr:hover {
+  background-color: var(--table-row-hover-bg); /* rgba(var(--primary-rgb), 0.15) or specific dark var */
+}
+
+body.dark-mode .data-table tbody td {
+  color: var(--text-secondary);
+}
+
+/* Styling for elements within tables (Cell Content Focus) - Appended */
+
+/* General .badge style within .data-table */
+.data-table .badge {
+  padding: 0.2em var(--space-2); /* Slightly reduced padding */
+  border-radius: var(--radius-sm); /* Softer radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+  line-height: 1.3; /* Adjusted line height */
+  border: 1px solid transparent; /* Base border */
+}
+
+/* Specific badge colors within tables */
+.data-table .badge-success {
+  background-color: rgba(var(--success-rgb), 0.1);
+  color: var(--success-dark);
+  border-color: rgba(var(--success-rgb), 0.2);
+}
+
+.data-table .badge-warning {
+  background-color: rgba(var(--warning-rgb), 0.1);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.2);
+}
+
+.data-table .badge-danger {
+  background-color: rgba(var(--danger-rgb), 0.1);
+  color: var(--danger-dark);
+  border-color: rgba(var(--danger-rgb), 0.2);
+}
+
+.data-table .badge-info {
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.2);
+}
+
+/* Field List and Field Items */
+.field-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2); /* Slightly more gap for less density */
+  align-items: center;
+}
+.field-item {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.2rem var(--space-2); /* Adjusted padding */
+  border-radius: var(--radius); /* Slightly larger radius */
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border); /* Standard border */
+  line-height: 1.4;
+}
+/* Specific field item types */
+.field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.08);
+  color: var(--accent-dark);
+  border-color: rgba(var(--accent-rgb), 0.15);
+}
+.field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.08);
+  color: var(--warning-darker);
+  border-color: rgba(var(--warning-rgb), 0.15);
+}
+.field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.05);
+  color: var(--primary-dark);
+  border-color: rgba(var(--primary-rgb), 0.1);
+}
+
+/* Visual Type Badge (specific to table_view.html) */
+.visual-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2); /* Good gap */
+  padding: var(--space-1) var(--space-3); /* Increased horizontal padding */
+  border-radius: var(--radius-md); /* Consistent medium radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background-color: var(--surface); /* Use surface, with a border */
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.visual-type-badge i {
+  color: var(--text-muted);
+  font-size: 1em; /* Icon same size as text */
+  /* margin-right is handled by gap */
+}
+
+
+/* General table icons (if used outside of badges) */
+.data-table .table-icon {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+
+/* Table action links */
+.data-table .action-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+.data-table .action-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Empty value styling */
+.empty-value {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Dark Mode for Cell Content */
+body.dark-mode .data-table .badge-success {
+  color: var(--success-light); /* Need to define --success-light etc. or use lighter grays */
+  background-color: rgba(var(--success-rgb), 0.25);
+  border-color: rgba(var(--success-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-warning {
+  color: var(--warning-light);
+  background-color: rgba(var(--warning-rgb), 0.25);
+  border-color: rgba(var(--warning-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-danger {
+  color: var(--danger-light);
+  background-color: rgba(var(--danger-rgb), 0.25);
+  border-color: rgba(var(--danger-rgb), 0.35);
+}
+body.dark-mode .data-table .badge-info {
+  color: var(--accent-light);
+  background-color: rgba(var(--accent-rgb), 0.25);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+body.dark-mode .field-item {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .field-item.filter-field {
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-light);
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+body.dark-mode .field-item.vc-object {
+  background-color: rgba(var(--warning-rgb), 0.15);
+  color: var(--warning-light);
+  border-color: rgba(var(--warning-rgb), 0.25);
+}
+body.dark-mode .field-item.visual-object {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary-light);
+  border-color: rgba(var(--primary-rgb), 0.2);
+}
+
+body.dark-mode .visual-type-badge {
+  background-color: var(--gray-700);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .visual-type-badge i {
+  color: var(--gray-500);
+}
+
+body.dark-mode .data-table .table-icon {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table .action-link {
+  color: var(--primary-light);
+}
+body.dark-mode .data-table .action-link:hover {
+  color: var(--primary);
+}
+body.dark-mode .empty-value {
+  color: var(--gray-500);
+}
+/* End of Appended Cell Content Styling */
+
+/* Ensure RGB variables are defined for badge opacity (if not already) */
+/* These :root level variables were already present and are fine. */
+/* The more specific .data-table .badge-* rules will take precedence. */
+/* The generic table .badge, .table-icon, .action-link rules that were previously here are now removed as they are superseded by .data-table scoped versions. */
+
+/* ===== Legacy CSS Removed - Now using modern-dashboard-header ===== */
+
+/* General Search Container - For global search if any */
+.search-container {
+  width: 100%;
+  max-width: 400px; /* Default max-width for a generic search bar */
+}
+
+/* Styles for the search box that might be used globally */
+.search-box { /* This might be a more global search, not the one in control-panel */
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full); /* Typically very rounded for global search */
+  padding: var(--space-2) var(--space-4);
+  gap: var(--space-2);
+  transition: all var(--transition-fast);
+}
+
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-box i {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.search-input { /* General input style for global search */
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Control Panel Specific Styles */
+/* These styles will override the general .search-container, .search-box if they are nested within .control-panel */
+
+.control-panel {
+  background-color: var(--surface);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); /* Slightly stronger shadow for better lift */
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6); /* Increased gap for better visual separation */
+}
+
+/* Search Bar within Control Panel */
+.control-panel .search-container { /* Specific to search within control panel */
+  width: 100%;
+  max-width: none; /* Override general max-width */
+}
+
+.search-input-wrapper { /* This is the main search input for the table_view page */
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary); /* Cleaner look with primary background */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); /* Softer, larger radius for a modern feel */
+  padding: var(--space-3) var(--space-4);
+  gap: var(--space-3);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm); /* Subtle lift for the search input */
+}
+
+.search-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2), var(--shadow-sm); /* Enhanced focus shadow */
+}
+
+.search-input-wrapper i.fa-search { /* Icon within the table_view search */
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  margin-right: var(--space-1);
+}
+
+.search-input-wrapper input[type="search"] { /* Input field within table_view search */
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  height: 24px;
+  line-height: 24px;
+}
+
+.search-input-wrapper input[type="search"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+.clear-search { /* Clear button for table_view search */
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  width: 28px;
+  height: 28px;
+}
+.clear-search:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary);
+}
+.clear-search i {
+  font-size: var(--font-size-sm);
+}
+
+.search-count { /* Count display for table_view search */
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+  padding-left: var(--space-2);
+}
+
+/* Filters Section */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5); /* Increased gap between control groups and actions */
+  padding-top: var(--space-5); /* Increased padding for visual separation from search */
+  border-top: 1px solid var(--border-light); /* Clearer visual separation */
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-5); /* Increased gap between individual filter groups */
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2); /* Gap between label and input */
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600; /* Bolder for better hierarchy */
+  color: var(--text-primary); /* Stronger color for labels */
+  margin-bottom: var(--space-1); /* Add a little space below label */
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper i.fa-chevron-down {
+  position: absolute;
+  right: var(--space-4); /* More padding from the edge */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: var(--font-size-sm); /* Slightly larger dropdown arrow */
+}
+
+.filter-select,
+.filter-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4); /* Consistent padding */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md); /* Standardized radius */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  appearance: none;
+  line-height: 1.6; /* Better readability for input text */
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  min-height: 44px; /* Ensure consistent height and good tap target */
+}
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.15); /* Slightly stronger focus ring */
+}
+
+.filter-select[multiple] {
+  padding-right: var(--space-4);
+  min-height: 100px; /* Good height for multiple selections */
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-4); /* More gap between buttons */
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-light);
+}
+
+.filter-actions .action-button {
+  padding: var(--space-3) var(--space-5); /* Slightly larger buttons */
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  min-height: 44px; /* Standard tap height */
+  text-transform: capitalize; /* Softer button text */
+}
+
+.filter-actions .action-button i {
+ font-size: var(--font-size-base);
+ margin-right: var(--space-1); /* Space between icon and text */
+}
+
+.filter-actions .action-button.primary {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+.filter-actions .action-button.primary:hover {
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.filter-actions .action-button.secondary {
+  background-color: var(--bg-primary); /* Changed from bg-tertiary for more subtlety */
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.filter-actions .action-button.secondary:hover {
+  background-color: var(--bg-tertiary); /* Hover to bg-tertiary */
+  border-color: var(--gray-400);
+  color: var(--text-primary);
+}
+
+/* Dark mode specific refinements for control panel */
+body.dark-mode .control-panel { /* Already handled by general dark mode --shadow */
+  /* box-shadow: var(--shadow-lg); */
+}
+body.dark-mode .search-input-wrapper {
+  background: var(--bg-secondary);
+  border-color: var(--gray-700);
+}
+body.dark-mode .search-input-wrapper:focus-within {
+   border-color: var(--primary-light);
+   box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25), var(--shadow-sm);
+}
+body.dark-mode .filter-section {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-label {
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select,
+body.dark-mode .filter-input {
+  background-color: var(--bg-secondary);
+  border-color: var(--gray-700);
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select:focus,
+body.dark-mode .filter-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.25);
+}
+body.dark-mode .filter-actions {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-actions .action-button.secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .filter-actions .action-button.secondary:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-500);
+  color: var(--text-primary);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Styles for .toolbar-button were already updated by the previous step using a broader anchor. */
+/* No changes needed here if the previous step correctly updated them. */
+/* This block is now just for confirmation. */
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: #22c55e;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.online {
+  background: #22c55e;
+}
+
+.status-indicator.offline {
+  background: #ef4444;
+}
+
+.report-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.help-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.help-button:hover {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Breadcrumb Styles */
+.breadcrumb ol {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: var(--space-2);
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: '/';
+  color: var(--text-muted);
+  margin-left: var(--space-2);
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Main Wrapper */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 0;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  padding: var(--space-8);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== DASHBOARD COMPONENTS ===== */
+
+/* Modern Header */
+.modern-dashboard-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--text-inverse);
+  padding: var(--space-8) var(--space-8);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.modern-dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>'); /* Default for light mode */
+  opacity: 0.2;
+  z-index: 1;
+}
+
+.header-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.header-main {
+  flex: 1;
+  width: 100%;
+}
+
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.header-controls .sidebar-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-inverse);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.header-controls .sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.header-controls .header-datetime {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.modern-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--text-inverse);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.title-text {
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.title-icon {
+  background: rgba(255, 255, 255, 0.25);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 60px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title-accent {
+  background: rgba(255, 255, 255, 0.15);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-left: var(--space-2);
+}
+
+.modern-subtitle {
+  font-size: var(--font-size-lg);
+  opacity: 0.9;
+  max-width: 600px;
+}
+
+.header-stats {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.quick-stat {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+.stat-number {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+/* Enhanced Metrics */
+.enhanced-metrics-section {
+  margin-bottom: var(--space-8);
+}
+
+.metrics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.metric-card-enhanced {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card-enhanced:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.metric-card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.metric-card-enhanced:hover::before {
+  transform: scaleX(1);
+}
+
+.metric-card-enhanced.secondary::before {
+  background: var(--accent);
+}
+
+.metric-card-enhanced.accent::before {
+  background: var(--success);
+}
+
+.metric-card-enhanced.warning::before {
+  background: var(--warning);
+}
+
+.card-background {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  opacity: 0.1;
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-4);
+}
+
+.metric-card-enhanced.secondary .card-icon {
+  background: var(--accent);
+}
+
+.metric-card-enhanced.accent .card-icon {
+  background: var(--success);
+}
+
+.metric-card-enhanced.warning .card-icon {
+  background: var(--warning);
+}
+
+.metric-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.metric-label {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--space-3);
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--success);
+}
+
+.metric-trend i {
+  background: rgba(40, 167, 69, 0.1);
+  padding: var(--space-1);
+  border-radius: var(--radius-full);
+}
+
+/* Modern Tools Section */
+.modern-tools-section {
+  margin-bottom: var(--space-8);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.section-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.section-title .title-icon {
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+}
+
+.section-description {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.modern-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--space-6);
+}
+
+.modern-tool-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.modern-tool-card.featured {
+  border: 2px solid var(--primary);
+  position: relative;
+}
+
+.modern-tool-card.featured::before {
+  content: 'FEATURED';
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  z-index: 10;
+}
+
+.tool-card-header {
+  padding: var(--space-6);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tool-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+}
+
+.tool-badge {
+  background: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tool-badge.ai {
+  background: linear-gradient(45deg, #667eea, #764ba2); /* Default for light mode */
+  animation: pulse 2s infinite;
+}
+
+.tool-content {
+  padding: var(--space-6);
+  flex: 1;
+}
+
+.tool-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.tool-description {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+
+.tool-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.feature-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+}
+
+.tool-footer {
+  padding: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.modern-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%; /* Default to full-width, can be overridden by parent or utility class */
+  padding: var(--space-3) var(--space-5);
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--primary); /* Consistent border */
+  border-radius: var(--radius-md);
+  font-weight: 600; /* Bolder for primary actions */
+  font-size: var(--font-size-base);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  min-height: 44px; /* Consistent tap height */
+  line-height: 1.5;
+  display: inline-flex; /* To allow gap and icon alignment */
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.modern-button:hover {
+  background: var(--primary-darker); /* Use -darker variant */
+  border-color: var(--primary-darker);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.modern-button:active {
+  background: var(--primary-darker);
+  border-color: var(--primary-darker);
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.modern-button:disabled,
+.modern-button.disabled {
+  background-color: var(--gray-200) !important;
+  border-color: var(--gray-200) !important;
+  color: var(--gray-500) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.8 !important;
+}
+
+/* Variants for .modern-button */
+.modern-button.secondary { /* Was accent color, now using secondary for consistency */
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--text-inverse);
+}
+.modern-button.secondary:hover { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+.modern-button.secondary:active { background: var(--secondary-darker); border-color: var(--secondary-darker); }
+
+.modern-button.accent { /* Using accent color */
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+}
+.modern-button.accent:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.modern-button.accent:active { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+.modern-button.success {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-inverse);
+}
+.modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+.modern-button.success:active { background: var(--success-dark); border-color: var(--success-dark); }
+
+.modern-button.warning {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: var(--gray-900); /* Dark text for light warning */
+}
+.modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+.modern-button.warning:active { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+.modern-button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-inverse);
+}
+.modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+.modern-button.danger:active { background: var(--danger-dark); border-color: var(--danger-dark); }
+
+
+.modern-button.ai {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+}
+.modern-button.ai:hover { background: linear-gradient(45deg, #5a6fcf, #673ca0); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.modern-button.ai:active { background: linear-gradient(45deg, #5a6fcf, #673ca0); transform: translateY(0); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+
+
+/* Outline variant for modern-button */
+.modern-button.outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+.modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.05); /* Lighter hover for outline */
+  color: var(--primary-darker);
+  border-color: var(--primary-darker);
+  box-shadow: none;
+}
+.modern-button.outline:active {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+.modern-button.outline:disabled,
+.modern-button.outline.disabled {
+  background: transparent !important;
+  border-color: var(--gray-300) !important;
+  color: var(--gray-400) !important;
+}
+
+/* Dark Mode for modern-button variants */
+body.dark-mode .modern-button:disabled,
+body.dark-mode .modern-button.disabled {
+  background-color: var(--gray-700) !important;
+  border-color: var(--gray-700) !important;
+  color: var(--gray-500) !important;
+}
+
+body.dark-mode .modern-button.secondary {
+  background: var(--gray-600); border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .modern-button.secondary:hover { background: var(--gray-500); border-color: var(--gray-500); }
+
+body.dark-mode .modern-button.accent {
+  /* Accent may need specific dark mode color if contrast is an issue */
+}
+body.dark-mode .modern-button.success {
+  background: var(--success); /* Use base success, hover to darker */
+  border-color: var(--success);
+}
+body.dark-mode .modern-button.success:hover { background: var(--success-dark); border-color: var(--success-dark); }
+
+
+body.dark-mode .modern-button.warning {
+  background: var(--warning); /* Use base warning, hover to darker */
+  border-color: var(--warning);
+  color: var(--gray-900); /* Still dark text on yellow */
+}
+body.dark-mode .modern-button.warning:hover { background: var(--warning-darker); border-color: var(--warning-darker); }
+
+body.dark-mode .modern-button.danger {
+   background: var(--danger);
+   border-color: var(--danger);
+}
+body.dark-mode .modern-button.danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }
+
+
+body.dark-mode .modern-button.outline {
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+}
+body.dark-mode .modern-button.outline:hover {
+  background: rgba(var(--primary-rgb), 0.15); /* Use primary-rgb for dark mode (which is lighter) */
+  color: var(--primary); /* Lighter text on hover */
+  border-color: var(--primary);
+}
+body.dark-mode .modern-button.outline:disabled,
+body.dark-mode .modern-button.outline.disabled {
+  border-color: var(--gray-600) !important;
+  color: var(--gray-500) !important;
+}
+
+/* Pagination Buttons */
+.pagination-button { /* Prev/Next buttons */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: var(--space-2);
+  min-height: 38px; /* Consistent height */
+  box-shadow: var(--shadow-sm);
+}
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.pagination-button:active:not(:disabled) {
+  background-color: var(--gray-300);
+  transform: translateY(0px);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+.pagination-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-page { /* Individual page number buttons */
+  padding: var(--space-2); /* Adjusted padding for a more square look if just a number */
+  width: 38px; /* Consistent width */
+  height: 38px; /* Consistent height */
+  border-radius: var(--radius-md); /* Consistent radius */
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent; /* For spacing, hover will add border */
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: var(--transition-fast);
+  line-height: 1; /* Ensure text is centered */
+}
+.pagination-page:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.pagination-page.active:hover {
+  background-color: var(--primary-darker);
+  border-color: var(--primary-darker);
+}
+
+/* Dark Mode for Pagination Buttons */
+body.dark-mode .pagination-button:hover:not(:disabled) {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-button:active:not(:disabled) {
+  background-color: var(--gray-600);
+}
+body.dark-mode .pagination-page:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-primary);
+}
+body.dark-mode .pagination-page.active {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  color: var(--gray-900); /* Ensure contrast on light primary */
+}
+body.dark-mode .pagination-page.active:hover {
+  background-color: var(--primary); /* Darken to the base dark primary */
+  border-color: var(--primary);
+}
+
+/* Toolbar Buttons (e.g., global header actions) */
+.toolbar-button {
+  background: none;
+  border: 1px solid transparent; /* Maintain layout consistency */
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md); /* Consistent radius */
+  transition: all var(--transition-fast);
+  position: relative;
+  width: 38px; /* Consistent size with .action-button */
+  height: 38px; /* Consistent size with .action-button */
+  display: inline-flex; /* Use inline-flex */
+  align-items: center;
+  justify-content: center;
+  line-height: 1; /* Ensure icon is centered */
+}
+
+.toolbar-button:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary); /* Softer hover, consistent with .action-button */
+  border-color: var(--border-light); /* Subtle border on hover */
+}
+
+.toolbar-button:active {
+  background-color: var(--gray-200); /* Pressed state */
+  transform: translateY(1px); /* Subtle press effect */
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.toolbar-button:disabled,
+.toolbar-button.disabled {
+  color: var(--gray-400) !important;
+  background-color: transparent !important; /* Or var(--bg-secondary) if needs a fill */
+  border-color: transparent !important; /* No border for disabled icon buttons unless specified */
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; /* Adjusted opacity for disabled icon buttons */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Dark Mode for Toolbar Buttons (consistent with .action-button dark mode) */
+body.dark-mode .toolbar-button:hover {
+  color: var(--primary-light);
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:active {
+  background-color: var(--gray-600);
+}
+body.dark-mode .toolbar-button:disabled,
+body.dark-mode .toolbar-button.disabled {
+  color: var(--gray-600) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.app-version {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ===== Comprehensive Table Styles ===== */
+
+.table-container {
+  overflow-x: auto;
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border-light); /* Softer border for the container */
+}
+
+.data-table { /* Using a more specific class from table_view.html */
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+/* General th, td styling */
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4); /* Vertical: space-3, Horizontal: space-4 */
+  text-align: left;
+  border-bottom: 1px solid var(--border-light); /* Lighter borders for rows */
+  vertical-align: middle; /* Better for mixed content */
+}
+
+/* Table Header */
+.data-table thead th {
+  background-color: var(--bg-secondary); /* Lighter header background */
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-sm); /* Slightly reduced from base */
+  text-transform: capitalize; /* Softer than uppercase */
+  letter-spacing: 0.03em; /* Slightly reduced letter spacing */
+  border-top: none; /* Container has border, so header doesn't need one */
+  border-bottom: 2px solid var(--primary); /* Accent border */
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); /* Softer shadow for sticky header */
+}
+
+.data-table thead th .fas.fa-sort {
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  opacity: 0.6; /* More subtle default sort icon */
+  transition: opacity var(--transition-fast);
+}
+.data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 0.9;
+}
+.data-table thead th.sort-asc .fas.fa-sort,
+.data-table thead th.sort-desc .fas.fa-sort {
+  opacity: 1;
+  color: var(--primary);
+}
+
+
+/* Table Body */
+.data-table tbody tr {
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--border-light);
+}
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--bg-secondary); /* Zebra striping */
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--primary-light-rgb-01); /* Defined as rgba(var(--primary-rgb), 0.08) */
+}
+
+.data-table tbody td {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Ensure last row's tds have no bottom border (redundant if tr:last-child has no border, but safe) */
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Dark Mode Table Styles */
+body.dark-mode .table-container {
+  border-color: var(--gray-700);
+}
+
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  border-bottom-color: var(--gray-700);
+}
+
+body.dark-mode .data-table thead th {
+  background-color: var(--gray-800);
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+body.dark-mode .data-table thead th .fas.fa-sort {
+  color: var(--gray-500);
+}
+body.dark-mode .data-table thead th.sortable:hover .fas.fa-sort {
+    opacity: 1;
+}
+body.dark-mode .data-table thead th.sort-asc .fas.fa-sort,
+body.dark-mode .data-table thead th.sort-desc .fas.fa-sort {
+  color: var(--primary-light);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(even) {
+  background-color: var(--gray-800);
+}
+
+body.dark-mode .data-table tbody tr:hover {
+  background-color: var(--table-row-hover-bg); /* rgba(var(--primary-rgb), 0.15) or specific dark var */
+}
+
+body.dark-mode .data-table tbody td {
+  color: var(--text-secondary);
+}
+
+/* Styling for elements within tables (Cell Content Focus) - Appended */
+
+/* General .badge style within .data-table */
+.data-table .badge {
+  padding: 0.2em var(--space-2); /* Slightly reduced padding */
+  border-radius: var(--radius-sm); /* Softer radius */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+  line-height: 1.3; /* Adjusted line height */
+  border: 1px solid transparent; /* Base border */
+}
+
+/* Specific badge colors within tables */
     gap: var(--space-1); /* Tighter gap for field items */
   }
 }

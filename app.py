@@ -156,12 +156,20 @@ def create_app(config_object=None) -> Flask:
     @app.context_processor
     def inject_common_data():
         """Inject common data into templates."""
+        # Get unique pages for header stats
+        dp = get_data_processor() if os.path.exists(app.config['REPORT_JSON_PATH']) else None
+        unique_pages = set()
+        
+        if dp and dp.visuals_data:
+            unique_pages = {row[0] for row in dp.visuals_data if row and row[0]}
+        
         return {
             "current_year": datetime.datetime.now().year,
             "report_name": get_report_name(),
             "app_name": app.config.get('APP_NAME', 'Power BI Analysis Tool'),
-            "app_version": app.config.get('APP_VERSION', '1.0.0'),
-            "app_author": app.config.get('APP_AUTHOR', '')
+            "app_version": app.config.get('APP_VERSION', '2.0.0'),
+            "app_author": app.config.get('APP_AUTHOR', 'Dimitrios'),
+            "unique_pages": unique_pages
         }
 
     def get_report_name():
@@ -182,15 +190,32 @@ def create_app(config_object=None) -> Flask:
     @app.route('/')
     def index() -> str:
         """Render the dashboard with report metrics."""
-        metrics = get_report_metrics()
-        time_loaded = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
-
-        return render_template(
-            'index.html', 
-            metrics=metrics, 
-            time_loaded=time_loaded,
-            most_common_visual=metrics.get("most_common_visual")
-        )
+        try:
+            metrics = get_report_metrics()
+            time_loaded = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
+            
+            return render_template(
+                'index.html', 
+                metrics=metrics, 
+                time_loaded=time_loaded,
+                most_common_visual=metrics.get("most_common_visual")
+            )
+        except Exception as e:
+            current_app.logger.error(f"Dashboard error: {e}")
+            # Return dashboard with default values
+            default_metrics = {
+                "visual_count": 0,
+                "page_count": 0, 
+                "measure_count": 0,
+                "unused_count": 0,
+                "most_common_visual": "None"
+            }
+            return render_template(
+                'index.html',
+                metrics=default_metrics,
+                time_loaded=datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p"),
+                most_common_visual="None"
+            )
 
     @app.route('/table-view')
     def table_view() -> str:
