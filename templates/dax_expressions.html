@@ -1,18 +1,35 @@
-{% extends "base.html" %} 
-{% block title %}DAX Explorer - Power BI Explorer{% endblock %} 
+{% extends "base.html" %}
+{% block title %}DAX Explorer - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-code"></i>{% endblock %}
+{% block header_title %}DAX Code Analyzer{% endblock %}
+{% block header_subtitle %}Browse, analyze, and optimize DAX formulas with AI-powered suggestions and similarity
+analysis{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ dax_expressions|length if dax_expressions else 0 }}</span>
+  <span class="stat-label">DAX Expressions</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ (dax_expressions|map(attribute='1')|map('length')|sum / 1000)|round|int if
+    dax_expressions else 0 }}</span>
+  <span class="stat-label">Total Lines (K)</span>
+</div>
+{% endblock %}
 
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
 <!-- Include FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-{% endblock %} 
+{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/dax-expressions"><i class="fas fa-code"></i><span class="breadcrumb-text">DAX Explorer</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -113,14 +130,14 @@
       <i class="fas fa-times"></i> Close Analysis
     </button>
   </div>
-  
+
   <div class="control-panel">
     <div class="filter-group">
       <label for="similarityThreshold" class="filter-label">Similarity Threshold:</label>
       <input type="range" id="similarityThreshold" min="0.5" max="0.95" step="0.05" value="0.7" class="slider">
       <span id="thresholdValue">70%</span>
     </div>
-    
+
     <div class="analysis-stats">
       <div class="stat-item">
         <div class="stat-value" id="similarPairsCount">0</div>
@@ -132,7 +149,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="similarity-results">
     <div class="similarity-table-container">
       <table id="similarityTable" class="data-table">
@@ -149,7 +166,7 @@
         </tbody>
       </table>
     </div>
-    
+
     <div id="comparisonView" class="comparison-view" style="display: none;">
       <div class="comparison-header">
         <h3>Comparing Measures</h3>
@@ -170,7 +187,7 @@
     </div>
   </div>
 </div>
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
@@ -293,32 +310,32 @@
       if (exportDax) {
         exportDax.addEventListener("click", exportDaxExpressions);
       }
-      
+
       // Analyze similarity button
       if (analyzeSimilarityBtn) {
         analyzeSimilarityBtn.addEventListener("click", analyzeSimilarity);
       }
-      
+
       // Close similarity analysis button
       if (closeSimilarityBtn) {
-        closeSimilarityBtn.addEventListener("click", function() {
+        closeSimilarityBtn.addEventListener("click", function () {
           similaritySection.style.display = "none";
           daxList.style.display = "flex";
         });
       }
-      
+
       // Similarity threshold slider
       if (similarityThreshold) {
-        similarityThreshold.addEventListener("input", function() {
+        similarityThreshold.addEventListener("input", function () {
           const threshold = parseFloat(this.value);
           thresholdValue.textContent = `${Math.round(threshold * 100)}%`;
           updateSimilarityTable(threshold);
         });
       }
-      
+
       // Close comparison view button
       if (closeComparisonBtn) {
-        closeComparisonBtn.addEventListener("click", function() {
+        closeComparisonBtn.addEventListener("click", function () {
           comparisonView.style.display = "none";
         });
       }
@@ -491,7 +508,7 @@
         );
       }
     }
-    
+
     /**
      * Copy text to clipboard with animation
      * @param {HTMLElement} button - Button element
@@ -557,7 +574,7 @@
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
-    
+
     /**
      * Calculate similarity between DAX expressions
      * @param {string} dax1 - First DAX expression
@@ -577,61 +594,61 @@
 
       const normalized1 = normalize(dax1);
       const normalized2 = normalize(dax2);
-      
+
       // For very different length expressions, use early return
-      const lengthRatio = Math.min(normalized1.length, normalized2.length) / 
-                          Math.max(normalized1.length, normalized2.length);
+      const lengthRatio = Math.min(normalized1.length, normalized2.length) /
+        Math.max(normalized1.length, normalized2.length);
       if (lengthRatio < 0.5) return lengthRatio * 0.5; // Low similarity for very different lengths
-      
+
       // Token-based similarity
       const tokens1 = normalized1.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
       const tokens2 = normalized2.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
-      
+
       // Calculate Jaccard similarity coefficient
       const set1 = new Set(tokens1);
       const set2 = new Set(tokens2);
-      
+
       const intersection = new Set([...set1].filter(x => set2.has(x)));
       const union = new Set([...set1, ...set2]);
-      
+
       const jaccardSimilarity = intersection.size / union.size;
-      
+
       // Calculate token sequence similarity (for detecting similar structure)
       let sequenceSimilarity = 0;
       const minLength = Math.min(tokens1.length, tokens2.length);
       let matches = 0;
-      
+
       for (let i = 0; i < minLength; i++) {
         if (tokens1[i] === tokens2[i]) matches++;
       }
-      
+
       if (minLength > 0) {
         sequenceSimilarity = matches / minLength;
       }
-      
+
       // Combine different similarity metrics
       return (jaccardSimilarity * 0.6) + (sequenceSimilarity * 0.4);
     }
-    
+
     /**
      * Analyze similarity between all DAX expressions
      */
     function analyzeSimilarity() {
       const measures = [];
-      
+
       // Collect all measures and their expressions
       queryItems.forEach(item => {
         if (item.style.display !== "none") { // Only include visible items
           const name = item.getAttribute("data-measure");
           const expression = item.querySelector("code").textContent;
-          
+
           measures.push({
             name: name,
             expression: expression
           });
         }
       });
-      
+
       // Show loading notification if available
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
@@ -639,17 +656,17 @@
           "info"
         );
       }
-      
+
       // Calculate similarity for all pairs
       const similarityResults = [];
-      
+
       for (let i = 0; i < measures.length; i++) {
         for (let j = i + 1; j < measures.length; j++) {
           const measure1 = measures[i];
           const measure2 = measures[j];
-          
+
           const similarity = calculateSimilarity(measure1.expression, measure2.expression);
-          
+
           // Store result if similarity is above minimum threshold (0.5)
           if (similarity > 0.5) {
             similarityResults.push({
@@ -662,20 +679,20 @@
           }
         }
       }
-      
+
       // Sort by similarity (highest first)
       similarityResults.sort((a, b) => b.similarity - a.similarity);
-      
+
       // Store results for later use
       window.similarityResults = similarityResults;
-      
+
       // Show similarity section
       daxList.style.display = "none";
       similaritySection.style.display = "block";
-      
+
       // Update UI with initial threshold of 70%
       updateSimilarityTable(0.7);
-      
+
       // Show completion notification if available
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
@@ -684,7 +701,7 @@
         );
       }
     }
-    
+
     /**
      * Update similarity table based on threshold
      * @param {number} threshold - Similarity threshold (0-1)
@@ -692,23 +709,23 @@
     function updateSimilarityTable(threshold) {
       const similarityTable = document.getElementById("similarityTable").querySelector("tbody");
       similarityTable.innerHTML = "";
-      
+
       const filteredResults = window.similarityResults.filter(result => result.similarity >= threshold);
-      
+
       // Update stats
       document.getElementById("similarPairsCount").textContent = filteredResults.length;
-      
+
       if (window.similarityResults.length > 0) {
         const highest = Math.round(window.similarityResults[0].similarity * 100);
         document.getElementById("highestSimilarity").textContent = `${highest}%`;
       } else {
         document.getElementById("highestSimilarity").textContent = "0%";
       }
-      
+
       // Populate table
       filteredResults.forEach((result, index) => {
         const row = document.createElement("tr");
-        
+
         // Determine similarity class
         let similarityClass = "low-similarity";
         if (result.similarity > 0.85) {
@@ -716,7 +733,7 @@
         } else if (result.similarity > 0.7) {
           similarityClass = "medium-similarity";
         }
-        
+
         row.innerHTML = `
           <td>${result.measure1}</td>
           <td>${result.measure2}</td>
@@ -727,18 +744,18 @@
             </button>
           </td>
         `;
-        
+
         similarityTable.appendChild(row);
       });
-      
+
       // Add event listeners to compare buttons
       document.querySelectorAll(".compare-btn").forEach(btn => {
-        btn.addEventListener("click", function() {
+        btn.addEventListener("click", function () {
           const index = parseInt(this.getAttribute("data-index"));
           showComparison(filteredResults[index]);
         });
       });
-      
+
       // Show empty message if no results
       if (filteredResults.length === 0) {
         const row = document.createElement("tr");
@@ -750,26 +767,26 @@
         similarityTable.appendChild(row);
       }
     }
-    
+
     /**
      * Show comparison view for two measures
      * @param {Object} comparisonData - Data for the two measures to compare
      */
     function showComparison(comparisonData) {
       comparisonView.style.display = "block";
-      
+
       // Set measure names
       document.getElementById("measure1Name").textContent = comparisonData.measure1;
       document.getElementById("measure2Name").textContent = comparisonData.measure2;
-      
+
       // Set code
       document.getElementById("measure1Code").textContent = comparisonData.expression1;
       document.getElementById("measure2Code").textContent = comparisonData.expression2;
-      
+
       // Highlight code with Prism
       Prism.highlightElement(document.getElementById("measure1Code"));
       Prism.highlightElement(document.getElementById("measure2Code"));
-      
+
       // Scroll to comparison view
       comparisonView.scrollIntoView({ behavior: "smooth" });
     }
@@ -784,7 +801,7 @@
     align-items: center;
     margin-bottom: var(--space-4);
   }
-  
+
   /* Query Items styling */
   .queries-list {
     display: flex;
@@ -922,7 +939,7 @@
     padding: 0 2px;
     margin: 0 -2px;
   }
-  
+
   /* Similarity Analysis Styles */
   .similarity-section {
     background-color: var(--bg-primary);
@@ -1028,7 +1045,7 @@
     max-height: 400px;
     overflow: auto;
   }
-  
+
   .empty-message {
     text-align: center;
     padding: var(--space-4);
@@ -1040,7 +1057,7 @@
     .comparison-content {
       grid-template-columns: 1fr;
     }
-    
+
     .analysis-stats {
       flex-direction: column;
     }

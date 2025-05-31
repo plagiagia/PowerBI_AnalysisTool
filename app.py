@@ -4,25 +4,36 @@ import csv
 import re
 import datetime
 import collections
+import markdown
 from typing import List, Set, Dict, Any, Optional
-from flask import Flask, render_template, g, current_app, abort, request
+from flask import Flask, render_template, g, current_app, abort, request, jsonify
 from data_processor import DataProcessor
 from lineage_view import LineageView
 from config import get_config
+from ai_utils import get_ai_service
 
 def create_app(config_object=None) -> Flask:
     """
     Application factory for creating the Flask app.
     """
     app = Flask(__name__)
-    
+
     # Load configuration
     if config_object is None:
         # Use function to get appropriate config based on environment
         config_object = get_config()
-    
+
     app.config.from_object(config_object)
-    
+
+    # Security headers
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        return response
+
     # No need to set default paths - they are already in the config file
 
     @app.teardown_appcontext
@@ -36,6 +47,11 @@ def create_app(config_object=None) -> Flask:
         Retrieve or create the DataProcessor instance for this request.
         """
         if not hasattr(g, 'data_processor'):
+            # Check if required file exists
+            if not os.path.exists(app.config['REPORT_JSON_PATH']):
+                current_app.logger.error(f"Report JSON file not found: {app.config['REPORT_JSON_PATH']}")
+                abort(500, description="Report data file not found. Please check your data directory.")
+            
             dp = DataProcessor(app.config['REPORT_JSON_PATH'])
             dp.process_json()
             g.data_processor = dp
@@ -102,33 +118,33 @@ def create_app(config_object=None) -> Flask:
         """
         dp = get_data_processor()
         lvp = get_lineage_view_processor()
-        
+
         # Filter visuals that have fields and are not filter visuals
         excluded_types = {"Page Level Filters", "Global Level Filters"}
         valid_visuals = [
             row for row in dp.visuals_data 
             if len(row) > 3 and row[3] and row[1] and row[1] not in excluded_types
         ]
-        
+
         # Extract visual types and count
         visual_types = [row[1] for row in valid_visuals]
         visual_count = len(visual_types)
-        
+
         # Find most common visual type
         most_common_visual = "None"
         if visual_types:
             counter = collections.Counter(visual_types)
             most_common_visual = counter.most_common(1)[0][0]
-        
+
         # Extract unique pages
         unique_pages = {row[0] for row in dp.visuals_data if row and row[0]}
-        
+
         # Get measures
         all_measures = lvp.get_all_measures()
         used_measures = dp.get_used_measures()
         final_measures = lvp.get_final_measures()
         unused_final_measures = final_measures - used_measures
-        
+
         return {
             "visual_count": visual_count,
             "page_count": len(unique_pages),
@@ -152,7 +168,7 @@ def create_app(config_object=None) -> Flask:
         """Extract the report name from the report file."""
         report_path = app.config['REPORT_JSON_PATH']
         report_name = os.path.basename(report_path).replace(".json", "")
-        
+
         try:
             with open(report_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
@@ -160,7 +176,7 @@ def create_app(config_object=None) -> Flask:
                     report_name = data['name']
         except:
             pass
-            
+
         return report_name
 
     @app.route('/')
@@ -168,7 +184,7 @@ def create_app(config_object=None) -> Flask:
         """Render the dashboard with report metrics."""
         metrics = get_report_metrics()
         time_loaded = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
-        
+
         return render_template(
             'index.html', 
             metrics=metrics, 
@@ -186,7 +202,7 @@ def create_app(config_object=None) -> Flask:
         # Check if the feature is enabled in config
         if not app.config.get('ENABLE_LINEAGE_VIEW', True):
             abort(404, description="This feature is currently disabled.")
-            
+
         lvp = get_lineage_view_processor()
         return render_template(
             'lineage_view.html',
@@ -199,7 +215,7 @@ def create_app(config_object=None) -> Flask:
         # Check if the feature is enabled in config
         if not app.config.get('ENABLE_DAX_EXPLORER', True):
             abort(404, description="This feature is currently disabled.")
-            
+
         lvp = get_lineage_view_processor()
         dax_expr = lvp.extract_dax_expressions()
         return render_template('dax_expressions.html', dax_expressions=dax_expr)
@@ -209,7 +225,7 @@ def create_app(config_object=None) -> Flask:
         # Check if the feature is enabled in config
         if not app.config.get('ENABLE_SOURCE_EXPLORER', True):
             abort(404, description="This feature is currently disabled.")
-            
+
         data = load_model_data(app.config['MODEL_JSON_PATH'])
         m_queries_info = extract_m_queries(data)
 
@@ -244,14 +260,97 @@ def create_app(config_object=None) -> Flask:
 
         # Get used measures
         used_measures = dp.get_used_measures()
-        
+
         # Get final measures
         final_measures = lvp.get_final_measures()
-        
+
         # Calculate unused final measures
         unused_final_measures = sorted(list(final_measures - used_measures))
 
         return render_template('unused_measures.html', unused_measures=unused_final_measures)
+
+
+    @app.route('/api/analyze-m-query', methods=['POST'])
+    def analyze_m_query():
+        """API endpoint to analyze an M query using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            return jsonify({"error": "AI features are currently disabled."}), 404
+
+        try:
+            data = request.json
+            if not data or 'query' not in data:
+                return jsonify({"error": "No query provided"}), 400
+
+            m_query = data['query']
+            table_name = data.get('tableName', 'Unknown Table')
+
+            ai_service = get_ai_service()
+            result = ai_service.analyze_m_query(m_query)
+
+            # Add table name to the result
+            result['tableName'] = table_name
+
+            return jsonify(result)
+        except Exception as e:
+            current_app.logger.error(f"Error analyzing M query: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/optimize-dax', methods=['POST'])
+    def optimize_dax():
+        """API endpoint to optimize a DAX measure using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            return jsonify({"error": "AI features are currently disabled."}), 404
+
+        try:
+            data = request.json
+            if not data or 'dax' not in data:
+                return jsonify({"error": "No DAX expression provided"}), 400
+
+            dax_expression = data['dax']
+            measure_name = data.get('measureName', '')
+
+            ai_service = get_ai_service()
+            result = ai_service.optimize_dax_measure(dax_expression, measure_name)
+
+            return jsonify({"optimized_dax": result})
+        except Exception as e:
+            current_app.logger.error(f"Error optimizing DAX measure: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/explain-dax', methods=['POST'])
+    def explain_dax():
+        """API endpoint to explain a DAX measure using AI."""
+        # Check if AI features are enabled in config
+        if not app.config.get('ENABLE_AI_FEATURES', True):
+            return jsonify({"error": "AI features are currently disabled."}), 404
+
+        try:
+            data = request.json
+            if not data or 'dax' not in data:
+                return jsonify({"error": "No DAX expression provided"}), 400
+
+            dax_expression = data['dax']
+            measure_name = data.get('measureName', '')
+
+            ai_service = get_ai_service()
+            result = ai_service.explain_dax_measure(dax_expression, measure_name)
+
+            return jsonify({"explanation": result})
+        except Exception as e:
+            current_app.logger.error(f"Error explaining DAX measure: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/model-json', methods=['GET'])
+    def get_model_json():
+        """API endpoint to get the current model JSON."""
+        try:
+            model_data = load_model_data(app.config['MODEL_JSON_PATH'])
+            return jsonify(model_data)
+        except Exception as e:
+            current_app.logger.error(f"Error loading model JSON: {e}")
+            return jsonify({"error": str(e)}), 500
 
     # Register error handlers
     @app.errorhandler(404)

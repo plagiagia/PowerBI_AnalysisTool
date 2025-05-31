@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
     """Base configuration."""
@@ -16,7 +20,7 @@ class Config:
     # UI configuration
     APP_NAME = "Power BI Analysis Tool"
     APP_VERSION = "1.0.0"
-    APP_AUTHOR = "Your Name"
+    APP_AUTHOR = "Dimitrios"
     
     # Feature flags
     ENABLE_SOURCE_EXPLORER = True
@@ -25,6 +29,13 @@ class Config:
     
     # Performance settings
     MAX_VISUALS_PER_PAGE = 100
+    
+    # AI Integration
+    ENABLE_AI_FEATURES = True
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    OPENAI_MODEL = os.environ.get('OPENAI_MODEL', "gpt-4o")  # Default model - can be adjusted based on needs
+    AI_TEMPERATURE = 0.7  # Controls randomness (0.0-1.0)
+    AI_MAX_TOKENS = 2000  # Maximum tokens per request
 
 
 class DevelopmentConfig(Config):
@@ -46,6 +57,11 @@ class ProductionConfig(Config):
     # In production, set this from environment variable
     SECRET_KEY = os.environ.get('SECRET_KEY')
     
+    def __init__(self):
+        # Ensure SECRET_KEY is set in production
+        if not self.SECRET_KEY:
+            raise ValueError("SECRET_KEY environment variable must be set in production")
+
 
 # Configuration dictionary to easily select environment
 config = {

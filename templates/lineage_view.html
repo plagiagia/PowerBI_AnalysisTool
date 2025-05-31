@@ -1,14 +1,57 @@
-{% extends "base.html" %} {% block title %}Data Lineage - Power BI Explorer{%
-endblock %} {% block head %}
+{% extends "base.html" %}
+{% block title %}Data Lineage - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-project-diagram"></i>{% endblock %}
+{% block header_title %}Data Lineage Diagram{% endblock %}
+{% block header_subtitle %}Visualize complex relationships and dependencies between measures and columns to understand
+data lineage{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number" id="header-parent-measures">0</span>
+  <span class="stat-label">Parent Measures</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number" id="header-final-measures">0</span>
+  <span class="stat-label">Final Measures</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number" id="header-columns">0</span>
+  <span class="stat-label">Columns</span>
+</div>
+{% endblock %}
+
+{% block head %}
 <!-- Include Vis Network CSS -->
 <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <!-- Include FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-{% endblock %} {% block breadcrumbs %}
+<!-- Include Showdown.js for Markdown to HTML conversion -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+<!-- Include AI features CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='lineage-ai.css') }}" />
+<style>
+  /* Ensure network diagram container takes available space */
+  .network-container {
+    height: 70vh; /* Default height */
+    background-color: var(--bg-primary); /* Adapts with theme */
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+  .network-diagram {
+    height: 100%;
+    width: 100%;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
 <li>
   <a href="/lineage-view"><i class="fas fa-project-diagram"></i><span class="breadcrumb-text">Data Lineage</span></a>
 </li>
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <!-- Page Header -->
 <div class="page-header">
   <h1 class="page-title">
@@ -176,62 +219,144 @@ endblock %} {% block head %}
       </div>
     </div>
 
-    <!-- Details Panel -->
-    <div class="lineage-details">
+    <!-- Measure Details Panel -->
+    <div class="measure-details">
       <div class="details-header">
         <h2 class="details-title">
-          <i class="fas fa-info-circle"></i> Lineage Details
+          <i class="fas fa-calculator"></i> Measure Details
         </h2>
         <div class="details-actions">
           <div class="search-container compact">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input type="search" id="searchLineage" placeholder="Search lineage..."
-                aria-label="Search lineage details" />
-              <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+              <input type="search" id="searchMeasure" placeholder="Search in measure..."
+                aria-label="Search measure definition" />
+              <button id="clearMeasureSearch" class="clear-search" style="display: none" aria-label="Clear search">
                 <i class="fas fa-times"></i>
               </button>
             </div>
           </div>
-          <button id="exportLineage" class="action-button outline">
+          <button id="exportMeasure" class="action-button outline">
             <i class="fas fa-download"></i> Export
           </button>
         </div>
       </div>
 
       <div class="details-content">
-        <div class="table-container">
-          <table id="lineageTable" class="data-table">
-            <thead>
-              <tr>
-                <th>Parent Measure</th>
-                <th>Child Measure</th>
-                <th>Column</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Table rows will be populated by JavaScript -->
-            </tbody>
-          </table>
+        <!-- Measure card -->
+        <div id="measureCard" class="measure-card">
+          <!-- Measure header with metadata -->
+          <div class="measure-card-header">
+            <div class="measure-info">
+              <h3 id="measureName" class="measure-name">Select a measure</h3>
+              <div class="measure-meta">
+                <span id="measureType" class="measure-type-badge">
+                  <i class="fas fa-code-branch"></i> Type
+                </span>
+                <span id="measureReferences" class="measure-references">
+                  <i class="fas fa-link"></i> <span id="referencesCount">0</span> References
+                </span>
+              </div>
+            </div>
+            <div class="measure-actions">
+              <button id="copyMeasure" class="icon-button" title="Copy measure definition">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button id="expandCollapseAll" class="icon-button" title="Expand/collapse all">
+                <i class="fas fa-expand-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Measure tabs -->
+          <div class="measure-tabs">
+            <button id="originalTab" class="measure-tab active">
+              <i class="fas fa-code"></i> Original Definition
+            </button>
+            <button id="expandedTab" class="measure-tab">
+              <i class="fas fa-expand"></i> Expanded Definition
+            </button>
+            <button id="optimizedTab" class="measure-tab">
+              <i class="fas fa-magic"></i> Optimized
+            </button>
+            <button id="explanationTab" class="measure-tab">
+              <i class="fas fa-book-open"></i> Explanation
+            </button>
+          </div>
+
+          <!-- Measure content -->
+          <div class="measure-content">
+            <!-- Original definition tab content -->
+            <div id="originalDefinition" class="tab-content active">
+              <div class="code-container">
+                <pre><code id="originalCode" class="language-dax">Select a measure to view its definition</code></pre>
+              </div>
+            </div>
+
+            <!-- Expanded definition tab content -->
+            <div id="expandedDefinition" class="tab-content">
+              <div class="code-container">
+                <pre><code id="expandedCode" class="language-dax">Select a measure to view its expanded definition</code></pre>
+              </div>
+            </div>
+
+            <!-- Optimized definition tab content -->
+            <div id="optimizedDefinition" class="tab-content">
+              <div class="code-container">
+                <pre><code id="optimizedCode" class="language-dax">Select a measure to view its optimized definition</code></pre>
+              </div>
+              <div class="ai-loading" id="optimizedLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI is optimizing the measure...</div>
+              </div>
+            </div>
+
+            <!-- Explanation tab content -->
+            <div id="explanationDefinition" class="tab-content">
+              <div class="explanation-container" id="explanationContent">
+                <div class="placeholder-text">Select a measure to view its explanation</div>
+              </div>
+              <div class="ai-loading" id="explanationLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI is generating explanation...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Referenced measures section -->
+          <div id="referencedMeasuresSection" class="referenced-measures-section">
+            <h4 class="section-title">
+              <i class="fas fa-link"></i> Referenced Measures
+              <span class="section-count" id="referencedMeasuresCount">0</span>
+            </h4>
+            <div id="referencedMeasuresList" class="referenced-measures-list">
+              <!-- Referenced measures will be populated by JavaScript -->
+            </div>
+          </div>
         </div>
 
-        <!-- Empty state for when no data is available -->
-        <div id="noDataMessage" class="empty-state" style="display: none">
+        <!-- Empty state for when no measure is selected -->
+        <div id="noMeasureSelected" class="empty-state">
           <div class="empty-state-icon">
-            <i class="fas fa-info-circle"></i>
+            <i class="fas fa-calculator"></i>
           </div>
-          <h3 class="empty-state-title">No details to display</h3>
+          <h3 class="empty-state-title">No measure selected</h3>
           <p class="empty-state-message">
-            Select a node in the diagram to view its relationships.
+            Select a measure in the diagram to view its details.
           </p>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <!-- Include Vis Network JS -->
 <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+
+<!-- Include AI features JS -->
+<script src="{{ url_for('static', filename='lineage-ai.js') }}"></script>
 
 <!-- Data for the network diagram -->
 <script>
@@ -253,11 +378,11 @@ endblock %} {% block head %}
     const forceDirectedRadio = document.getElementById("forceDirected");
     const fitViewButton = document.getElementById("fitView");
     const resetViewButton = document.getElementById("resetView");
-    const lineageTable = document.getElementById("lineageTable");
-    const searchLineage = document.getElementById("searchLineage");
-    const clearSearch = document.getElementById("clearSearch");
-    const noDataMessage = document.getElementById("noDataMessage");
-    const exportLineageButton = document.getElementById("exportLineage");
+    // const lineageTable = document.getElementById("lineageTable"); // This element does not exist in the HTML
+    const searchLineage = document.getElementById("searchLineage"); // This element also seems to be missing
+    const clearSearch = document.getElementById("clearSearch"); // Missing
+    // const noDataMessage = document.getElementById("noDataMessage"); // Missing
+    // const exportLineageButton = document.getElementById("exportLineage"); // Missing
     const zoomInButton = document.getElementById("zoomIn");
     const zoomOutButton = document.getElementById("zoomOut");
     const fullscreenButton = document.getElementById("fullscreen");
@@ -284,7 +409,7 @@ endblock %} {% block head %}
     const columnNodeIds = new Set();
 
     // Initialize the network with nodes and edges
-    initializeNetwork();
+    initializeNetwork(document.body.classList.contains('dark-mode'));
 
     // Setup event listeners
     setupEventListeners();
@@ -292,158 +417,231 @@ endblock %} {% block head %}
     // Update statistics
     updateStatistics();
 
+    // Listen for theme changes from base.html
+    document.addEventListener('themeChanged', function(event) {
+      if (network) { // Check if network is initialized
+        const isDarkMode = event.detail.theme === 'dark';
+        const optionsToSet = getVisOptions(isDarkMode);
+        network.setOptions(optionsToSet);
+
+        // Update node colors directly as setOptions might not refresh them from dataset
+        if (nodeDataset) {
+            const allNodes = nodeDataset.get({ returnType: 'Array' });
+            const updatedNodes = allNodes.map(node => {
+                // Ensure node.nodeType is used, which is set in processNodesAndEdges
+                const newColors = getNodeColor(node, isDarkMode);
+                return { ...node, id: node.id, color: newColors }; // Ensure id is part of the update object
+            });
+            if (updatedNodes.length > 0) {
+                 nodeDataset.update(updatedNodes);
+            }
+        }
+      }
+    });
+
+    function getCSSVariable(variableName, defaultValue = '#000000') {
+        if (typeof window === 'undefined') return defaultValue; // Guard for server-side or pre-DOM environments
+        const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        return value || defaultValue;
+    }
+
+    function getVisOptions(isDarkMode) {
+        const commonNodeOptions = {
+            shape: "dot",
+            size: 16,
+            borderWidth: 2,
+            shadow: true,
+        };
+
+        const commonEdgeOptions = {
+            width: 1,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+            smooth: { enabled: true, type: "dynamic", roundness: 0.5 }
+        };
+
+        const commonInteractionOptions = {
+            hover: true,
+            tooltipDelay: 200,
+            hideEdgesOnDrag: true,
+            navigationButtons: false,
+            keyboard: { enabled: true, speed: { x: 10, y: 10, zoom: 0.1 } },
+            zoomView: true
+        };
+
+        const commonPhysicsOptions = {
+            enabled: true,
+            barnesHut: {
+                gravitationalConstant: -2000,
+                centralGravity: 0.1,
+                springLength: 95,
+                springConstant: 0.04,
+                damping: 0.09
+            },
+            stabilization: {
+                enabled: true,
+                iterations: 1000,
+                updateInterval: 50
+            }
+        };
+
+        const commonLayoutOptions = {
+            improvedLayout: true,
+            // Hierarchical settings are applied conditionally in applyHierarchicalLayout / applyForceDirectedLayout
+        };
+
+        if (isDarkMode) {
+            return {
+                nodes: {
+                    ...commonNodeOptions,
+                    font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#e0e0e0') }
+                },
+                edges: {
+                    ...commonEdgeOptions,
+                    color: {
+                        color: getCSSVariable('--gray-500', '#6f6f6f'),
+                        highlight: getCSSVariable('--primary-light', '#5fa0e6')
+                    }
+                },
+                physics: commonPhysicsOptions,
+                layout: commonLayoutOptions,
+                interaction: commonInteractionOptions,
+                // Canvas background for Vis.js is typically handled by styling the container div.
+                // Ensure #mynetwork or .network-container background is themed via CSS.
+            };
+        } else { // Light Mode
+            return {
+                nodes: {
+                    ...commonNodeOptions,
+                    font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#212529') }
+                },
+                edges: {
+                    ...commonEdgeOptions,
+                    color: {
+                        color: "#aaa",
+                        highlight: "#3498db"
+                    }
+                },
+                physics: commonPhysicsOptions,
+                layout: commonLayoutOptions,
+                interaction: commonInteractionOptions
+            };
+        }
+    }
+
+    function getNodeColor(node, isDarkMode) {
+        let baseColors;
+        // node.type comes from backend (Python: self.nodes.append({'id': ..., 'type': 'column'})
+        // node.nodeType is a JS-assigned property for more detailed classification.
+        // Prefer node.nodeType if available, otherwise fallback to node.type for columns.
+        const type = node.nodeType || (node.type === "column" ? "column" : "unknown");
+
+        if (type === "column") {
+            baseColors = isDarkMode ? { background: getCSSVariable('--accent', '#17a2b8'), border: getCSSVariable('--primary-dark', '#0052a3') }
+                                    : { background: "#ADD8E6", border: "#87CEEB" };
+        } else if (type === "parent") { // Pure parent or intermediate treated as parent for color
+            baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
+                                    : { background: "#F1C83B", border: "#DAA520" };
+        } else if (type === "final") { // Pure child
+            baseColors = isDarkMode ? { background: getCSSVariable('--success', '#28a745'), border: getCSSVariable('--primary-dark', '#0052a3') }
+                                    : { background: "#23C4A7", border: "#20B2AA" };
+        } else if (type === "intermediate") { // Explicit intermediate if ever needed (currently same as parent)
+             baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
+                                    : { background: "#F1C83B", border: "#DAA520" };
+        } else { // Isolated or unknown
+            baseColors = isDarkMode ? { background: getCSSVariable('--gray-600', '#495057'), border: getCSSVariable('--gray-700', '#343a40') }
+                                    : { background: "#CCCCCC", border: "#999999" };
+        }
+        return baseColors;
+    }
+
     /**
      * Initialize the network diagram
      */
-    function initializeNetwork() {
-      // Show loading indicator
+    function initializeNetwork(isDarkMode) {
       if (networkLoading) {
         networkLoading.style.display = "flex";
       }
 
-      // Process nodes to identify types based on edges
-      processNodesAndEdges();
+      processNodesAndEdges(isDarkMode);
 
-      // Create datasets for nodes and edges
       nodeDataset = new vis.DataSet(nodesArray);
       edgeDataset = new vis.DataSet(edgesArray);
 
-      // Network options
-      const options = {
-        nodes: {
-          shape: "dot",
-          size: 16,
-          font: {
-            size: 12,
-            face: "Inter, Segoe UI, sans-serif",
-          },
-          borderWidth: 2,
-          shadow: true,
-        },
-        edges: {
-          width: 1,
-          color: {
-            color: "#aaa",
-            highlight: "#3498db",
-          },
-          arrows: {
-            to: { enabled: true, scaleFactor: 0.5 },
-          },
-          smooth: {
-            enabled: true,
-            type: "dynamic",
-            roundness: 0.5,
-          },
-        },
-        physics: {
-          enabled: true,
-          barnesHut: {
-            gravitationalConstant: -2000,
-            centralGravity: 0.1,
-            springLength: 95,
-            springConstant: 0.04,
-            damping: 0.09,
-          },
-          stabilization: {
-            enabled: true,
-            iterations: 1000,
-            updateInterval: 100,
-          },
-        },
-        layout: {
-          improvedLayout: true,
-        },
-        interaction: {
-          hover: true,
-          tooltipDelay: 200,
-          hideEdgesOnDrag: true,
-          navigationButtons: false,
-          keyboard: {
-            enabled: true,
-            speed: { x: 10, y: 10, zoom: 0.1 },
-          },
-          zoomView: true,
-        },
-      };
+      const options = getVisOptions(isDarkMode);
 
-      // Create the network
       const data = {
         nodes: nodeDataset,
-        edges: edgeDataset,
+        edges: edgeDataset
       };
 
       network = new vis.Network(networkContainer, data, options);
 
-      // Apply hierarchical layout initially if selected
       if (hierarchicalRadio && hierarchicalRadio.checked) {
         applyHierarchicalLayout();
+      } else if (forceDirectedRadio && forceDirectedRadio.checked) {
+        // Ensure physics are enabled for force-directed if it was turned off after stabilization
+        network.setOptions({ physics: { enabled: true }});
       }
 
-      // Hide loading indicator when the network is stabilized
+
       network.on("stabilizationIterationsDone", function () {
         if (networkLoading) {
           networkLoading.style.display = "none";
         }
+        // Turn off physics after initial stabilization for performance if not hierarchical
+        if (forceDirectedRadio && forceDirectedRadio.checked) {
+             network.setOptions({ physics: { enabled: false } });
+        }
       });
 
-      // Handle node selection for details table
       network.on("selectNode", function (params) {
         if (params.nodes.length > 0) {
           const nodeId = params.nodes[0];
           currentSelection = nodeId;
-          updateDetailsTable(nodeId);
+          const selectedNode = nodeDataset.get(nodeId);
+          if (selectedNode && selectedNode.nodeType !== "column") {
+            updateMeasureDetails(selectedNode);
+          } else {
+            hideMeasureDetails();
+          }
         }
       });
 
-      // Handle click on canvas (deselection)
       network.on("click", function (params) {
         if (params.nodes.length === 0) {
-          // Clicked on empty space
           currentSelection = null;
-          populateDetailsTable(edgesArray); // Show all relationships
+          hideMeasureDetails();
         }
       });
 
-      // Populate measure select options
       populateMeasureSelect();
-
-      // Populate initial table with all relationships
-      populateDetailsTable(edgesArray);
+      // populateDetailsTable(edgesArray); // This function seems to be missing from the provided HTML
     }
 
     /**
      * Process nodes and edges to identify node types
      */
-    function processNodesAndEdges() {
-      // Identify parent and child nodes from edges
+    function processNodesAndEdges(isDarkMode) {
       edgesArray.forEach((edge) => {
-        const fromId = edge.from;
-        const toId = edge.to;
-
-        parentNodeIds.add(fromId);
-        childNodeIds.add(toId);
+        parentNodeIds.add(edge.from);
+        childNodeIds.add(edge.to);
       });
 
-      // Process nodes to set types and colors
       nodesArray.forEach((node) => {
         if (node.type === "column") {
-          // Column node
-          node.color = { background: "#ADD8E6", border: "#87CEEB" };
-          node.shape = "box";
-          columnNodeIds.add(node.id);
+            node.nodeType = "column";
+            node.shape = "box";
+            columnNodeIds.add(node.id);
         } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-          // Pure parent - no parents of its own
-          node.color = { background: "#F1C83B", border: "#DAA520" };
+            node.nodeType = "parent";
         } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Pure child - final measure
-          node.color = { background: "#23C4A7", border: "#20B2AA" };
+            node.nodeType = "final";
         } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Both parent and child - intermediate measure
-          node.color = { background: "#F1C83B", border: "#DAA520" };
+            node.nodeType = "intermediate"; // Explicitly intermediate
         } else {
-          // Isolated node
-          node.color = { background: "#CCCCCC", border: "#999999" };
+            node.nodeType = "isolated";
         }
+        node.color = getNodeColor(node, isDarkMode);
       });
     }
 
@@ -451,14 +649,11 @@ endblock %} {% block head %}
      * Set up event listeners for interactive elements
      */
     function setupEventListeners() {
-      // Panel toggles
       if (panelToggles.length > 0) {
         panelToggles.forEach((toggle) => {
           toggle.addEventListener("click", function () {
             const panel = this.closest(".control-panel");
             panel.classList.toggle("collapsed");
-
-            // Update toggle icon
             const icon = this.querySelector("i");
             if (panel.classList.contains("collapsed")) {
               icon.className = "fas fa-chevron-down";
@@ -469,121 +664,55 @@ endblock %} {% block head %}
         });
       }
 
-      // Measure select dropdown
       if (measureSelect) {
         measureSelect.addEventListener("change", function () {
           filterByMeasure(this.value);
         });
       }
 
-      // Filter checkboxes
-      if (parentMeasuresCheck) {
-        parentMeasuresCheck.addEventListener("change", applyFilters);
-      }
+      if (parentMeasuresCheck) parentMeasuresCheck.addEventListener("change", applyFilters);
+      if (finalMeasuresCheck) finalMeasuresCheck.addEventListener("change", applyFilters);
+      if (columnsCheck) columnsCheck.addEventListener("change", applyFilters);
 
-      if (finalMeasuresCheck) {
-        finalMeasuresCheck.addEventListener("change", applyFilters);
-      }
-
-      if (columnsCheck) {
-        columnsCheck.addEventListener("change", applyFilters);
-      }
-
-      // Layout radio buttons
       if (hierarchicalRadio) {
         hierarchicalRadio.addEventListener("change", function () {
-          if (this.checked) {
-            applyHierarchicalLayout();
-          }
+          if (this.checked) applyHierarchicalLayout();
         });
       }
 
       if (forceDirectedRadio) {
         forceDirectedRadio.addEventListener("change", function () {
-          if (this.checked) {
-            applyForceDirectedLayout();
-          }
+          if (this.checked) applyForceDirectedLayout();
         });
       }
 
-      // Fit view button
       if (fitViewButton) {
         fitViewButton.addEventListener("click", function () {
-          if (network) {
-            network.fit({
-              animation: {
-                duration: 1000,
-                easingFunction: "easeInOutQuad",
-              },
-            });
-          }
+          if (network) network.fit({ animation: { duration: 1000, easingFunction: "easeInOutQuad" } });
         });
       }
 
-      // Reset view button
-      if (resetViewButton) {
-        resetViewButton.addEventListener("click", function () {
-          resetView();
-        });
-      }
+      if (resetViewButton) resetViewButton.addEventListener("click", resetView);
 
-      // Search lineage
-      if (searchLineage) {
-        searchLineage.addEventListener("input", function () {
-          const searchTerm = this.value.toLowerCase();
+      // Search and export buttons for a details table that is not present in the provided HTML
+      // if (searchLineage) { ... }
+      // if (clearSearch) { ... }
+      // if (exportLineageButton) { ... }
 
-          // Show/hide clear button
-          if (clearSearch) {
-            clearSearch.style.display = searchTerm ? "block" : "none";
-          }
 
-          // Filter table rows
-          filterDetailsTable(searchTerm);
-        });
-      }
-
-      // Clear search button
-      if (clearSearch) {
-        clearSearch.addEventListener("click", function () {
-          if (searchLineage) {
-            searchLineage.value = "";
-            searchLineage.focus();
-            clearSearch.style.display = "none";
-
-            // Show all rows
-            filterDetailsTable("");
-          }
-        });
-      }
-
-      // Export lineage button
-      if (exportLineageButton) {
-        exportLineageButton.addEventListener("click", exportLineage);
-      }
-
-      // Zoom controls
       if (zoomInButton) {
         zoomInButton.addEventListener("click", function () {
-          if (network) {
-            const scale = network.getScale() * 1.2;
-            network.moveTo({ scale: scale });
-          }
+          if (network) network.moveTo({ scale: network.getScale() * 1.2 });
         });
       }
 
       if (zoomOutButton) {
         zoomOutButton.addEventListener("click", function () {
-          if (network) {
-            const scale = network.getScale() / 1.2;
-            network.moveTo({ scale: scale });
-          }
+          if (network) network.moveTo({ scale: network.getScale() / 1.2 });
         });
       }
 
-      // Fullscreen button
-      if (fullscreenButton) {
-        fullscreenButton.addEventListener("click", toggleFullscreen);
-      }
+      if (fullscreenButton) fullscreenButton.addEventListener("click", toggleFullscreen);
     }
 
     /**
@@ -591,110 +720,65 @@ endblock %} {% block head %}
      */
     function populateMeasureSelect() {
       if (!measureSelect) return;
+      while (measureSelect.options.length > 1) measureSelect.remove(1);
 
-      // Clear existing options (except the first one)
-      while (measureSelect.options.length > 1) {
-        measureSelect.remove(1);
-      }
+      const groups = {
+        parent: document.createElement("optgroup"),
+        final: document.createElement("optgroup"),
+        column: document.createElement("optgroup"),
+        intermediate: document.createElement("optgroup"), // For intermediate measures
+        isolated: document.createElement("optgroup")    // For isolated measures
+      };
+      groups.parent.label = "Parent Measures";
+      groups.final.label = "Final Measures";
+      groups.column.label = "Columns";
+      groups.intermediate.label = "Intermediate Measures";
+      groups.isolated.label = "Isolated Measures";
 
-      // Create optgroups
-      const parentGroup = document.createElement("optgroup");
-      parentGroup.label = "Parent Measures";
-
-      const finalGroup = document.createElement("optgroup");
-      finalGroup.label = "Final Measures";
-
-      const columnGroup = document.createElement("optgroup");
-      columnGroup.label = "Columns";
-
-      // Add nodes to respective groups
       nodesArray.forEach((node) => {
         const option = document.createElement("option");
         option.value = node.id;
         option.textContent = node.label;
-
-        if (node.type === "column") {
-          columnGroup.appendChild(option);
-        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-          // Pure parent
-          parentGroup.appendChild(option);
-        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Pure child - final measure
-          finalGroup.appendChild(option);
-        } else {
-          // Both parent and child - add to parent group
-          parentGroup.appendChild(option);
-        }
+        // Use node.nodeType for grouping
+        if (node.nodeType === "column") groups.column.appendChild(option);
+        else if (node.nodeType === "parent") groups.parent.appendChild(option);
+        else if (node.nodeType === "final") groups.final.appendChild(option);
+        else if (node.nodeType === "intermediate") groups.intermediate.appendChild(option);
+        else groups.isolated.appendChild(option);
       });
 
-      // Add groups to select element if they have options
-      if (parentGroup.children.length > 0) {
-        measureSelect.appendChild(parentGroup);
-      }
-
-      if (finalGroup.children.length > 0) {
-        measureSelect.appendChild(finalGroup);
-      }
-
-      if (columnGroup.children.length > 0) {
-        measureSelect.appendChild(columnGroup);
+      for (const groupName in groups) {
+        if (groups[groupName].children.length > 0) {
+          measureSelect.appendChild(groups[groupName]);
+        }
       }
     }
 
     /**
      * Filter network by selected measure
-     * @param {string} measureId - ID of the selected measure
      */
     function filterByMeasure(measureId) {
       if (!network || !nodeDataset || !edgeDataset) return;
-
       if (!measureId) {
-        // Reset to show all nodes and edges
         resetView();
         return;
       }
 
-      // Find direct connections (one level)
-      const connectedEdges = edgesArray.filter(
-        (edge) => edge.from === measureId || edge.to === measureId
-      );
-
-      // Get connected node IDs
-      const connectedNodeIds = new Set();
-      connectedNodeIds.add(measureId); // Add the selected measure
-
-      connectedEdges.forEach((edge) => {
+      const connectedEdges = edgesArray.filter(edge => edge.from === measureId || edge.to === measureId);
+      const connectedNodeIds = new Set([measureId]);
+      connectedEdges.forEach(edge => {
         connectedNodeIds.add(edge.from);
         connectedNodeIds.add(edge.to);
       });
 
-      // Update visibility of nodes
-      nodeDataset.forEach((node) => {
-        const isVisible = connectedNodeIds.has(node.id);
-        const updates = { id: node.id, hidden: !isVisible };
-        nodeDataset.update(updates);
-      });
+      const nodeUpdates = nodeDataset.map(node => ({ id: node.id, hidden: !connectedNodeIds.has(node.id) }));
+      nodeDataset.update(nodeUpdates);
 
-      // Update visibility of edges
-      edgeDataset.forEach((edge) => {
-        const isVisible =
-          connectedNodeIds.has(edge.from) && connectedNodeIds.has(edge.to);
-        const updates = { id: edge.id, hidden: !isVisible };
-        edgeDataset.update(updates);
-      });
+      const edgeUpdates = edgeDataset.map(edge => ({ id: edge.id, hidden: !(connectedNodeIds.has(edge.from) && connectedNodeIds.has(edge.to)) }));
+      edgeDataset.update(edgeUpdates);
 
-      // Update details table with filtered edges
-      populateDetailsTable(connectedEdges);
-
-      // Fit view to show visible nodes
-      if (network) {
-        network.fit({
-          animation: {
-            duration: 1000,
-            easingFunction: "easeInOutQuad",
-          },
-        });
-      }
+      // populateDetailsTable(connectedEdges); // Missing function/element
+      if (network) network.fit({ animation: { duration: 1000, easingFunction: "easeInOutQuad" } });
     }
 
     /**
@@ -707,46 +791,27 @@ endblock %} {% block head %}
       const showFinal = finalMeasuresCheck && finalMeasuresCheck.checked;
       const showColumns = columnsCheck && columnsCheck.checked;
 
-      // Update node visibility
-      nodeDataset.forEach((node) => {
+      const nodeUpdates = nodeDataset.map((node) => {
         let visible = true;
-
-        if (node.type === "column") {
-          visible = showColumns;
-        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-          // Pure parent
-          visible = showParents;
-        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Pure child - final measure
-          visible = showFinal;
-        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Both parent and child - consider it a parent for filtering
-          visible = showParents;
-        }
-
-        nodeDataset.update({ id: node.id, hidden: !visible });
+        // Use node.nodeType for filtering decisions
+        if (node.nodeType === "column") visible = showColumns;
+        else if (node.nodeType === "parent" || node.nodeType === "intermediate") visible = showParents; // Treat intermediate as parent for this filter
+        else if (node.nodeType === "final") visible = showFinal;
+        // Isolated nodes visibility could be an option or tied to one of these
+        return { id: node.id, hidden: !visible };
       });
+      nodeDataset.update(nodeUpdates);
 
-      // Update edge visibility
-      edgeDataset.forEach((edge) => {
+      const edgeUpdates = edgeDataset.map((edge) => {
         const fromNode = nodeDataset.get(edge.from);
         const toNode = nodeDataset.get(edge.to);
-
-        const isVisible =
-          fromNode && !fromNode.hidden && toNode && !toNode.hidden;
-
-        edgeDataset.update({ id: edge.id, hidden: !isVisible });
+        const isVisible = fromNode && !fromNode.hidden && toNode && !toNode.hidden;
+        return { id: edge.id, hidden: !isVisible };
       });
+      edgeDataset.update(edgeUpdates);
 
-      // Update details table
-      const visibleEdges = edgesArray.filter((edge) => {
-        const fromNode = nodeDataset.get(edge.from);
-        const toNode = nodeDataset.get(edge.to);
-
-        return fromNode && !fromNode.hidden && toNode && !toNode.hidden;
-      });
-
-      populateDetailsTable(visibleEdges);
+      // const visibleEdges = edgesArray.filter(...); // Logic for visible edges based on nodeDataset
+      // populateDetailsTable(visibleEdges); // Missing function/element
     }
 
     /**
@@ -754,17 +819,11 @@ endblock %} {% block head %}
      */
     function applyHierarchicalLayout() {
       if (!network) return;
-
       network.setOptions({
         layout: {
-          hierarchical: {
-            enabled: true,
-            direction: "LR", // Left to right
-            sortMethod: "directed",
-            levelSeparation: 150,
-            nodeSpacing: 120,
-          },
+          hierarchical: { enabled: true, direction: "LR", sortMethod: "directed", levelSeparation: 150, nodeSpacing: 120 }
         },
+        physics: { enabled: false } // Typically disable physics for hierarchical
       });
     }
 
@@ -773,28 +832,17 @@ endblock %} {% block head %}
      */
     function applyForceDirectedLayout() {
       if (!network) return;
-
       network.setOptions({
-        layout: {
-          hierarchical: {
-            enabled: false,
-          },
-        },
+        layout: { hierarchical: { enabled: false } },
         physics: {
-          enabled: true,
-          barnesHut: {
-            gravitationalConstant: -2000,
-            centralGravity: 0.1,
-            springLength: 95,
-            springConstant: 0.04,
-            damping: 0.09,
-          },
-          stabilization: {
             enabled: true,
-            iterations: 1000,
-          },
-        },
+            stabilization: { enabled: true, iterations: 1000 } // Re-enable stabilization
+        }
       });
+      // Turn off physics after stabilization
+        network.once("stabilizationIterationsDone", function () {
+            network.setOptions({ physics: { enabled: false } });
+        });
     }
 
     /**
@@ -802,247 +850,53 @@ endblock %} {% block head %}
      */
     function resetView() {
       if (!network || !nodeDataset || !edgeDataset) return;
+      if (measureSelect) measureSelect.value = "";
+      if (parentMeasuresCheck) parentMeasuresCheck.checked = true;
+      if (finalMeasuresCheck) finalMeasuresCheck.checked = true;
+      if (columnsCheck) columnsCheck.checked = true;
 
-      // Reset measure select
-      if (measureSelect) {
-        measureSelect.value = "";
-      }
+      const nodeUpdates = nodeDataset.map(node => ({ id: node.id, hidden: false }));
+      nodeDataset.update(nodeUpdates);
+      const edgeUpdates = edgeDataset.map(edge => ({ id: edge.id, hidden: false }));
+      edgeDataset.update(edgeUpdates);
 
-      // Reset filter checkboxes
-      if (parentMeasuresCheck) {
-        parentMeasuresCheck.checked = true;
-      }
-
-      if (finalMeasuresCheck) {
-        finalMeasuresCheck.checked = true;
-      }
-
-      if (columnsCheck) {
-        columnsCheck.checked = true;
-      }
-
-      // Show all nodes and edges
-      nodeDataset.forEach((node) => {
-        nodeDataset.update({ id: node.id, hidden: false });
-      });
-
-      edgeDataset.forEach((edge) => {
-        edgeDataset.update({ id: edge.id, hidden: false });
-      });
-
-      // Reset selection
       currentSelection = null;
-
-      // Restore all relationships in details table
-      populateDetailsTable(edgesArray);
-
-      // Fit view
-      if (network) {
-        network.fit({
-          animation: {
-            duration: 1000,
-            easingFunction: "easeInOutQuad",
-          },
-        });
-      }
+      hideMeasureDetails();
+      // populateDetailsTable(edgesArray); // Missing
+      if (network) network.fit({ animation: { duration: 1000, easingFunction: "easeInOutQuad" } });
+      if (hierarchicalRadio && hierarchicalRadio.checked) applyHierarchicalLayout(); else applyForceDirectedLayout();
     }
 
     /**
-     * Update details table based on selected node
-     * @param {string} nodeId - ID of the selected node
-     */
-    function updateDetailsTable(nodeId) {
-      // Find connections related to this node
-      const relatedEdges = edgesArray.filter(
-        (edge) => edge.from === nodeId || edge.to === nodeId
-      );
-
-      // Populate table with these edges
-      populateDetailsTable(relatedEdges);
-    }
-
-    /**
-     * Populate the details table with edges
+     * Populate the details table with edges - Placeholder as element is missing
      * @param {Array} edges - Array of edges to display
      */
     function populateDetailsTable(edges) {
-      if (!lineageTable) return;
-
-      const tbody = lineageTable.querySelector("tbody");
-      if (!tbody) return;
-
-      // Clear existing rows
-      tbody.innerHTML = "";
-
-      // Show/hide empty state
-      if (noDataMessage) {
-        noDataMessage.style.display = edges.length === 0 ? "flex" : "none";
-      }
-
-      if (edges.length === 0) return;
-
-      // Add rows for each edge
-      edges.forEach((edge) => {
-        const row = document.createElement("tr");
-
-        // Get node objects
-        const fromNode = nodesArray.find((n) => n.id === edge.from);
-        const toNode = nodesArray.find((n) => n.id === edge.to);
-
-        // Create cells
-        const fromCell = document.createElement("td");
-        const toCell = document.createElement("td");
-        const columnCell = document.createElement("td");
-
-        // Set content based on node types
-        if (fromNode && fromNode.type === "column") {
-          // This is a column-to-measure relationship
-          fromCell.textContent = "";
-          toCell.textContent = toNode ? toNode.label : "";
-          columnCell.textContent = fromNode.label;
-
-          // Add class to column name
-          columnCell.classList.add("column-name");
-        } else {
-          // This is a measure-to-measure relationship
-          fromCell.textContent = fromNode ? fromNode.label : "";
-          toCell.textContent = toNode ? toNode.label : "";
-          columnCell.textContent = "";
-
-          // Add classes based on node types
-          if (fromNode && parentNodeIds.has(fromNode.id)) {
-            fromCell.classList.add("parent-measure");
-          }
-
-          if (toNode && !parentNodeIds.has(toNode.id)) {
-            toCell.classList.add("final-measure");
-          }
-        }
-
-        // Append cells to row
-        row.appendChild(fromCell);
-        row.appendChild(toCell);
-        row.appendChild(columnCell);
-
-        // Add row to table
-        tbody.appendChild(row);
-      });
+      // const lineageTable = document.getElementById("lineageTable"); // Element doesn't exist
+      // if (!lineageTable) return;
+      // ...
     }
 
     /**
-     * Filter the details table by search term
-     * @param {string} term - Search term
+     * Filter the details table by search term - Placeholder
      */
     function filterDetailsTable(term) {
-      if (!lineageTable) return;
-
-      const tbody = lineageTable.querySelector("tbody");
-      if (!tbody) return;
-
-      const rows = tbody.querySelectorAll("tr");
-      let visibleCount = 0;
-
-      rows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        const isVisible = term === "" || text.includes(term);
-
-        row.style.display = isVisible ? "" : "none";
-
-        if (isVisible) {
-          visibleCount++;
-
-          // Highlight matching text if there's a search term
-          if (term) {
-            const cells = row.querySelectorAll("td");
-            cells.forEach((cell) => {
-              const originalText = cell.textContent;
-              if (originalText.toLowerCase().includes(term)) {
-                // Replace with highlighted version
-                const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
-                cell.innerHTML = originalText.replace(
-                  regex,
-                  '<span class="search-highlight">$1</span>'
-                );
-              }
-            });
-          }
-        }
-      });
-
-      // Show/hide empty state
-      if (noDataMessage) {
-        noDataMessage.style.display = visibleCount === 0 ? "flex" : "none";
-      }
+      // const lineageTable = document.getElementById("lineageTable");
+      // if (!lineageTable) return;
+      // ...
     }
 
-    /**
-     * Escape special characters in string for regex
-     * @param {string} string - String to escape
-     * @returns {string} Escaped string
-     */
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
     /**
-     * Export the lineage data
+     * Export the lineage data - Placeholder
      */
     function exportLineage() {
-      if (!lineageTable) return;
-
-      // Get visible rows
-      const tbody = lineageTable.querySelector("tbody");
-      if (!tbody) return;
-
-      const rows = Array.from(tbody.querySelectorAll("tr")).filter(
-        (row) => row.style.display !== "none"
-      );
-
-      // Prepare CSV data
-      const headers = ["Parent Measure", "Child Measure", "Column"];
-      const csvRows = [headers.join(",")];
-
-      rows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        const values = Array.from(cells).map((cell) => {
-          // Get text content without HTML
-          let text = cell.textContent.trim();
-
-          // Escape quotes and wrap in quotes if contains comma
-          if (text.includes(",") || text.includes('"')) {
-            text = '"' + text.replace(/"/g, '""') + '"';
-          }
-
-          return text;
-        });
-
-        csvRows.push(values.join(","));
-      });
-
-      // Create CSV content
-      const csvContent = csvRows.join("\n");
-
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "measure_lineage.csv");
-      link.style.display = "none";
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Show notification
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification(
-          "Lineage data exported to CSV",
-          "success"
-        );
-      }
+      // const lineageTable = document.getElementById("lineageTable");
+      // if (!lineageTable) return;
+      // ...
     }
 
     /**
@@ -1051,90 +905,40 @@ endblock %} {% block head %}
     function toggleFullscreen() {
       const container = document.querySelector(".network-container");
       if (!container) return;
-
-      if (!isFullscreen) {
-        // Enter fullscreen
+      isFullscreen = !isFullscreen;
+      if (isFullscreen) {
         container.classList.add("fullscreen");
-
         if (fullscreenButton) {
-          fullscreenButton.innerHTML =
-            '<i class="fas fa-compress-arrows-alt"></i>';
+          fullscreenButton.innerHTML = '<i class="fas fa-compress-arrows-alt"></i>';
           fullscreenButton.setAttribute("aria-label", "Exit fullscreen");
         }
-
-        isFullscreen = true;
-
-        // Resize network after transition
-        setTimeout(() => {
-          if (network) {
-            network.redraw();
-            network.fit();
-          }
-        }, 300);
       } else {
-        // Exit fullscreen
         container.classList.remove("fullscreen");
-
         if (fullscreenButton) {
-          fullscreenButton.innerHTML =
-            '<i class="fas fa-expand-arrows-alt"></i>';
+          fullscreenButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
           fullscreenButton.setAttribute("aria-label", "Fullscreen");
         }
-
-        isFullscreen = false;
-
-        // Resize network after transition
-        setTimeout(() => {
-          if (network) {
-            network.redraw();
-            network.fit();
-          }
-        }, 300);
       }
+      setTimeout(() => { if (network) { network.redraw(); network.fit(); } }, 300);
     }
 
     /**
      * Update statistics display
      */
     function updateStatistics() {
-      // Count the different types of nodes
-      let parentCount = 0;
-      let finalCount = 0;
-      let colCount = 0;
-
-      nodesArray.forEach((node) => {
-        if (node.type === "column") {
-          colCount++;
-        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-          // Pure parent
-          parentCount++;
-        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Pure child - final measure
-          finalCount++;
-        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          // Both parent and child - count as parent
-          parentCount++;
-        }
+      let parentCount = 0, finalCount = 0, colCount = 0, intermediateCount = 0;
+      nodesArray.forEach(node => {
+        // Use node.nodeType which is set in processNodesAndEdges
+        if (node.nodeType === "column") colCount++;
+        else if (node.nodeType === "parent") parentCount++;
+        else if (node.nodeType === "final") finalCount++;
+        else if (node.nodeType === "intermediate") intermediateCount++; // Count intermediate
       });
-
-      // Update the statistics display
-      if (parentMeasureCount) {
-        parentMeasureCount.textContent = parentCount;
-      }
-
-      if (finalMeasureCount) {
-        finalMeasureCount.textContent = finalCount;
-      }
-
-      if (columnCount) {
-        columnCount.textContent = colCount;
-      }
-
-      if (relationshipCount) {
-        relationshipCount.textContent = edgesArray.length;
-      }
-
-      // Add animation for statistics
+      // Parents in stats might include intermediate ones for simplicity or show them separately
+      if (parentMeasureCount) parentMeasureCount.textContent = parentCount + intermediateCount; // Or just parentCount
+      if (finalMeasureCount) finalMeasureCount.textContent = finalCount;
+      if (columnCount) columnCount.textContent = colCount;
+      if (relationshipCount) relationshipCount.textContent = edgesArray.length;
       animateCounters();
     }
 
@@ -1143,16 +947,14 @@ endblock %} {% block head %}
      */
     function animateCounters() {
       const counters = document.querySelectorAll(".stat-value");
-
-      counters.forEach((counter) => {
+      counters.forEach(counter => {
         const target = parseInt(counter.textContent);
+        counter.textContent = '0'; // Start from 0 for animation
         let count = 0;
-        const duration = 1500; // milliseconds
-        const increment = target / (duration / 16); // 60 FPS
-
+        const duration = 1500;
+        const increment = target / (duration / 16);
         const timer = setInterval(() => {
           count += increment;
-
           if (count >= target) {
             counter.textContent = target;
             clearInterval(timer);
@@ -1161,6 +963,200 @@ endblock %} {% block head %}
           }
         }, 16);
       });
+    }
+
+    // Measure Details Card Functionality (mostly unchanged but ensure elements exist)
+    const measureCard = document.getElementById("measureCard");
+    const noMeasureSelected = document.getElementById("noMeasureSelected");
+    const measureNameEl = document.getElementById("measureName"); // Renamed to avoid conflict
+    const measureTypeEl = document.getElementById("measureType"); // Renamed
+    const referencesCountEl = document.getElementById("referencesCount"); // Renamed
+    const originalTab = document.getElementById("originalTab");
+    const expandedTab = document.getElementById("expandedTab");
+    const originalDefinition = document.getElementById("originalDefinition");
+    const expandedDefinition = document.getElementById("expandedDefinition");
+    const originalCode = document.getElementById("originalCode");
+    const expandedCode = document.getElementById("expandedCode");
+    const referencedMeasuresSection = document.getElementById("referencedMeasuresSection");
+    const referencedMeasuresList = document.getElementById("referencedMeasuresList");
+    const referencedMeasuresCount = document.getElementById("referencedMeasuresCount");
+    const copyMeasure = document.getElementById("copyMeasure");
+    const expandCollapseAll = document.getElementById("expandCollapseAll");
+    const searchMeasure = document.getElementById("searchMeasure");
+    const clearMeasureSearch = document.getElementById("clearMeasureSearch");
+    const exportMeasure = document.getElementById("exportMeasure");
+
+    if (originalTab) originalTab.addEventListener("click", () => window.LineageAI.switchTab("original"));
+    if (expandedTab) expandedTab.addEventListener("click", () => window.LineageAI.switchTab("expanded"));
+    if (copyMeasure) copyMeasure.addEventListener("click", copyMeasureDefinition);
+    if (expandCollapseAll) expandCollapseAll.addEventListener("click", toggleExpandCollapse);
+    if (searchMeasure) searchMeasure.addEventListener("input", (e) => searchInMeasure(e.target.value));
+    if (clearMeasureSearch) {
+      clearMeasureSearch.addEventListener("click", () => {
+        if (searchMeasure) {
+          searchMeasure.value = "";
+          searchMeasure.focus();
+          clearMeasureSearch.style.display = "none";
+          searchInMeasure("");
+        }
+      });
+    }
+    if (exportMeasure) exportMeasure.addEventListener("click", exportMeasureDefinition);
+
+    function updateMeasureDetails(node) {
+      if (!measureCard || !noMeasureSelected) return;
+      measureCard.style.display = "flex";
+      noMeasureSelected.style.display = "none";
+
+      if (measureNameEl) measureNameEl.textContent = node.label;
+
+      let typeText = "Unknown", typeClass = "unknown";
+      // Use node.nodeType for type display
+      if (node.nodeType === "parent") { typeText = "Parent Measure"; typeClass = "parent"; }
+      else if (node.nodeType === "final") { typeText = "Final Measure"; typeClass = "final"; }
+      else if (node.nodeType === "intermediate") { typeText = "Intermediate Measure"; typeClass = "parent"; } // Style as parent
+      else if (node.nodeType === "column") { typeText = "Column"; typeClass = "column"; }
+
+
+      if (measureTypeEl) {
+        measureTypeEl.textContent = typeText;
+        measureTypeEl.className = "measure-type-badge " + typeClass;
+        measureTypeEl.innerHTML = `<i class="fas fa-code-branch"></i> ${typeText}`;
+      }
+
+      const parentEdges = edgesArray.filter(edge => edge.to === node.id);
+      const parentNodes = parentEdges.map(edge => nodeDataset.get(edge.from)).filter(n => n && n.nodeType !== "column");
+      const childEdges = edgesArray.filter(edge => edge.from === node.id);
+      const childNodes = childEdges.map(edge => nodeDataset.get(edge.to)).filter(n => n);
+      const totalRefs = parentNodes.length + childNodes.length;
+      if (referencesCountEl) referencesCountEl.textContent = totalRefs;
+
+      if (originalCode && node.dax) originalCode.textContent = node.dax; else if (originalCode) originalCode.textContent = "N/A";
+      if (expandedCode) expandedCode.textContent = generateExpandedDefinition(node); else if (expandedCode) expandedCode.textContent = "N/A";
+
+      // Reset AI tabs
+      if (window.LineageAI && typeof window.LineageAI.resetAITabs === 'function') {
+        window.LineageAI.resetAITabs();
+      }
+
+
+      if (referencedMeasuresList) {
+        referencedMeasuresList.innerHTML = "";
+        parentNodes.forEach(parent => appendReferencedMeasure(parent, "parent", referencedMeasuresList));
+        childNodes.forEach(child => appendReferencedMeasure(child, child.nodeType === "final" ? "final" : "intermediate", referencedMeasuresList)); // Adjust class based on child's actual type
+        if (referencedMeasuresCount) referencedMeasuresCount.textContent = totalRefs;
+        if (referencedMeasuresSection) referencedMeasuresSection.style.display = totalRefs > 0 ? "block" : "none";
+      }
+    }
+
+    function appendReferencedMeasure(node, typeClass, listElement) {
+        const refEl = document.createElement("div");
+        refEl.className = `measure-reference ${typeClass}`;
+        refEl.textContent = node.label;
+        refEl.setAttribute("data-id", node.id);
+        refEl.addEventListener("click", function () {
+            if (network) {
+                network.selectNodes([node.id], { highlightEdges: false });
+                // Need to ensure the node object passed to updateMeasureDetails is from nodeDataset
+                const fullNodeObject = nodeDataset.get(node.id);
+                if (fullNodeObject) updateMeasureDetails(fullNodeObject);
+            }
+        });
+        listElement.appendChild(refEl);
+    }
+
+
+    function generateExpandedDefinition(node) {
+      if (!node || !node.dax) return "No definition available";
+      let expandedDax = node.dax;
+      const parentEdges = edgesArray.filter(edge => edge.to === node.id);
+      const parentNodes = parentEdges.map(edge => nodeDataset.get(edge.from)).filter(n => n && n.nodeType !== "column");
+      parentNodes.forEach(parent => {
+        const regex = new RegExp(`\\[${escapeRegExp(parent.label)}\\]|\\b${escapeRegExp(parent.label)}\\b(?!=[\(\"\'\\w])`, "g");
+        expandedDax = expandedDax.replace(regex, `/* ${parent.label} */ (${parent.dax || "N/A"})`);
+      });
+      return expandedDax;
+    }
+
+    function hideMeasureDetails() {
+      if (!measureCard || !noMeasureSelected) return;
+      measureCard.style.display = "none";
+      noMeasureSelected.style.display = "flex";
+    }
+
+    function copyMeasureDefinition() {
+      const activeTab = document.querySelector(".measure-tabs .active"); // More specific selector
+      let textToCopy = "";
+      if (!activeTab) return;
+
+      if (activeTab.id === "originalTab" && originalCode) textToCopy = originalCode.textContent;
+      else if (activeTab.id === "expandedTab" && expandedCode) textToCopy = expandedCode.textContent;
+      else if (activeTab.id === "optimizedTab" && document.getElementById("optimizedCode")) textToCopy = document.getElementById("optimizedCode").textContent;
+
+
+      if (textToCopy && textToCopy !== "Select a measure to view its definition" && textToCopy !== "Optimizing..." &&  textToCopy !== "Select a measure to view its optimized definition") {
+        navigator.clipboard.writeText(textToCopy).then(
+          () => window.PowerBIExplorer && window.PowerBIExplorer.showNotification("Definition copied", "success"),
+          (err) => console.error("Copy failed: ", err)
+        );
+      }
+    }
+
+    function toggleExpandCollapse() {
+      if (expandCollapseAll) {
+        const icon = expandCollapseAll.querySelector("i");
+        icon.classList.toggle("fa-expand-alt");
+        icon.classList.toggle("fa-compress-alt");
+        expandCollapseAll.title = icon.classList.contains("fa-compress-alt") ? "Collapse all" : "Expand all";
+      }
+    }
+
+    function searchInMeasure(term) {
+      if (clearMeasureSearch) clearMeasureSearch.style.display = term ? "block" : "none";
+      const activeTab = document.querySelector(".measure-tabs .active");
+      let codeElement = null;
+      if (!activeTab) return;
+
+      if (activeTab.id === "originalTab" && originalCode) codeElement = originalCode;
+      else if (activeTab.id === "expandedTab" && expandedCode) codeElement = expandedCode;
+      else if (activeTab.id === "optimizedTab" && document.getElementById("optimizedCode")) codeElement = document.getElementById("optimizedCode");
+
+      if (!codeElement) return;
+      const originalContent = codeElement.getAttribute('data-original-content') || codeElement.textContent;
+      if (!codeElement.hasAttribute('data-original-content')) {
+        codeElement.setAttribute('data-original-content', originalContent);
+      }
+
+      if (!term) {
+        codeElement.innerHTML = originalContent;
+        return;
+      }
+      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+      codeElement.innerHTML = originalContent.replace(regex, '<span class="search-highlight">$1</span>');
+    }
+
+    function exportMeasureDefinition() {
+      const activeTab = document.querySelector(".measure-tabs .active");
+      let textToExport = "";
+      let fileName = (measureNameEl && measureNameEl.textContent !== "Select a measure" ? measureNameEl.textContent.replace(/\s+/g, "_") : "measure") + ".dax";
+      if (!activeTab) return;
+
+      if (activeTab.id === "originalTab" && originalCode) textToExport = originalCode.textContent;
+      else if (activeTab.id === "expandedTab" && expandedCode) textToExport = expandedCode.textContent;
+      else if (activeTab.id === "optimizedTab" && document.getElementById("optimizedCode")) textToExport = document.getElementById("optimizedCode").textContent;
+
+      if (textToExport && textToExport !== "Select a measure to view its definition" && textToExport !== "Optimizing..." && textToExport !== "Select a measure to view its optimized definition") {
+        const blob = new Blob([textToExport], { type: "text/plain;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        if (window.PowerBIExplorer) window.PowerBIExplorer.showNotification("Definition exported", "success");
+      }
     }
   });
 </script>

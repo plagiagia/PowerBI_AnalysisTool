@@ -29,7 +29,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <!-- Main CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" id="prismLightTheme" />
+  <!-- Prism.js Tomorrow Night theme (Dark) - Initially disabled -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prismDarkTheme" disabled />
 
   <title>{% block title %}Power BI Explorer{% endblock %}</title>
 
@@ -37,101 +39,178 @@
 </head>
 
 <body>
-
-
   <!-- Sidebar navigation -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
         <a href="/" class="logo-link">
-          <i class="fas fa-chart-bar"></i>
-          <span>Power BI Explorer</span>
+          <div class="logo-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="logo-text">
+            <span class="logo-title">Power BI</span>
+            <span class="logo-subtitle">Analytics Hub</span>
+          </div>
         </a>
       </div>
     </div>
 
     <nav class="sidebar-nav" aria-label="Main Navigation">
       <ul class="nav-list">
+        <!-- Dashboard -->
         <li class="nav-item{% if request.path == '/' %} active{% endif %}">
           <a href="/" class="nav-link" aria-current="{{ 'page' if request.path == '/' else 'false' }}">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
+            <div class="nav-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <span class="nav-text">Dashboard</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
+
+        <!-- Data Exploration Section -->
+        <li class="nav-section">
+          <span class="nav-section-title">
+            <i class="fas fa-search"></i>
+            Data Exploration
+          </span>
+        </li>
+
         <li class="nav-item{% if request.path == '/table-view' %} active{% endif %}">
           <a href="/table-view" class="nav-link"
             aria-current="{{ 'page' if request.path == '/table-view' else 'false' }}">
-            <i class="fas fa-table"></i>
-            <span>Visual Fields</span>
+            <div class="nav-icon">
+              <i class="fas fa-table"></i>
+            </div>
+            <span class="nav-text">Visual Fields</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
         <li class="nav-item{% if request.path == '/lineage-view' %} active{% endif %}">
           <a href="/lineage-view" class="nav-link"
             aria-current="{{ 'page' if request.path == '/lineage-view' else 'false' }}">
-            <i class="fas fa-project-diagram"></i>
-            <span>Data Lineage</span>
+            <div class="nav-icon">
+              <i class="fas fa-project-diagram"></i>
+            </div>
+            <span class="nav-text">Data Lineage</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
+
+        <!-- Code Analysis Section -->
+        <li class="nav-section">
+          <span class="nav-section-title">
+            <i class="fas fa-code"></i>
+            Code Analysis
+          </span>
+        </li>
+
         <li class="nav-item{% if request.path == '/dax-expressions' %} active{% endif %}">
           <a href="/dax-expressions" class="nav-link"
             aria-current="{{ 'page' if request.path == '/dax-expressions' else 'false' }}">
-            <i class="fas fa-code"></i>
-            <span>DAX Explorer</span>
+            <div class="nav-icon">
+              <i class="fas fa-code"></i>
+            </div>
+            <span class="nav-text">DAX Explorer</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
         <li class="nav-item{% if request.path == '/source-explorer' %} active{% endif %}">
           <a href="/source-explorer" class="nav-link"
             aria-current="{{ 'page' if request.path == '/source-explorer' else 'false' }}">
-            <i class="fas fa-database"></i>
-            <span>Sources</span>
+            <div class="nav-icon">
+              <i class="fas fa-database"></i>
+            </div>
+            <span class="nav-text">Source Explorer</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
+
+        <!-- Optimization Section -->
+        <li class="nav-section">
+          <span class="nav-section-title">
+            <i class="fas fa-bolt"></i>
+            Optimization
+          </span>
+        </li>
+
         <li class="nav-item{% if request.path == '/unused-measures' %} active{% endif %}">
           <a href="/unused-measures" class="nav-link"
             aria-current="{{ 'page' if request.path == '/unused-measures' else 'false' }}">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>Unused Measures</span>
+            <div class="nav-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <span class="nav-text">Unused Measures</span>
+            <div class="nav-indicator"></div>
           </a>
         </li>
+
       </ul>
     </nav>
 
     <div class="sidebar-footer">
-      <button class="theme-toggle" aria-label="Toggle dark mode">
-        <i class="fas fa-moon"></i>
-      </button>
-      <div class="app-version">v1.0.0</div>
+      <div class="user-section">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-info">
+          <span class="user-name">Analytics User</span>
+          <span class="user-role">Data Analyst</span>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button id="themeSwitcher" class="action-button theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="action-button settings-button" aria-label="Settings">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+      <div class="app-version">v{{ app_version }}</div>
     </div>
   </aside>
 
   <!-- Main content wrapper -->
   <div class="main-wrapper">
-    <!-- Top app bar -->
-    <header class="app-bar">
-      <div class="app-bar-start">
-        <button class="sidebar-toggle" aria-label="Toggle sidebar">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="breadcrumb">
-          <ol>
-            <li>
-              <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Home</span></a>
-            </li>
-            {% block breadcrumbs %}{% endblock %}
-          </ol>
-        </div>
+    <!-- Dynamic Page Header -->
+    <header class="modern-dashboard-header">
+      <div class="header-background">
+        <div class="header-gradient"></div>
+        <div class="header-pattern"></div>
       </div>
-
-      <div class="app-bar-end">
-        <div class="report-info">
-          <span class="report-name">
-            <i class="fas fa-file-powerpoint"></i> {{ report_name if
-            report_name else 'Current Report' }}
-          </span>
+      <div class="header-content">
+        <div class="header-main">
+          <div class="header-controls">
+            <button class="sidebar-toggle" aria-label="Toggle sidebar">
+              <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-datetime">
+              <span id="current-datetime"></span>
+            </div>
+          </div>
+          <h1 class="modern-title">
+            <span class="title-icon">
+              {% block header_icon %}<i class="fas fa-chart-line"></i>{% endblock %}
+            </span>
+            <span class="title-text">{% block header_title %}Power BI Analytics Hub{% endblock %}</span>
+          </h1>
+          <p class="modern-subtitle">
+            {% block header_subtitle %}Advanced analytics and insights for your Power BI reports with AI-powered
+            recommendations{% endblock %}
+          </p>
         </div>
-        <button class="help-button" aria-label="Help">
-          <i class="fas fa-question-circle"></i>
-        </button>
+        <div class="header-stats">
+          {% block header_stats %}
+          <div class="quick-stat">
+            <span class="stat-number">{{ metrics.visual_count if metrics is defined else 121 }}</span>
+            <span class="stat-label">Active Visuals</span>
+          </div>
+          <div class="quick-stat">
+            <span class="stat-number">{{ metrics.measure_count if metrics is defined else 258 }}</span>
+            <span class="stat-label">Total Measures</span>
+          </div>
+          {% endblock %}
+        </div>
       </div>
     </header>
 
@@ -159,6 +238,80 @@
 
   <!-- Page-specific scripts -->
   {% block scripts %}{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const body = document.body;
+    const moonIconClass = 'fa-moon';
+    const sunIconClass = 'fa-sun';
+    const prismLightTheme = document.getElementById('prismLightTheme'); // Assuming modern.css contains or implies light prism theme
+    const prismDarkTheme = document.getElementById('prismDarkTheme');
+
+    // Function to update icon
+    function updateIcon(isDarkMode) {
+        if (themeSwitcher) {
+            const icon = themeSwitcher.querySelector('i');
+            if (isDarkMode) {
+                icon.classList.remove(moonIconClass);
+                icon.classList.add(sunIconClass);
+                themeSwitcher.title = "Switch to Light Mode";
+            } else {
+                icon.classList.remove(sunIconClass);
+                icon.classList.add(moonIconClass);
+                themeSwitcher.title = "Switch to Dark Mode";
+            }
+        }
+    }
+
+    // Function to enable dark mode
+    function enableDarkMode() {
+        body.classList.add('dark-mode');
+        if (prismDarkTheme) prismDarkTheme.disabled = false;
+        // if (prismLightTheme) prismLightTheme.disabled = true; // Only disable if it's exclusively a light theme
+        localStorage.setItem('theme', 'dark');
+        updateIcon(true);
+        // Dispatch event for other components (like Vis.js)
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'dark' } }));
+    }
+
+    // Function to disable dark mode
+    function disableDarkMode() {
+        body.classList.remove('dark-mode');
+        if (prismDarkTheme) prismDarkTheme.disabled = true;
+        // if (prismLightTheme) prismLightTheme.disabled = false; // Re-enable light theme
+        localStorage.setItem('theme', 'light');
+        updateIcon(false);
+        // Dispatch event for other components (like Vis.js)
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'light' } }));
+    }
+
+    // Event listener for the switcher
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', () => {
+            if (body.classList.contains('dark-mode')) {
+                disableDarkMode();
+            } else {
+                enableDarkMode();
+            }
+        });
+    }
+
+    // Apply theme on initial load
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'dark') {
+        enableDarkMode();
+    } else if (savedTheme === 'light') {
+        disableDarkMode();
+    } else if (systemPrefersDark) {
+        enableDarkMode(); // Default to system preference if no saved theme
+    } else {
+        disableDarkMode(); // Default to light if no saved and no system preference for dark
+    }
+});
+</script>
 </body>
 
 </html>

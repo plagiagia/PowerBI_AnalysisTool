@@ -1,254 +1,454 @@
-{% extends "base.html" %} 
-{% block title %}Dashboard - Power BI Explorer{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Dashboard - Power BI Explorer{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Dashboard</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<section class="dashboard-header">
-  <h1 class="dashboard-title">Power BI Visuals Explorer</h1>
-  <p class="dashboard-description">
-    Explore and analyze your Power BI reports with advanced visualization and
-    diagnostics tools.
-  </p>
-</section>
 
-<!-- Metrics Section with improved layout -->
-<section class="metrics-section">
-  <div class="metrics-grid">
-    <!-- Total Visuals Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-chart-bar"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Total Visuals</div>
-        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 32 }}">
-          0
+<!-- Enhanced Metrics Section -->
+<section class="enhanced-metrics-section">
+  <div class="metrics-container">
+    <!-- Visual Analytics Card -->
+    <div class="metric-card-enhanced primary">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-chart-bar"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 121 }}">0</div>
+        <div class="metric-label">Total Visuals</div>
+      </div>
+      <div class="card-glow"></div>
     </div>
 
-    <!-- Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-calculator"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Measures</div>
-        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 78 }}">
-          0
+    <!-- Measures Card -->
+    <div class="metric-card-enhanced secondary">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-calculator"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 258 }}">0</div>
+        <div class="metric-label">DAX Measures</div>
+      </div>
+      <div class="card-glow"></div>
     </div>
 
-    <!-- Pages Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Pages</div>
-        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 5 }}">
-          0
+    <!-- Pages Card -->
+    <div class="metric-card-enhanced accent">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-file-alt"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 18 }}">0</div>
+        <div class="metric-label">Report Pages</div>
+      </div>
+      <div class="card-glow"></div>
     </div>
 
-    <!-- Unused Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Unused Measures</div>
-        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 12 }}">
-          0
+    <!-- Performance Card -->
+    <div class="metric-card-enhanced warning">
+      <div class="card-background">
+        <div class="card-icon">
+          <i class="fas fa-exclamation-triangle"></i>
         </div>
       </div>
+      <div class="card-content">
+        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 4 }}">0</div>
+        <div class="metric-label">Unused Measures</div>
+      </div>
+      <div class="card-glow"></div>
     </div>
   </div>
 </section>
 
-<!-- Analysis Tools Section with improved layout -->
-<section class="tools-section">
-  <h2 class="section-title"><i class="fas fa-tools"></i> Analysis Tools</h2>
+<!-- Modern Analysis Tools Section -->
+<section class="modern-tools-section">
+  <div class="section-header">
+    <h2 class="section-title">
+      <span class="title-icon">
+        <i class="fas fa-tools"></i>
+      </span>
+      Analysis Toolkit
+    </h2>
+    <div class="section-description">
+      Powerful tools to analyze, optimize, and understand your Power BI reports
+    </div>
+  </div>
 
-  <div class="tools-grid improved-layout">
-    <!-- Visual Fields Table -->
-    <div class="tool-card">
+  <!-- Enhanced Tools Grid -->
+  <div class="modern-tools-grid">
+    <!-- Visual Fields Explorer -->
+    <div class="modern-tool-card" data-category="exploration">
       <div class="tool-card-header">
         <div class="tool-icon">
           <i class="fas fa-table"></i>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Visual Fields Table</h3>
-          <p class="tool-description">
-            Get a comprehensive view of all the fields used across visuals in
-            your report.
-          </p>
+        <div class="tool-badge">Core</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Visual Fields Explorer</h3>
+        <p class="tool-description">Deep dive into field usage across all visuals with advanced filtering and search
+          capabilities</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-search"></i>
+            Smart Search
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-filter"></i>
+            Advanced Filters
+          </span>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/table-view" class="tool-button">Explore Fields <i class="fas fa-arrow-right"></i></a>
+      <div class="tool-footer">
+        <a href="/table-view" class="modern-button primary">
+          <span>Explore Fields</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
+      <div class="card-highlight"></div>
     </div>
 
-    <!-- Data Lineage Diagram -->
-    <div class="tool-card">
+    <!-- Data Lineage -->
+    <div class="modern-tool-card" data-category="analysis">
       <div class="tool-card-header">
         <div class="tool-icon">
           <i class="fas fa-project-diagram"></i>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Data Lineage Diagram</h3>
-          <p class="tool-description">
-            Visualize relationships between measures and columns to understand
-            dependencies.
-          </p>
+        <div class="tool-badge">Advanced</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Data Lineage Diagram</h3>
+        <p class="tool-description">Visualize complex relationships and dependencies between measures and columns</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-share-alt"></i>
+            Interactive Graph
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-eye"></i>
+            Dependency Tracking
+          </span>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/lineage-view" class="tool-button">View Diagram <i class="fas fa-arrow-right"></i></a>
+      <div class="tool-footer">
+        <a href="/lineage-view" class="modern-button secondary">
+          <span>View Diagram</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
+      <div class="card-highlight"></div>
     </div>
 
     <!-- DAX Explorer -->
-    <div class="tool-card">
+    <div class="modern-tool-card" data-category="optimization">
       <div class="tool-card-header">
         <div class="tool-icon">
           <i class="fas fa-code"></i>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">DAX Explorer</h3>
-          <p class="tool-description">
-            Browse and analyze DAX formulas with syntax highlighting and copy
-            functionality.
-          </p>
+        <div class="tool-badge">AI-Powered</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">DAX Code Analyzer</h3>
+        <p class="tool-description">Browse, analyze, and optimize DAX formulas with AI-powered suggestions</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-brain"></i>
+            AI Analysis
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-code"></i>
+            Syntax Highlighting
+          </span>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/dax-expressions" class="tool-button">Browse DAX <i class="fas fa-arrow-right"></i></a>
+      <div class="tool-footer">
+        <a href="/dax-expressions" class="modern-button accent">
+          <span>Analyze DAX</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
+      <div class="card-highlight"></div>
     </div>
 
     <!-- Source Explorer -->
-    <div class="tool-card">
+    <div class="modern-tool-card" data-category="exploration">
       <div class="tool-card-header">
         <div class="tool-icon">
           <i class="fas fa-database"></i>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Source Explorer</h3>
-          <p class="tool-description">
-            Examine the M queries that form your report's data sources.
-          </p>
+        <div class="tool-badge">Pro</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Source Query Explorer</h3>
+        <p class="tool-description">Examine M queries and data transformation logic with intelligent insights</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-magic"></i>
+            M Query Analysis
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-cogs"></i>
+            Transformation Tracking
+          </span>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/source-explorer" class="tool-button">Explore Sources <i class="fas fa-arrow-right"></i></a>
+      <div class="tool-footer">
+        <a href="/source-explorer" class="modern-button info">
+          <span>Explore Sources</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
+      <div class="card-highlight"></div>
     </div>
 
-    <!-- Unused Measures -->
-    <div class="tool-card">
+    <!-- Performance Optimizer -->
+    <div class="modern-tool-card" data-category="optimization">
       <div class="tool-card-header">
         <div class="tool-icon">
-          <i class="fas fa-search-minus"></i>
+          <i class="fas fa-tachometer-alt"></i>
         </div>
-        <div class="tool-info">
-          <h3 class="tool-title">Unused Measures</h3>
-          <p class="tool-description">
-            Identify measures not used in any visuals for optimization.
-          </p>
+        <div class="tool-badge">Optimizer</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Performance Optimizer</h3>
+        <p class="tool-description">Identify unused measures and optimization opportunities to improve report
+          performance</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-search-minus"></i>
+            Unused Detection
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-rocket"></i>
+            Performance Tips
+          </span>
         </div>
       </div>
-      <div class="tool-card-footer">
-        <a href="/unused-measures" class="tool-button">Find Unused Measures <i class="fas fa-arrow-right"></i></a>
+      <div class="tool-footer">
+        <a href="/unused-measures" class="modern-button warning">
+          <span>Optimize Now</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="modern-tool-card" data-category="ai">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="tool-badge ai">AI Assistant</div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Power BI AI Assistant</h3>
+        <p class="tool-description">Get intelligent insights and recommendations powered by advanced AI analysis</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-brain"></i>
+            Smart Insights
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-lightbulb"></i>
+            Recommendations
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="#" class="modern-button ai">
+          <span>Ask AI</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
     </div>
   </div>
 </section>
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Show welcome notification on first visit
-    const firstVisit = !localStorage.getItem("visitedBefore");
-    if (firstVisit) {
-      setTimeout(() => {
-        if (window.PowerBIExplorer) {
-          window.PowerBIExplorer.showNotification(
-            "Welcome to the new Power BI Explorer interface!",
-            "info",
-            5000
-          );
-        }
-        localStorage.setItem("visitedBefore", "true");
-      }, 1000);
-    }
+    // Initialize modern dashboard
+    initModernDashboard();
   });
+
+  function initModernDashboard() {
+    // Animate metric values
+    animateCounters();
+
+    // Add modern hover effects
+    initHoverEffects();
+
+    // Initialize mobile menu if needed
+    initMobileMenu();
+  }
+
+  function animateCounters() {
+    const counters = document.querySelectorAll('.metric-value[data-value]');
+
+    const observerOptions = {
+      threshold: 0.5,
+      rootMargin: '0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const counter = entry.target;
+          const target = parseInt(counter.getAttribute('data-value')) || 0;
+          animateCounter(counter, target);
+          observer.unobserve(counter);
+        }
+      });
+    }, observerOptions);
+
+    counters.forEach(counter => observer.observe(counter));
+  }
+
+  function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 50; // 50 steps
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        current = target;
+        clearInterval(timer);
+      }
+      element.textContent = Math.floor(current);
+    }, 40); // 2 second total animation
+  }
+
+  function initHoverEffects() {
+    // Tool cards
+    const toolCards = document.querySelectorAll('.modern-tool-card');
+    toolCards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-8px)';
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Modern buttons with ripple effect
+    const buttons = document.querySelectorAll('.modern-button');
+    buttons.forEach(button => {
+      button.addEventListener('click', createRipple);
+    });
+  }
+
+  function createRipple(e) {
+    const button = e.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    ripple.classList.add('ripple');
+
+    button.appendChild(ripple);
+
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
+
+  function initMobileMenu() {
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 &&
+          !sidebar.contains(e.target) &&
+          !sidebarToggle.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      });
+    }
+  }
 </script>
 
-<!-- Add inline styles for improved layout -->
 <style>
-  /* Improved layout for tools grid */
-  .tools-grid.improved-layout {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-5);
+  /* Ripple Effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
   }
-  
-  /* Make the last card centered if total cards are odd */
-  .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-    grid-column: 2;
-  }
-  
-  /* Add some elevation and transition effects */
-  .tool-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .tool-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 1200px) {
-    .tools-grid.improved-layout {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .tools-grid.improved-layout .tool-card:last-child:nth-child(odd) {
-      grid-column: auto;
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
     }
   }
-  
+
+  /* Smooth transitions */
+  .modern-tool-card,
+  .metric-card-enhanced,
+  .insight-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Loading animation for metrics */
+  .metric-value {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Focus styles for accessibility */
+  .modern-button:focus,
+  .modern-tool-card:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Mobile optimizations */
   @media (max-width: 768px) {
-    .tools-grid.improved-layout {
-      grid-template-columns: 1fr;
+    .sidebar {
+      transition: transform 0.3s ease;
     }
-  }
-  
-  /* Enhance metric cards */
-  .metrics-grid {
-    gap: var(--space-5);
-  }
-  
-  .metric-card {
-    padding: var(--space-5);
-  }
-  
-  .metric-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.75rem;
+
+    .sidebar.open {
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
   }
 </style>
 {% endblock %}

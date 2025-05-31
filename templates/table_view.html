@@ -1,6 +1,21 @@
 {% extends "base.html" %} 
 {% block title %}Visual Fields - Power BI Explorer{% endblock %} 
 
+{% block header_icon %}<i class="fas fa-table"></i>{% endblock %}
+{% block header_title %}Visual Fields Explorer{% endblock %}
+{% block header_subtitle %}Explore all fields used across visuals in your Power BI report with advanced filtering and search capabilities{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ table_data|length if table_data else 0 }}</span>
+  <span class="stat-label">Total Visuals</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ unique_pages|length if unique_pages else 0 }}</span>
+  <span class="stat-label">Report Pages</span>
+</div>
+{% endblock %}
+
 {% block head %}
 <!-- Add any page-specific head content here -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -50,10 +65,10 @@
   <div class="filter-section">
     <div class="filter-controls">
       <div class="filter-group">
-        <label for="pageFilter" class="filter-label">Page:</label>
+          <label for="pageFilter" class="filter-label">Page(s):</label>
         <div class="select-wrapper">
-          <select id="pageFilter" class="filter-select">
-            <option value="">All Pages</option>
+            <select id="pageFilter" class="filter-select" multiple size="3">
+              <!-- <option value="">All Pages</option> Will be handled by empty selection -->
             <!-- Will be populated dynamically via JS -->
           </select>
           <i class="fas fa-chevron-down"></i>
@@ -61,10 +76,10 @@
       </div>
 
       <div class="filter-group">
-        <label for="visualTypeFilter" class="filter-label">Visual Type:</label>
+          <label for="visualTypeFilter" class="filter-label">Visual Type(s):</label>
         <div class="select-wrapper">
-          <select id="visualTypeFilter" class="filter-select">
-            <option value="">All Visual Types</option>
+            <select id="visualTypeFilter" class="filter-select" multiple size="3">
+              <!-- <option value="">All Visual Types</option> Will be handled by empty selection -->
             <!-- Will be populated dynamically via JS -->
           </select>
           <i class="fas fa-chevron-down"></i>
@@ -438,8 +453,8 @@
      */
     function applyFiltersAndSearch() {
       const searchValue = searchBox ? searchBox.value.toLowerCase() : "";
-      const selectedPage = pageFilter ? pageFilter.value : "";
-      const selectedVisualType = visualTypeFilter ? visualTypeFilter.value : "";
+      const selectedPages = pageFilter ? Array.from(pageFilter.selectedOptions).map(option => option.value) : [];
+      const selectedVisualTypes = visualTypeFilter ? Array.from(visualTypeFilter.selectedOptions).map(option => option.value) : [];
       const fieldText = fieldFilter ? fieldFilter.value.toLowerCase() : "";
 
       let visibleItems = 0;
@@ -460,8 +475,8 @@
         const visualTypeCell = cells[1].textContent.trim();
         const fieldsCell = cells[3]; // Now using the element, not just text
 
-        const pageMatches = !selectedPage || pageCell === selectedPage;
-        const typeMatches = !selectedVisualType || visualTypeCell.includes(selectedVisualType);
+        const pageMatches = selectedPages.length === 0 || selectedPages.includes(pageCell);
+        const typeMatches = selectedVisualTypes.length === 0 || selectedVisualTypes.includes(visualTypeCell.trim());
         
         // Improved field filtering - search both regular text and inner HTML
         const fieldMatches = !fieldText || searchInElement(fieldsCell, fieldText);
@@ -509,8 +524,12 @@
      */
     function resetAllFilters() {
       if (searchBox) searchBox.value = "";
-      if (pageFilter) pageFilter.value = "";
-      if (visualTypeFilter) visualTypeFilter.value = "";
+      if (pageFilter) {
+          Array.from(pageFilter.options).forEach(option => option.selected = false);
+      }
+      if (visualTypeFilter) {
+          Array.from(visualTypeFilter.options).forEach(option => option.selected = false);
+      }
       if (fieldFilter) fieldFilter.value = "";
       if (clearSearch) clearSearch.style.display = "none";
 
