@@ -446,17 +446,19 @@ body {
 
 /* ===== Legacy CSS Removed - Now using modern-dashboard-header ===== */
 
+/* General Search Container - For global search if any */
 .search-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 400px; /* Default max-width for a generic search bar */
 }
 
-.search-box {
+/* Styles for the search box that might be used globally */
+.search-box { /* This might be a more global search, not the one in control-panel */
   display: flex;
   align-items: center;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full); /* Typically very rounded for global search */
   padding: var(--space-2) var(--space-4);
   gap: var(--space-2);
   transition: all var(--transition-fast);
@@ -464,7 +466,7 @@ body {
 
 .search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .search-box i {
@@ -472,7 +474,7 @@ body {
   font-size: var(--font-size-sm);
 }
 
-.search-input {
+.search-input { /* General input style for global search */
   border: none;
   background: none;
   outline: none;
@@ -483,6 +485,262 @@ body {
 
 .search-input::placeholder {
   color: var(--text-muted);
+}
+
+/* Control Panel Specific Styles */
+/* These styles will override the general .search-container, .search-box if they are nested within .control-panel */
+
+.control-panel {
+  background-color: var(--surface);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); /* Slightly stronger shadow for better lift */
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6); /* Increased gap for better visual separation */
+}
+
+/* Search Bar within Control Panel */
+.control-panel .search-container { /* Specific to search within control panel */
+  width: 100%;
+  max-width: none; /* Override general max-width */
+}
+
+.search-input-wrapper { /* This is the main search input for the table_view page */
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary); /* Cleaner look with primary background */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); /* Softer, larger radius for a modern feel */
+  padding: var(--space-3) var(--space-4);
+  gap: var(--space-3);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm); /* Subtle lift for the search input */
+}
+
+.search-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2), var(--shadow-sm); /* Enhanced focus shadow */
+}
+
+.search-input-wrapper i.fa-search { /* Icon within the table_view search */
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  margin-right: var(--space-1);
+}
+
+.search-input-wrapper input[type="search"] { /* Input field within table_view search */
+  border: none;
+  background: none;
+  outline: none;
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  height: 24px;
+  line-height: 24px;
+}
+
+.search-input-wrapper input[type="search"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+.clear-search { /* Clear button for table_view search */
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  width: 28px;
+  height: 28px;
+}
+.clear-search:hover {
+  color: var(--primary);
+  background-color: var(--bg-tertiary);
+}
+.clear-search i {
+  font-size: var(--font-size-sm);
+}
+
+.search-count { /* Count display for table_view search */
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+  padding-left: var(--space-2);
+}
+
+/* Filters Section */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5); /* Increased gap between control groups and actions */
+  padding-top: var(--space-5); /* Increased padding for visual separation from search */
+  border-top: 1px solid var(--border-light); /* Clearer visual separation */
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-5); /* Increased gap between individual filter groups */
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2); /* Gap between label and input */
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600; /* Bolder for better hierarchy */
+  color: var(--text-primary); /* Stronger color for labels */
+  margin-bottom: var(--space-1); /* Add a little space below label */
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper i.fa-chevron-down {
+  position: absolute;
+  right: var(--space-4); /* More padding from the edge */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: var(--font-size-sm); /* Slightly larger dropdown arrow */
+}
+
+.filter-select,
+.filter-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4); /* Consistent padding */
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md); /* Standardized radius */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  appearance: none;
+  line-height: 1.6; /* Better readability for input text */
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  min-height: 44px; /* Ensure consistent height and good tap target */
+}
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.15); /* Slightly stronger focus ring */
+}
+
+.filter-select[multiple] {
+  padding-right: var(--space-4);
+  min-height: 100px; /* Good height for multiple selections */
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-4); /* More gap between buttons */
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-light);
+}
+
+.filter-actions .action-button {
+  padding: var(--space-3) var(--space-5); /* Slightly larger buttons */
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  min-height: 44px; /* Standard tap height */
+  text-transform: capitalize; /* Softer button text */
+}
+
+.filter-actions .action-button i {
+ font-size: var(--font-size-base);
+ margin-right: var(--space-1); /* Space between icon and text */
+}
+
+.filter-actions .action-button.primary {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+.filter-actions .action-button.primary:hover {
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.filter-actions .action-button.secondary {
+  background-color: var(--bg-primary); /* Changed from bg-tertiary for more subtlety */
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.filter-actions .action-button.secondary:hover {
+  background-color: var(--bg-tertiary); /* Hover to bg-tertiary */
+  border-color: var(--gray-400);
+  color: var(--text-primary);
+}
+
+/* Dark mode specific refinements for control panel */
+body.dark-mode .control-panel { /* Already handled by general dark mode --shadow */
+  /* box-shadow: var(--shadow-lg); */
+}
+body.dark-mode .search-input-wrapper {
+  background: var(--bg-secondary);
+  border-color: var(--gray-700);
+}
+body.dark-mode .search-input-wrapper:focus-within {
+   border-color: var(--primary-light);
+   box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25), var(--shadow-sm);
+}
+body.dark-mode .filter-section {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-label {
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select,
+body.dark-mode .filter-input {
+  background-color: var(--bg-secondary);
+  border-color: var(--gray-700);
+  color: var(--text-primary);
+}
+body.dark-mode .filter-select:focus,
+body.dark-mode .filter-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.25);
+}
+body.dark-mode .filter-actions {
+  border-top-color: var(--gray-700);
+}
+body.dark-mode .filter-actions .action-button.secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--gray-600);
+}
+body.dark-mode .filter-actions .action-button.secondary:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-500);
+  color: var(--text-primary);
 }
 
 .toolbar-actions {
@@ -1180,6 +1438,120 @@ main {
   50% { opacity: 0.7; }
 }
 
+/* Table Styles */
+.table-container {
+  overflow-x: auto; /* For responsive tables */
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-6);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+th, td {
+  padding: var(--space-4); /* Consistent padding */
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Table Header */
+thead th {
+  background-color: var(--bg-tertiary); /* Light gray background */
+  color: var(--text-primary);
+  font-weight: 600; /* Bolder font for headers */
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-top: 1px solid var(--border); /* Top border for header */
+  border-bottom-width: 2px; /* Thicker bottom border for header */
+}
+
+/* Table Body */
+tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+tbody tr:hover {
+  background-color: var(--surface-hover); /* Hover effect for rows */
+}
+
+tbody td {
+  color: var(--text-secondary);
+}
+
+tbody tr:last-child td {
+  border-bottom: none; /* Remove border for the last row */
+}
+
+/* Styling for elements within tables */
+table .badge {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+table .badge-success {
+  background-color: rgba(var(--success-rgb), 0.1); /* Using RGB for opacity */
+  color: var(--success);
+}
+
+table .badge-warning {
+  background-color: rgba(var(--warning-rgb), 0.1);
+  color: var(--warning);
+}
+
+table .badge-danger {
+  background-color: rgba(var(--danger-rgb), 0.1);
+  color: var(--danger);
+}
+
+table .badge-info {
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+}
+
+table .table-icon {
+  font-size: var(--font-size-lg);
+  color: var(--text-muted);
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+
+table .action-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+table .action-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Ensure RGB variables are defined for badge opacity (if not already) */
+:root {
+  --success-rgb: 40, 167, 69;
+  --warning-rgb: 255, 193, 7;
+  --danger-rgb: 220, 53, 69;
+  --accent-rgb: 23, 162, 184;
+}
+
+body.dark-mode {
+  --success-rgb: 40, 167, 69; /* Adjust if needed for dark mode visibility */
+  --warning-rgb: 255, 193, 7;
+  --danger-rgb: 220, 53, 69;
+  --accent-rgb: 23, 162, 184;
+}
+
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .header-content {
@@ -1190,6 +1562,41 @@ main {
   
   .modern-tools-grid {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  /* Table View Responsive Adjustments for 1024px */
+  .control-panel {
+    /* No change needed here from previous attempt, already flex-column by default */
+  }
+
+  .filter-controls {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjust filter columns */
+  }
+
+  .table-toolbar {
+    flex-direction: column; /* Stack toolbar items */
+    align-items: flex-start; /* Align to start */
+    gap: var(--space-3); /* Reduce gap */
+  }
+
+  .pagination-container {
+    flex-direction: column; /* Stack pagination elements */
+    align-items: flex-start; /* Align to start */
+    gap: var(--space-3); /* Reduce gap */
+  }
+  .pagination-controls {
+    order: 1;
+  }
+  .pagination-info {
+    order: 2;
+  }
+  .pagination-size {
+    order: 3;
+    width: 100%;
+  }
+  .pagination-size .select-wrapper {
+    width: auto;
+    min-width: 120px; /* Give it a bit more space */
   }
 }
 
@@ -1255,6 +1662,60 @@ main {
     flex-direction: column;
     text-align: center;
   }
+
+  /* Table View Responsive Adjustments for 768px */
+  .control-panel {
+    padding: var(--space-4); /* Reduce padding */
+  }
+
+  .filter-controls {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Further adjust filter columns */
+  }
+
+  .filter-actions {
+    flex-wrap: wrap; /* Ensure buttons wrap */
+    gap: var(--space-2);
+  }
+  .filter-actions .action-button {
+    flex-grow: 1; /* Allow buttons to grow and fill space */
+  }
+
+  .table-container table {
+      min-width: 600px; /* Ensure table can scroll horizontally */
+  }
+
+  /* Reduce font sizes for table view elements */
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+  .page-description,
+  .filter-label,
+  .filter-select,
+  .filter-input,
+  .table-info .results-count,
+  .pagination-info,
+  .pagination-button,
+  .pagination-page,
+  .pagination-size label {
+    font-size: var(--font-size-sm);
+  }
+  table { /* Affects table content */
+    font-size: var(--font-size-xs);
+  }
+  th, td {
+    padding: var(--space-3); /* Reduce padding in table cells */
+  }
+  .field-item {
+    padding: var(--space-1) var(--space-1);
+    font-size: 0.7rem;
+  }
+  .visual-type-badge {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1);
+  }
+  .visual-type-badge i {
+    font-size: 0.8em; /* Make icon slightly smaller within badge */
+  }
 }
 
 @media (max-width: 480px) {
@@ -1290,5 +1751,94 @@ main {
   
   .header-stats {
     gap: var(--space-3);
+  }
+
+  /* Table View Responsive Adjustments for 480px */
+  .control-panel {
+    padding: var(--space-3);
+  }
+  .search-input-wrapper {
+    padding: var(--space-2) var(--space-3);
+  }
+  .search-input-wrapper input[type="search"] {
+    font-size: var(--font-size-sm);
+  }
+
+  .filter-controls {
+    grid-template-columns: 1fr; /* Stack all filters */
+  }
+  .filter-actions {
+    flex-direction: column;
+  }
+  .filter-actions .action-button {
+    width: 100%;
+  }
+
+  .table-toolbar {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+  .table-actions .action-button.outline {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-3); /* Make tap target larger */
+  }
+
+  .pagination-container {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+  .pagination-controls {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--space-3);
+  }
+  .pagination-button { /* Prev/Next buttons */
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-3); /* Make tap target larger */
+  }
+  .pagination-pages {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .pagination-page {
+    padding: var(--space-2);
+  }
+  .pagination-size {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .pagination-size .select-wrapper {
+    width: 100%;
+  }
+  .pagination-size .filter-select {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .page-title {
+    font-size: var(--font-size-lg);
+    gap: var(--space-2);
+  }
+  .page-description {
+    font-size: var(--font-size-xs);
+  }
+  th, td { /* Table cells */
+    padding: var(--space-2);
+    white-space: normal; /* Allow text wrapping */
+  }
+  /* Override sticky header white-space for mobile if needed, but generally keep it */
+  .data-table thead th {
+     /* white-space: normal; */ /* Uncomment if headers are too wide and break layout */
+  }
+  .visual-type-badge {
+    white-space: normal; /* Allow badge text to wrap */
+    text-align: center;
+  }
+  .field-list {
+    gap: var(--space-1); /* Tighter gap for field items */
   }
 }
