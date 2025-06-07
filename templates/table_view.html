@@ -1,9 +1,10 @@
-{% extends "base.html" %} 
-{% block title %}Visual Fields - Power BI Explorer{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Visual Fields - Power BI Explorer{% endblock %}
 
 {% block header_icon %}<i class="fas fa-table"></i>{% endblock %}
 {% block header_title %}Visual Fields Explorer{% endblock %}
-{% block header_subtitle %}Explore all fields used across visuals in your Power BI report with advanced filtering and search capabilities{% endblock %}
+{% block header_subtitle %}Explore all fields used across visuals in your Power BI report with advanced filtering and
+search capabilities{% endblock %}
 
 {% block header_stats %}
 <div class="quick-stat">
@@ -19,23 +20,15 @@
 {% block head %}
 <!-- Add any page-specific head content here -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-{% endblock %} 
+{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/table-view"><i class="fas fa-table"></i><span class="breadcrumb-text">Visual Fields</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title"><i class="fas fa-table"></i> Visual Fields Table</h1>
-  <p class="page-description">
-    Explore all fields used across visuals in your Power BI report with advanced
-    filtering and search capabilities.
-  </p>
-</div>
 
 <!-- Control Panel -->
 <div class="control-panel">
@@ -43,18 +36,9 @@
   <div class="search-container">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
-      <input
-        type="search"
-        id="searchBox"
-        placeholder="Search visuals, fields, or pages..."
-        aria-label="Search visual fields"
-      />
-      <button
-        id="clearSearch"
-        class="clear-search"
-        style="display: none"
-        aria-label="Clear search"
-      >
+      <input type="search" id="searchBox" placeholder="Search visuals, fields, or pages..."
+        aria-label="Search visual fields" />
+      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -65,10 +49,10 @@
   <div class="filter-section">
     <div class="filter-controls">
       <div class="filter-group">
-          <label for="pageFilter" class="filter-label">Page(s):</label>
+        <label for="pageFilter" class="filter-label">Page(s):</label>
         <div class="select-wrapper">
-            <select id="pageFilter" class="filter-select" multiple size="3">
-              <!-- <option value="">All Pages</option> Will be handled by empty selection -->
+          <select id="pageFilter" class="filter-select" multiple size="3">
+            <!-- <option value="">All Pages</option> Will be handled by empty selection -->
             <!-- Will be populated dynamically via JS -->
           </select>
           <i class="fas fa-chevron-down"></i>
@@ -76,10 +60,10 @@
       </div>
 
       <div class="filter-group">
-          <label for="visualTypeFilter" class="filter-label">Visual Type(s):</label>
+        <label for="visualTypeFilter" class="filter-label">Visual Type(s):</label>
         <div class="select-wrapper">
-            <select id="visualTypeFilter" class="filter-select" multiple size="3">
-              <!-- <option value="">All Visual Types</option> Will be handled by empty selection -->
+          <select id="visualTypeFilter" class="filter-select" multiple size="3">
+            <!-- <option value="">All Visual Types</option> Will be handled by empty selection -->
             <!-- Will be populated dynamically via JS -->
           </select>
           <i class="fas fa-chevron-down"></i>
@@ -89,12 +73,7 @@
       <div class="filter-group">
         <label for="fieldFilter" class="filter-label">Field Contains:</label>
         <div class="select-wrapper">
-          <input
-            type="text"
-            id="fieldFilter"
-            class="filter-input"
-            placeholder="Enter field name..."
-          />
+          <input type="text" id="fieldFilter" class="filter-input" placeholder="Enter field name..." />
         </div>
       </div>
     </div>
@@ -146,15 +125,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in table_data %} 
+        {% for row in table_data %}
         {% if row[3] %}
         <tr>
           <td data-label="Page">{{ row[0] }}</td>
           <td data-label="Visual Type" class="visual-type">
-            <span
-              class="visual-type-badge"
-              data-type="{{ row[1]|lower|replace(' ', '-') }}"
-            >
+            <span class="visual-type-badge" data-type="{{ row[1]|lower|replace(' ', '-') }}">
               {% if row[1]|lower == 'table' %}
               <i class="fas fa-table"></i>
               {% elif row[1]|lower == 'column chart' or row[1]|lower == 'bar chart' %}
@@ -169,7 +145,7 @@
               <i class="fas fa-filter"></i>
               {% else %}
               <i class="fas fa-chart-area"></i>
-              {% endif %} 
+              {% endif %}
               {{ row[1] }}
             </span>
           </td>
@@ -183,10 +159,10 @@
           </td>
           <td data-label="Filter Fields">
             <div class="field-list">
-              {% if row[4] %} 
+              {% if row[4] %}
               {% for field in row[4].split('; ') %}
               <span class="field-item filter-field">{{ field }}</span>
-              {% endfor %} 
+              {% endfor %}
               {% else %}
               <span class="empty-value">—</span>
               {% endif %}
@@ -194,10 +170,10 @@
           </td>
           <td data-label="VC Objects">
             <div class="field-list">
-              {% if row[5] %} 
+              {% if row[5] %}
               {% for field in row[5].split('; ') %}
               <span class="field-item vc-object">{{ field }}</span>
-              {% endfor %} 
+              {% endfor %}
               {% else %}
               <span class="empty-value">—</span>
               {% endif %}
@@ -205,17 +181,17 @@
           </td>
           <td data-label="Visual Objects">
             <div class="field-list">
-              {% if row[6] %} 
+              {% if row[6] %}
               {% for field in row[6].split('; ') %}
               <span class="field-item visual-object">{{ field }}</span>
-              {% endfor %} 
+              {% endfor %}
               {% else %}
               <span class="empty-value">—</span>
               {% endif %}
             </div>
           </td>
         </tr>
-        {% endif %} 
+        {% endif %}
         {% endfor %}
       </tbody>
     </table>
@@ -266,7 +242,7 @@
     </div>
   </div>
 </div>
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <script>
@@ -477,7 +453,7 @@
 
         const pageMatches = selectedPages.length === 0 || selectedPages.includes(pageCell);
         const typeMatches = selectedVisualTypes.length === 0 || selectedVisualTypes.includes(visualTypeCell.trim());
-        
+
         // Improved field filtering - search both regular text and inner HTML
         const fieldMatches = !fieldText || searchInElement(fieldsCell, fieldText);
 
@@ -486,7 +462,7 @@
         if (searchValue) {
           // First check if the row contains the search term anywhere
           searchMatches = searchInElement(row, searchValue);
-          
+
           // If it matches, highlight occurrences in appropriate cells
           if (searchMatches) {
             cells.forEach((cell) => {
@@ -525,10 +501,10 @@
     function resetAllFilters() {
       if (searchBox) searchBox.value = "";
       if (pageFilter) {
-          Array.from(pageFilter.options).forEach(option => option.selected = false);
+        Array.from(pageFilter.options).forEach(option => option.selected = false);
       }
       if (visualTypeFilter) {
-          Array.from(visualTypeFilter.options).forEach(option => option.selected = false);
+        Array.from(visualTypeFilter.options).forEach(option => option.selected = false);
       }
       if (fieldFilter) fieldFilter.value = "";
       if (clearSearch) clearSearch.style.display = "none";
@@ -622,7 +598,7 @@
 
       // Calculate total pages
       totalPages = Math.ceil(currentVisibleRows / itemsPerPage);
-      
+
       // Make sure total pages is at least 1
       totalPages = Math.max(1, totalPages);
 
@@ -688,7 +664,7 @@
       // Update "showing" text
       let start = (currentPage - 1) * itemsPerPage + 1;
       let end = Math.min(start + itemsPerPage - 1, currentVisibleRows);
-      
+
       // Handle case with 0 items
       if (currentVisibleRows === 0) {
         start = 0;

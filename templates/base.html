@@ -169,44 +169,23 @@
 
   <!-- Main content wrapper -->
   <div class="main-wrapper">
-    <!-- Dynamic Page Header -->
-    <header class="modern-dashboard-header">
-      <div class="header-background">
-        <div class="header-gradient"></div>
-        <div class="header-pattern"></div>
-      </div>
+    <!-- Header with Title, Subtitle and Date -->
+    <header class="clean-header">
       <div class="header-content">
         <div class="header-main">
-          <div class="header-controls">
-            <button class="sidebar-toggle" aria-label="Toggle sidebar">
-              <i class="fas fa-bars"></i>
-            </button>
-            <div class="header-datetime">
-              <span id="current-datetime"></span>
-            </div>
-          </div>
-          <h1 class="modern-title">
+          <h1 class="page-title">
             <span class="title-icon">
               {% block header_icon %}<i class="fas fa-chart-line"></i>{% endblock %}
             </span>
             <span class="title-text">{% block header_title %}Power BI Analytics Hub{% endblock %}</span>
           </h1>
-          <p class="modern-subtitle">
+          <p class="page-subtitle">
             {% block header_subtitle %}Advanced analytics and insights for your Power BI reports with AI-powered
             recommendations{% endblock %}
           </p>
         </div>
-        <div class="header-stats">
-          {% block header_stats %}
-          <div class="quick-stat">
-            <span class="stat-number">{{ metrics.visual_count if metrics is defined else 121 }}</span>
-            <span class="stat-label">Active Visuals</span>
-          </div>
-          <div class="quick-stat">
-            <span class="stat-number">{{ metrics.measure_count if metrics is defined else 258 }}</span>
-            <span class="stat-label">Total Measures</span>
-          </div>
-          {% endblock %}
+        <div class="header-datetime">
+          <span id="current-datetime"></span>
         </div>
       </div>
     </header>

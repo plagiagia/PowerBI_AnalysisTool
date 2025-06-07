@@ -1,9 +1,10 @@
-{% extends "base.html" %} 
-{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %}
 
 {% block header_icon %}<i class="fas fa-database"></i>{% endblock %}
 {% block header_title %}Source Explorer{% endblock %}
-{% block header_subtitle %}Examine and analyze the M queries that form your report's data sources with AI-powered insights{% endblock %}
+{% block header_subtitle %}Examine and analyze the M queries that form your report's data sources with AI-powered
+insights{% endblock %}
 
 {% block header_stats %}
 <div class="quick-stat">
@@ -11,7 +12,8 @@
   <span class="stat-label">Data Sources</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if m_queries_info else 0 }}</span>
+  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if
+    m_queries_info else 0 }}</span>
   <span class="stat-label">Total Lines (K)</span>
 </div>
 {% endblock %}
@@ -21,22 +23,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
 <!-- We're not using Prism's toolbar to avoid conflicts with our custom copy button -->
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/toolbar/prism-toolbar.min.css" /> -->
-{% endblock %} 
+{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/source-explorer"><i class="fas fa-database"></i><span class="breadcrumb-text">Source Explorer</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title"><i class="fas fa-database"></i> Source Explorer</h1>
-  <p class="page-description">
-    Examine the M queries that form your report's data sources.
-  </p>
-</div>
 
 <!-- Control Panel -->
 <div class="control-panel">
@@ -44,12 +39,7 @@
   <div class="search-container">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
-      <input
-        type="text"
-        id="searchQueries"
-        placeholder="Search in queries..."
-        aria-label="Search in M queries"
-      />
+      <input type="text" id="searchQueries" placeholder="Search in queries..." aria-label="Search in M queries" />
       <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
         <i class="fas fa-times"></i>
       </button>
@@ -145,7 +135,7 @@
         <button class="tab-button active" onclick="switchTab(this, 'explanation')">Explanation</button>
         <button class="tab-button" onclick="switchTab(this, 'renamed-code')">Renamed Code</button>
       </div>
-      
+
       <div id="explanation" class="tab-content active">
         <div class="loading-spinner">
           <i class="fas fa-spinner fa-spin"></i>
@@ -153,7 +143,7 @@
         </div>
         <div id="explanationContent" class="explanation-content"></div>
       </div>
-      
+
       <div id="renamed-code" class="tab-content">
         <div id="renamedCodeContent" class="code-content">
           <pre><code class="language-powerquery"></code></pre>
@@ -178,7 +168,7 @@
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script> -->
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // DOM Elements
     const searchQueries = document.getElementById("searchQueries");
     const clearSearch = document.getElementById("clearSearch");
@@ -191,30 +181,30 @@
     const collapseAllBtn = document.getElementById("collapseAll");
     const exportQueriesBtn = document.getElementById("exportQueries");
     const searchCount = document.querySelector(".search-count");
-    
+
     // Variables for state
     let currentVisibleItems = queryItems.length;
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     /**
      * Set up event listeners for interactive elements
      */
     function setupEventListeners() {
       // Search box
       if (searchQueries) {
-        searchQueries.addEventListener("input", function() {
+        searchQueries.addEventListener("input", function () {
           if (clearSearch) {
             clearSearch.style.display = this.value ? "block" : "none";
           }
           performSearch();
         });
       }
-      
+
       // Clear search button
       if (clearSearch) {
-        clearSearch.addEventListener("click", function() {
+        clearSearch.addEventListener("click", function () {
           if (searchQueries) {
             searchQueries.value = "";
             clearSearch.style.display = "none";
@@ -223,10 +213,10 @@
           }
         });
       }
-      
+
       // Clear empty state button
       if (clearEmptyStateBtn) {
-        clearEmptyStateBtn.addEventListener("click", function() {
+        clearEmptyStateBtn.addEventListener("click", function () {
           if (searchQueries) {
             searchQueries.value = "";
             if (clearSearch) clearSearch.style.display = "none";
@@ -235,10 +225,10 @@
           }
         });
       }
-      
+
       // Expand all button
       if (expandAllBtn) {
-        expandAllBtn.addEventListener("click", function() {
+        expandAllBtn.addEventListener("click", function () {
           queryItems.forEach(item => {
             const button = item.querySelector(".toggle-expand");
             if (!item.classList.contains("expanded")) {
@@ -247,10 +237,10 @@
           });
         });
       }
-      
+
       // Collapse all button
       if (collapseAllBtn) {
-        collapseAllBtn.addEventListener("click", function() {
+        collapseAllBtn.addEventListener("click", function () {
           queryItems.forEach(item => {
             const button = item.querySelector(".toggle-expand");
             if (item.classList.contains("expanded")) {
@@ -259,29 +249,29 @@
           });
         });
       }
-      
+
       // Export queries button
       if (exportQueriesBtn) {
         exportQueriesBtn.addEventListener("click", exportAllQueries);
       }
-      
+
       // Toggle expand buttons for each query
       document.querySelectorAll(".toggle-expand").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
           const item = this.closest(".query-item");
           toggleQueryItem(item, this);
         });
       });
-      
+
       // Copy table name buttons
       document.querySelectorAll(".copy-name").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
           const tableName = this.getAttribute("data-copy");
           copyToClipboardWithAnimation(this, tableName);
         });
       });
     }
-    
+
     /**
      * Toggle expansion state of a query item
      * @param {HTMLElement} item - The query item element
@@ -289,25 +279,25 @@
      */
     function toggleQueryItem(item, button) {
       if (!item || !button) return;
-      
+
       const isExpanded = item.classList.toggle("expanded");
-      
+
       // Update button icon
-      button.innerHTML = isExpanded ? 
-        '<i class="fas fa-chevron-up"></i>' : 
+      button.innerHTML = isExpanded ?
+        '<i class="fas fa-chevron-up"></i>' :
         '<i class="fas fa-chevron-down"></i>';
-      
+
       button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
     }
-    
+
     /**
      * Search queries based on input
      */
     function performSearch() {
       const searchValue = searchQueries.value.toLowerCase();
-      
+
       let visibleItems = 0;
-      
+
       // Remove previous search highlights
       document.querySelectorAll(".search-highlight").forEach(el => {
         const text = el.textContent;
@@ -316,33 +306,33 @@
         parent.replaceChild(textNode, el);
         parent.normalize();
       });
-      
+
       // Filter query items
       queryItems.forEach(item => {
         const tableName = item.getAttribute("data-table");
         const queryText = item.querySelector("code").textContent.toLowerCase();
-        
+
         let matches = true;
         if (searchValue) {
-          matches = tableName.toLowerCase().includes(searchValue) || 
-                   queryText.includes(searchValue);
-          
+          matches = tableName.toLowerCase().includes(searchValue) ||
+            queryText.includes(searchValue);
+
           // Highlight matches in table name
           if (tableName.toLowerCase().includes(searchValue)) {
             highlightSearchTerm(item.querySelector(".query-name"), searchValue);
           }
         }
-        
+
         item.style.display = matches ? "" : "none";
-        
+
         if (matches) visibleItems++;
       });
-      
+
       // Update count and empty state
       currentVisibleItems = visibleItems;
       updateResultCount();
       updateEmptyState();
-      
+
       // Update search count display
       if (searchCount && searchValue) {
         searchCount.textContent = `${visibleItems} matches`;
@@ -350,7 +340,7 @@
         searchCount.textContent = "";
       }
     }
-    
+
     /**
      * Highlight search term in an element
      * @param {HTMLElement} element - Element containing text
@@ -358,18 +348,18 @@
      */
     function highlightSearchTerm(element, term) {
       if (!element) return;
-      
+
       const icon = element.querySelector(".table-icon");
       let text = element.textContent;
-      
+
       if (icon) {
         text = text.replace(icon.textContent, "").trim();
       }
-      
+
       // Create highlighted version
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
       const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
-      
+
       // Update element content
       if (icon) {
         element.innerHTML = icon.outerHTML + " " + highlightedText;
@@ -377,7 +367,7 @@
         element.innerHTML = highlightedText;
       }
     }
-    
+
     /**
      * Update the result count display
      */
@@ -386,7 +376,7 @@
         resultCount.textContent = currentVisibleItems;
       }
     }
-    
+
     /**
      * Update empty state visibility
      */
@@ -394,12 +384,12 @@
       if (emptyState) {
         emptyState.style.display = currentVisibleItems === 0 ? "flex" : "none";
       }
-      
+
       if (queriesList) {
         queriesList.style.display = currentVisibleItems === 0 ? "none" : "";
       }
     }
-    
+
     /**
      * Export all visible queries to a file
      */
@@ -407,15 +397,15 @@
       const visibleQueries = Array.from(queryItems).filter(
         item => item.style.display !== "none"
       );
-      
+
       if (visibleQueries.length === 0) return;
-      
+
       const content = visibleQueries.map(item => {
         const tableName = item.getAttribute("data-table");
         const query = item.querySelector("code").textContent;
         return `-- Table: ${tableName}\r\n${query}\r\n\r\n`;
       }).join('');
-      
+
       // Create and download file
       const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -424,21 +414,21 @@
       link.setAttribute("download", "m_queries.txt");
       link.style.display = "none";
       document.body.appendChild(link);
-      
+
       link.click();
-      
+
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       // Show notification if available
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
-          "M queries exported successfully", 
+          "M queries exported successfully",
           "success"
         );
       }
     }
-    
+
     /**
      * Copy text to clipboard with animation
      * @param {HTMLElement} button - The button that was clicked
@@ -446,13 +436,13 @@
      */
     function copyToClipboardWithAnimation(button, text) {
       if (!button) return;
-      
+
       // Store original button HTML
       const originalHTML = button.innerHTML;
-      
+
       // Show loading spinner
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      
+
       // Try to use Clipboard API
       if (navigator.clipboard) {
         navigator.clipboard.writeText(text)
@@ -469,7 +459,7 @@
         fallbackCopy(text, button, originalHTML);
       }
     }
-    
+
     /**
      * Fallback copy method for browsers without clipboard API
      * @param {string} text - Text to copy
@@ -484,23 +474,23 @@
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         if (document.execCommand("copy")) {
           button.innerHTML = '<i class="fas fa-check"></i>';
         } else {
           button.innerHTML = '<i class="fas fa-times"></i>';
         }
-        
+
         document.body.removeChild(textArea);
       } catch (err) {
         button.innerHTML = '<i class="fas fa-times"></i>';
       }
-      
+
       setTimeout(() => {
         button.innerHTML = originalHTML;
       }, 2000);
     }
-    
+
     /**
      * Escape special characters in string for regex
      * @param {string} string - String to escape
@@ -509,38 +499,38 @@
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
-    
+
     /**
      * Function to copy code to clipboard
      * @param {HTMLElement} button - The copy button element
      */
-    window.copyToClipboard = function(button) {
+    window.copyToClipboard = function (button) {
       const codeElement = button.closest(".code-container").querySelector("code");
       copyToClipboardWithAnimation(button, codeElement.textContent);
     };
-    
+
     /**
      * Function to analyze a query using AI
      * @param {HTMLElement} button - The analyze button element
      */
-    window.analyzeQuery = function(button) {
+    window.analyzeQuery = function (button) {
       const codeContainer = button.closest(".code-container");
       const codeElement = codeContainer.querySelector("code");
       const queryItem = button.closest(".query-item");
       const tableName = queryItem.getAttribute("data-table");
       const query = codeElement.textContent;
-      
+
       // Show the modal
       const modal = document.getElementById("aiAnalysisModal");
       modal.style.display = "block";
-      
+
       // Set the table name in the modal
       document.getElementById("tableName").textContent = tableName;
-      
+
       // Show loading spinner, hide content
       document.querySelector(".loading-spinner").style.display = "flex";
       document.getElementById("explanationContent").style.display = "none";
-      
+
       // Make API request to analyze the query
       fetch("/api/analyze-m-query", {
         method: "POST",
@@ -552,96 +542,96 @@
           tableName: tableName
         })
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Failed to analyze query");
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Hide loading spinner, show content
-        document.querySelector(".loading-spinner").style.display = "none";
-        document.getElementById("explanationContent").style.display = "block";
-        
-        // Check if data has the expected properties
-        if (!data.explanation || !data.renamed_code) {
-          throw new Error("Invalid response format from server");
-        }
-        
-        // Update explanation content
-        const explanationContent = document.getElementById("explanationContent");
-        try {
-          // Parse the markdown content
-          let parsedContent = marked.parse(data.explanation);
-          
-          // Enhance the content with custom styling and icons
-          parsedContent = enhanceExplanationContent(parsedContent);
-          
-          explanationContent.innerHTML = parsedContent;
-        } catch (parseError) {
-          console.error("Error parsing markdown:", parseError);
-          explanationContent.textContent = data.explanation; // Fallback to plain text
-        }
-        
-        // Update renamed code content
-        const renamedCodeElement = document.querySelector("#renamed-code code");
-        renamedCodeElement.textContent = data.renamed_code;
-        try {
-          Prism.highlightElement(renamedCodeElement);
-        } catch (highlightError) {
-          console.error("Error highlighting code:", highlightError);
-        }
-        
-        // Set up copy renamed code button
-        const copyRenamedCodeBtn = document.getElementById("copyRenamedCode");
-        copyRenamedCodeBtn.onclick = function() {
-          copyToClipboardWithAnimation(this, data.renamed_code);
-        };
-      })
-      .catch(error => {
-        console.error("Error analyzing query:", error);
-        
-        // Hide loading spinner, show content with error
-        document.querySelector(".loading-spinner").style.display = "none";
-        document.getElementById("explanationContent").style.display = "block";
-        
-        document.getElementById("explanationContent").innerHTML = `
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Failed to analyze query");
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Hide loading spinner, show content
+          document.querySelector(".loading-spinner").style.display = "none";
+          document.getElementById("explanationContent").style.display = "block";
+
+          // Check if data has the expected properties
+          if (!data.explanation || !data.renamed_code) {
+            throw new Error("Invalid response format from server");
+          }
+
+          // Update explanation content
+          const explanationContent = document.getElementById("explanationContent");
+          try {
+            // Parse the markdown content
+            let parsedContent = marked.parse(data.explanation);
+
+            // Enhance the content with custom styling and icons
+            parsedContent = enhanceExplanationContent(parsedContent);
+
+            explanationContent.innerHTML = parsedContent;
+          } catch (parseError) {
+            console.error("Error parsing markdown:", parseError);
+            explanationContent.textContent = data.explanation; // Fallback to plain text
+          }
+
+          // Update renamed code content
+          const renamedCodeElement = document.querySelector("#renamed-code code");
+          renamedCodeElement.textContent = data.renamed_code;
+          try {
+            Prism.highlightElement(renamedCodeElement);
+          } catch (highlightError) {
+            console.error("Error highlighting code:", highlightError);
+          }
+
+          // Set up copy renamed code button
+          const copyRenamedCodeBtn = document.getElementById("copyRenamedCode");
+          copyRenamedCodeBtn.onclick = function () {
+            copyToClipboardWithAnimation(this, data.renamed_code);
+          };
+        })
+        .catch(error => {
+          console.error("Error analyzing query:", error);
+
+          // Hide loading spinner, show content with error
+          document.querySelector(".loading-spinner").style.display = "none";
+          document.getElementById("explanationContent").style.display = "block";
+
+          document.getElementById("explanationContent").innerHTML = `
           <div class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
             <p>Error analyzing query: ${error.message}</p>
             <p>Please try again later.</p>
           </div>
         `;
-      });
+        });
     };
-    
+
     /**
      * Function to close the modal
      */
-    window.closeModal = function() {
+    window.closeModal = function () {
       const modal = document.getElementById("aiAnalysisModal");
       modal.style.display = "none";
     };
-    
+
     /**
      * Function to switch tabs in the modal
      * @param {HTMLElement} button - The tab button that was clicked
      * @param {string} tabId - The ID of the tab content to show
      */
-    window.switchTab = function(button, tabId) {
+    window.switchTab = function (button, tabId) {
       // Update active tab button
       document.querySelectorAll(".tab-button").forEach(btn => {
         btn.classList.remove("active");
       });
       button.classList.add("active");
-      
+
       // Update active tab content
       document.querySelectorAll(".tab-content").forEach(content => {
         content.classList.remove("active");
       });
       document.getElementById(tabId).classList.add("active");
     };
-    
+
     /**
      * Enhance the explanation content with custom styling and icons
      * @param {string} content - The parsed markdown content
@@ -651,19 +641,19 @@
       // Create a temporary div to manipulate the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = content;
-      
+
       // Process the content
       const paragraphs = tempDiv.querySelectorAll('p');
-      
+
       // Find the main sections
       let stepsSection = null;
       let issuesSection = null;
       let suggestionsSection = null;
-      
+
       // Look for specific sections based on content
       paragraphs.forEach(p => {
         const text = p.textContent.toLowerCase();
-        
+
         // Check if this paragraph is the start of a section
         if (text.includes('this m query performs') || text.includes('steps:')) {
           stepsSection = p;
@@ -673,52 +663,52 @@
           suggestionsSection = p;
         }
       });
-      
+
       // Enhance steps section
       if (stepsSection) {
         // Create a wrapper for the steps section
         const stepsWrapper = document.createElement('div');
         stepsWrapper.className = 'steps-section';
-        
+
         // Add a title with icon
         const stepsTitle = document.createElement('h3');
         stepsTitle.innerHTML = '<i class="fas fa-list-ol"></i> Query Steps';
         stepsWrapper.appendChild(stepsTitle);
-        
+
         // Track which steps we've already processed to avoid duplicates
         const processedSteps = new Set();
-        
+
         // Find all steps (usually strong text followed by description)
         const strongElements = tempDiv.querySelectorAll('strong');
         strongElements.forEach(strong => {
           // Check if this is a step name (usually followed by a colon)
           if (strong.textContent.includes(':')) {
             const stepName = strong.textContent.trim();
-            
+
             // Skip if we've already processed this step
             if (processedSteps.has(stepName)) {
               return;
             }
-            
+
             processedSteps.add(stepName);
-            
+
             // Get the parent paragraph
             const paragraph = strong.closest('p');
             if (paragraph) {
               // Create a step div
               const stepDiv = document.createElement('div');
               stepDiv.className = 'step';
-              
+
               // Create a title for the step
               const stepTitle = document.createElement('div');
               stepTitle.className = 'step-title';
               stepTitle.innerHTML = '<i class="fas fa-arrow-right"></i> ' + strong.outerHTML;
-              
+
               // Extract just this step's description (up to the next strong element or end of paragraph)
               let description = '';
               let nextElement = strong.nextSibling;
               let foundNextStep = false;
-              
+
               while (nextElement && !foundNextStep) {
                 // If we find another strong element, stop
                 if (nextElement.nodeName === 'STRONG' && nextElement.textContent.includes(':')) {
@@ -726,7 +716,7 @@
                 } else {
                   // Clone the node to avoid modifying the original
                   const clone = nextElement.cloneNode(true);
-                  
+
                   // If it's a text node, append its content
                   if (nextElement.nodeType === Node.TEXT_NODE) {
                     description += nextElement.textContent;
@@ -734,21 +724,21 @@
                     // For element nodes, append their outer HTML
                     description += nextElement.outerHTML || '';
                   }
-                  
+
                   nextElement = nextElement.nextSibling;
                 }
               }
-              
+
               // Add the title and description to the step div
               stepDiv.appendChild(stepTitle);
               stepDiv.innerHTML += description;
-              
+
               // Add the step to the steps wrapper
               stepsWrapper.appendChild(stepDiv);
             }
           }
         });
-        
+
         // Remove all the original paragraphs with steps
         strongElements.forEach(strong => {
           if (strong.textContent.includes(':')) {
@@ -758,84 +748,84 @@
             }
           }
         });
-        
+
         // Insert the steps wrapper after the steps section
         if (stepsSection.parentNode) {
           stepsSection.parentNode.insertBefore(stepsWrapper, stepsSection.nextSibling);
         }
       }
-      
+
       // Enhance issues section
       if (issuesSection) {
         const issuesWrapper = document.createElement('div');
         issuesWrapper.className = 'issues';
-        
+
         const issuesTitle = document.createElement('div');
         issuesTitle.className = 'issues-title';
         issuesTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Potential Issues';
-        
+
         issuesWrapper.appendChild(issuesTitle);
-        
+
         // Get the content of the issues section
         let nextElement = issuesSection.nextElementSibling;
         while (nextElement && nextElement.tagName !== 'H2' && nextElement.tagName !== 'H3') {
           const clone = nextElement.cloneNode(true);
           issuesWrapper.appendChild(clone);
-          
+
           const temp = nextElement;
           nextElement = nextElement.nextElementSibling;
-          
+
           // Remove the original element
           if (temp.parentNode) {
             temp.parentNode.removeChild(temp);
           }
         }
-        
+
         // Insert the issues wrapper after the issues section
         if (issuesSection.parentNode) {
           issuesSection.parentNode.insertBefore(issuesWrapper, issuesSection);
           issuesSection.parentNode.removeChild(issuesSection);
         }
       }
-      
+
       // Enhance suggestions section
       if (suggestionsSection) {
         const suggestionsWrapper = document.createElement('div');
         suggestionsWrapper.className = 'suggestions';
-        
+
         const suggestionsTitle = document.createElement('div');
         suggestionsTitle.className = 'suggestions-title';
         suggestionsTitle.innerHTML = '<i class="fas fa-lightbulb"></i> Suggestions for Improvement';
-        
+
         suggestionsWrapper.appendChild(suggestionsTitle);
-        
+
         // Get the content of the suggestions section
         let nextElement = suggestionsSection.nextElementSibling;
         while (nextElement && nextElement.tagName !== 'H2' && nextElement.tagName !== 'H3') {
           const clone = nextElement.cloneNode(true);
           suggestionsWrapper.appendChild(clone);
-          
+
           const temp = nextElement;
           nextElement = nextElement.nextElementSibling;
-          
+
           // Remove the original element
           if (temp.parentNode) {
             temp.parentNode.removeChild(temp);
           }
         }
-        
+
         // Insert the suggestions wrapper after the suggestions section
         if (suggestionsSection.parentNode) {
           suggestionsSection.parentNode.insertBefore(suggestionsWrapper, suggestionsSection);
           suggestionsSection.parentNode.removeChild(suggestionsSection);
         }
       }
-      
+
       return tempDiv.innerHTML;
     }
-    
+
     // Close modal when clicking outside of it
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       const modal = document.getElementById("aiAnalysisModal");
       if (event.target === modal) {
         closeModal();
@@ -843,509 +833,4 @@
     };
   });
 </script>
-
-<style>
-/* Query Items */
-.queries-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-.query-item {
-  background-color: var(--bg-primary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.query-item:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--primary);
-}
-
-.query-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border);
-}
-
-.query-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.query-name {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.table-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--primary);
-  color: white;
-  margin-right: var(--space-2);
-}
-
-.query-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.icon-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-tertiary);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.icon-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: var(--text-primary);
-}
-
-.query-item-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height var(--transition-normal), padding var(--transition-normal);
-}
-
-.query-item.expanded .query-item-content {
-  max-height: 2000px;
-  padding: var(--space-4);
-}
-
-.code-container {
-  position: relative;
-  margin: 0;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.code-container pre {
-  margin: 0;
-  padding: var(--space-3);
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  max-height: 400px;
-  overflow: auto;
-}
-
-.code-actions {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  display: flex;
-  gap: var(--space-2);
-  z-index: 10; /* Ensure our buttons are on top */
-}
-
-.copy-button, .ai-analyze-button {
-  padding: var(--space-1) var(--space-2);
-  background-color: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.ai-analyze-button {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-.ai-analyze-button:hover {
-  background-color: rgba(0, 123, 255, 0.2);
-}
-
-/* Hide any Prism copy buttons if they appear */
-.code-toolbar > .toolbar {
-  display: none !important;
-}
-
-.copy-button:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-/* Search highlight */
-.search-highlight {
-  background-color: rgba(255, 193, 7, 0.3);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 -2px;
-}
-
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8);
-  text-align: center;
-}
-
-.empty-state-icon {
-  font-size: 48px;
-  color: var(--text-tertiary);
-  margin-bottom: var(--space-4);
-}
-
-.empty-state-title {
-  font-size: var(--font-size-xl);
-  color: var(--text-primary);
-  margin-bottom: var(--space-2);
-}
-
-.empty-state-message {
-  color: var(--text-secondary);
-  margin-bottom: var(--space-4);
-  max-width: 400px;
-}
-
-/* Modal Styles */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  overflow: auto;
-}
-
-.modal-content {
-  position: relative;
-  background-color: var(--bg-primary);
-  margin: 5% auto;
-  padding: 0;
-  width: 80%;
-  max-width: 900px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  animation: modalFadeIn 0.3s;
-}
-
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  color: var(--text-primary);
-}
-
-.modal-close {
-  background: transparent;
-  border: none;
-  font-size: var(--font-size-lg);
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.modal-close:hover {
-  color: var(--text-primary);
-}
-
-.modal-body {
-  padding: var(--space-4);
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: var(--space-4);
-}
-
-.tab-button {
-  padding: var(--space-2) var(--space-4);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.tab-button.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-
-.tab-button:hover:not(.active) {
-  color: var(--text-primary);
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-/* Loading Spinner */
-.loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8);
-  color: var(--text-secondary);
-}
-
-.loading-spinner i {
-  font-size: 2rem;
-  margin-bottom: var(--space-2);
-}
-
-/* Explanation Content */
-.explanation-content {
-  padding: var(--space-4);
-  line-height: 1.6;
-  color: var(--text-primary);
-}
-
-.explanation-content h1, 
-.explanation-content h2, 
-.explanation-content h3 {
-  margin-top: var(--space-5);
-  margin-bottom: var(--space-3);
-  color: var(--primary);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: var(--space-2);
-}
-
-.explanation-content p {
-  margin-bottom: var(--space-4);
-}
-
-.explanation-content ul, 
-.explanation-content ol {
-  margin-bottom: var(--space-4);
-  padding-left: var(--space-5);
-}
-
-.explanation-content li {
-  margin-bottom: var(--space-2);
-}
-
-.explanation-content strong {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.explanation-content em {
-  font-style: italic;
-  color: var(--text-secondary);
-}
-
-.explanation-content code {
-  background-color: var(--bg-tertiary);
-  padding: 0.2em 0.4em;
-  border-radius: var(--radius-sm);
-  font-family: monospace;
-  color: #d63384; /* Pink color for code */
-}
-
-.explanation-content pre {
-  background-color: var(--bg-tertiary);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-  margin-bottom: var(--space-4);
-  border-left: 3px solid var(--primary);
-}
-
-/* Custom styling for the AI analysis content */
-.explanation-content .steps-section {
-  margin-top: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-.explanation-content .step {
-  background-color: rgba(0, 123, 255, 0.05);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  margin-bottom: var(--space-3);
-  border-left: 4px solid var(--primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.explanation-content .step:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.explanation-content .step-title {
-  font-weight: 600;
-  font-size: 1.1em;
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px dashed rgba(0, 123, 255, 0.2);
-}
-
-.explanation-content .step-title i {
-  margin-right: var(--space-2);
-  color: var(--primary);
-  font-size: 1.2em;
-}
-
-.explanation-content .issues {
-  background-color: rgba(255, 193, 7, 0.1);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  margin: var(--space-4) 0;
-  border-left: 3px solid #ffc107; /* Warning color */
-}
-
-.explanation-content .issues-title {
-  font-weight: 600;
-  color: #856404; /* Dark yellow */
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.explanation-content .issues-title i {
-  margin-right: var(--space-2);
-}
-
-.explanation-content .suggestions {
-  background-color: rgba(40, 167, 69, 0.1);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  margin: var(--space-4) 0;
-  border-left: 3px solid #28a745; /* Success color */
-}
-
-.explanation-content .suggestions-title {
-  font-weight: 600;
-  color: #155724; /* Dark green */
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.explanation-content .suggestions-title i {
-  margin-right: var(--space-2);
-}
-
-/* Code Content */
-.code-content {
-  margin-bottom: var(--space-4);
-}
-
-.code-content pre {
-  margin: 0;
-  padding: var(--space-3);
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  max-height: 400px;
-  overflow: auto;
-}
-
-/* Error Message */
-.error-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.error-message i {
-  font-size: 2rem;
-  color: #dc3545;
-  margin-bottom: var(--space-3);
-}
-
-.error-message p {
-  margin-bottom: var(--space-2);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .query-item-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .query-actions {
-    margin-top: var(--space-2);
-    align-self: flex-end;
-  }
-  
-  .modal-content {
-    width: 95%;
-    margin: 10% auto;
-  }
-  
-  .tabs {
-    flex-direction: column;
-  }
-  
-  .tab-button {
-    text-align: left;
-    padding: var(--space-3);
-    border-left: 2px solid transparent;
-    border-bottom: none;
-  }
-  
-  .tab-button.active {
-    border-left-color: var(--primary);
-    border-bottom: none;
-  }
-}
-</style>
 {% endblock %}

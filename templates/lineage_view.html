@@ -30,22 +30,6 @@ data lineage{% endblock %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 <!-- Include AI features CSS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='lineage-ai.css') }}" />
-<style>
-  /* Ensure network diagram container takes available space */
-  .network-container {
-    height: 70vh;
-    /* Default height */
-    background-color: var(--bg-primary);
-    /* Adapts with theme */
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-  }
-
-  .network-diagram {
-    height: 100%;
-    width: 100%;
-  }
-</style>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -55,16 +39,6 @@ data lineage{% endblock %}
 {% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-project-diagram"></i> Measure Dependencies Diagram
-  </h1>
-  <p class="page-description">
-    Visualize the relationships between measures and columns to understand data
-    lineage.
-  </p>
-</div>
 
 <!-- Layout with filters on left and diagram on right -->
 <div class="lineage-layout">

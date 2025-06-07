@@ -302,7 +302,6 @@
       threshold: 0.5,
       rootMargin: '0px'
     };
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -390,65 +389,4 @@
     }
   }
 </script>
-
-<style>
-  /* Ripple Effect */
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    transform: scale(0);
-    animation: ripple-animation 0.6s linear;
-    pointer-events: none;
-  }
-
-  @keyframes ripple-animation {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  /* Smooth transitions */
-  .modern-tool-card,
-  .metric-card-enhanced,
-  .insight-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Loading animation for metrics */
-  .metric-value {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  /* Focus styles for accessibility */
-  .modern-button:focus,
-  .modern-tool-card:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    .sidebar {
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.open {
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    }
-  }
-</style>
 {% endblock %}
