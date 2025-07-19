@@ -7,46 +7,54 @@
 
 ## 📋 Overview
 
-The **Power BI Analytics Hub** provides a modern, intuitive interface to explore the structure and components of your Power BI reports. With a completely redesigned user experience, it helps you understand complex data models, optimize measure usage, and identify opportunities for improvement.
+The **Power BI Analytics Hub** is a web-based tool that analyzes exported Power BI report files to help you understand report structure, measure dependencies, and identify optimization opportunities. It provides a modern interface to explore your Power BI reports offline using extracted JSON and TSV files.
 
 ## ✨ Key Features
 
 ### 🎯 **Core Analysis Tools**
 
-- **📊 Modern Dashboard** - Comprehensive overview with animated metrics and clean UI
-- **🔍 Visual Fields Explorer** - Advanced filtering and search capabilities for all report fields
-- **🔗 Data Lineage Diagram** - Interactive network visualization of measure dependencies
-- **💻 DAX Code Analyzer** - DAX analysis with syntax highlighting and similarity detection
-- **🗃️ Source Query Explorer** - M query examination with code highlighting
-- **⚡ Performance Optimizer** - Unused measure detection and optimization recommendations
+- **📊 Interactive Dashboard** - Overview with key metrics about your Power BI report
+- **🔍 Visual Fields Explorer** - Detailed table of all fields used across visuals with advanced filtering
+- **🔗 Data Lineage Diagram** - Interactive network visualization showing measure dependencies and relationships
+- **💻 DAX Code Analyzer** - Browse DAX expressions with syntax highlighting and similarity analysis
+- **🗃️ Source Query Explorer** - Examine M queries from data sources with code highlighting
+- **⚡ Performance Optimizer** - Identify unused measures to optimize report performance
 
-### 🎨 **Modern User Experience (v2.0.0)**
+### 🎨 **Modern User Experience**
 
-- **Clean, Professional Interface** - Modern design following current UX trends
-- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- **Animated Interactions** - Smooth animations and hover effects
-- **Color-Coded Organization** - Intuitive visual hierarchy and categorization
-- **Accessibility Focused** - WCAG compliant design principles
+- **Clean, Professional Interface** - Modern web design with smooth animations
+- **Responsive Design** - Works on desktop, tablet, and mobile devices
+- **Interactive Visualizations** - Clickable network diagrams and sortable tables
+- **Export Capabilities** - Download analysis results as CSV files
+- **Search & Filter** - Find specific measures, visuals, or fields quickly
 
-## 🚀 Quick Start
+## 📋 Requirements
 
-### Prerequisites
+### Data Files Needed
+
+To use this tool, you need to extract the following files from your Power BI environment:
+
+1. **`report.json`** - Power BI report structure (exported from Power BI Service or Desktop)
+2. **`MeasureDependencies.tsv`** - Measure dependency data (can be generated using Tabular Editor or similar tools)
+3. **`model.json`** - Power BI model metadata (exported from Power BI Desktop or Service)
+
+### System Requirements
 
 - Python 3.7+
 - Modern web browser
-- Power BI report files (JSON format)
+- 100MB+ free disk space for data files
+
+## 🚀 Quick Start
 
 ### Installation
 
 1. **Clone the repository:**
-
    ```bash
    git clone https://github.com/plagiagia/PowerBI_AnalysisTool.git
    cd PowerBI_AnalysisTool
    ```
 
-2. **Set up environment:**
-
+2. **Set up Python environment:**
    ```bash
    # Create virtual environment
    python -m venv venv
@@ -59,195 +67,172 @@ The **Power BI Analytics Hub** provides a modern, intuitive interface to explore
    ```
 
 3. **Install dependencies:**
-
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Configure your environment:**
+4. **Prepare your data files:**
+   - Create a `data/` directory in the project root
+   - Place your Power BI files:
+     - `data/report.json` - Your Power BI report structure
+     - `data/MeasureDependencies.tsv` - Measure dependencies
+     - `data/model.json` - Model metadata
 
-   ```bash
-   # Run the setup script
-   python setup_env.py
-
-   # Edit the generated .env file with your settings
-   ```
-
-5. **Prepare your data files:**
-
-   - Place your Power BI report JSON in `data/report.json`
-   - Place your measure dependencies TSV in `data/MeasureDependencies.tsv`
-   - Place your model JSON in `data/model.json`
-
-6. **Launch the application:**
-
+5. **Launch the application:**
    ```bash
    python app.py
    ```
 
-7. **Open your browser** and navigate to `http://localhost:5000`
+6. **Open your browser** and navigate to `http://localhost:5000`
 
 ## 🔍 Feature Guide
 
 ### 📊 Dashboard
 
 Your analytics command center featuring:
+- **Report Metrics** - Total visuals, measures, pages, and unused measures
+- **Visual Statistics** - Most common visual types and distribution
+- **Quick Navigation** - Direct access to all analysis tools
 
-- **Real-time Metrics** - Visual count, measures, pages, and unused elements
-- **Animated Counters** - Engaging data presentation
-- **Quick Access Cards** - Direct links to all analysis tools
-- **Modern Interface** - Clean, professional design
-
-### 🔍 Visual Fields Explorer
+### 🔍 Visual Fields Explorer (`/table-view`)
 
 Comprehensive field analysis with:
+- **Complete Field Inventory** - Every field used across all visuals
+- **Advanced Filtering** - Filter by page, visual type, or field name
+- **Search Functionality** - Find specific fields instantly
+- **Export Options** - Download filtered results as CSV
 
-- **Smart Search** - Find fields across all visuals instantly
-- **Advanced Filters** - Filter by page, visual type, and field category
-- **Export Capabilities** - Download analysis results
-- **Sortable Tables** - Organize data your way
+### 🔗 Data Lineage Diagram (`/lineage-view`)
 
-### 🔗 Data Lineage Diagram
+Understand measure relationships:
+- **Interactive Network Graph** - Visual representation of measure dependencies
+- **Hierarchical Layout** - Clear parent-child relationships
+- **Focus Mode** - Highlight specific measure chains
+- **Measure Details** - View DAX code and dependencies for selected measures
 
-Understand your data relationships:
+### 💻 DAX Code Analyzer (`/dax-expressions`)
 
-- **Interactive Network** - Visualize measure dependencies
-- **Focus Mode** - Highlight specific relationships
-- **Hierarchical Layout** - Clear dependency chains
-- **Export Options** - Share lineage documentation
+Explore your DAX formulas:
+- **Syntax Highlighting** - Professional DAX code presentation
+- **Similarity Analysis** - Find potentially duplicate or similar measures
+- **Search & Filter** - Quickly locate specific measures
+- **Copy & Export** - Easy code sharing and documentation
 
-### 💻 DAX Code Analyzer
+### 🗃️ Source Query Explorer (`/source-explorer`)
 
-Master your DAX formulas:
+M query analysis:
+- **M Language Highlighting** - Clear syntax highlighting for M queries
+- **Query Structure** - Understand data transformation logic
+- **Search Functionality** - Find specific tables or transformations
+- **Export Options** - Download queries for documentation
 
-- **Syntax Highlighting** - Professional code presentation
-- **Similarity Detection** - Find redundant measures
-- **Copy & Export** - Easy code sharing
-- **Search & Filter** - Quickly find specific measures
+### ⚡ Performance Optimizer (`/unused-measures`)
 
-### 🗃️ Source Query Explorer
-
-M query insights:
-
-- **Code Highlighting** - Clear M language syntax
-- **Query Documentation** - Export for team sharing
-- **Search Functionality** - Find specific queries quickly
-- **Copy & Export** - Share query code easily
-
-### ⚡ Performance Optimizer
-
-Boost your report performance:
-
-- **Unused Detection** - Find measures not in use
-- **Impact Analysis** - Understand removal consequences
-- **Cleanup Recommendations** - Identify optimization opportunities
-- **Export Results** - Document unused measures
+Identify optimization opportunities:
+- **Unused Measure Detection** - Find measures not referenced in any visuals
+- **Cleanup Recommendations** - Suggestions for performance improvement
+- **Tabular Editor Scripts** - Generate scripts to help with cleanup
+- **Impact Analysis** - Understand what would be affected by removing measures
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Basic Configuration
 
-Create a `.env` file with:
+The application uses these default file paths (configurable in `config.py`):
+- `data/report.json` - Power BI report structure
+- `data/MeasureDependencies.tsv` - Measure dependency data  
+- `data/model.json` - Power BI model metadata
 
+### Optional Environment Variables
+
+Create a `.env` file for custom settings:
 ```env
-# AI Features (optional)
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o
-AI_TEMPERATURE=0.7
-
 # Flask Configuration
 SECRET_KEY=your_secure_secret_key
 FLASK_ENV=development
 
 # Feature Toggles
-ENABLE_AI_FEATURES=true
 ENABLE_SOURCE_EXPLORER=true
 ENABLE_DAX_EXPLORER=true
 ENABLE_LINEAGE_VIEW=true
 ```
-
-### File Paths
-
-Default data file locations (configurable in `config.py`):
-
-- `data/report.json` - Power BI report structure
-- `data/MeasureDependencies.tsv` - Measure dependency data
-- `data/model.json` - Power BI model metadata
 
 ## 📁 Project Structure
 
 ```
 PowerBI_AnalysisTool/
 ├── 📄 app.py                     # Main Flask application
-├── ⚙️ config.py                  # Configuration management
-├── 🔧 setup_env.py               # Environment setup script
-├── 📊 data_processor.py          # Report data processing
-├── 🔗 lineage_view.py            # Dependency analysis
-├── 🤖 ai_utils.py                # AI integration utilities
+├── ⚙️ config.py                  # Configuration settings
+├── 📊 data_processor.py          # Report data processing logic
+├── 🔗 lineage_view.py            # Measure dependency analysis
 ├── 📁 static/                    # Frontend assets
-│   ├── 🎨 modern.css             # Modern UI styling
+│   ├── 🎨 modern.css             # UI styling
 │   └── ⚡ modern.js              # Interactive features
 ├── 📁 templates/                 # HTML templates
-│   ├── 🏠 base.html              # Base layout
-│   ├── 📊 index.html             # Modern dashboard
+│   ├── 🏠 base.html              # Base layout template
+│   ├── 📊 index.html             # Dashboard
 │   ├── 🔍 table_view.html        # Visual fields explorer
-│   ├── 🔗 lineage_view.html      # Data lineage
+│   ├── 🔗 lineage_view.html      # Data lineage diagram
 │   ├── 💻 dax_expressions.html   # DAX analyzer
 │   ├── 🗃️ source_explorer.html   # M query explorer
 │   └── ⚡ unused_measures.html   # Performance optimizer
-├── 📁 data/                      # Data files directory
-├── 📋 CHANGELOG.md               # Version history
-├── 🐛 ISSUES.md                  # Issue tracking
+├── 📁 data/                      # Data files directory (user-provided)
+├── 📋 requirements.txt           # Python dependencies
 ├── 📜 LICENSE                    # License information
-└── 📖 README.md                  # This documentation
+└── 📖 README.md                  # Documentation
 ```
+
+## 📥 Getting Your Data Files
+
+### Extracting report.json
+1. Open Power BI Desktop
+2. Go to File → Export → Export report as JSON (or use Power BI REST API)
+3. Save as `report.json` in the `data/` folder
+
+### Creating MeasureDependencies.tsv
+You can generate this using tools like:
+- **Tabular Editor** - Export measure dependencies
+- **DAX Studio** - Query model metadata
+- **Power BI External Tools** - Various community tools
+
+Expected TSV format:
+```
+Measure	DAXExpression	ParentMeasures	ChildMeasures	Table	Columns
+Sales	SUM(Sales[Amount])			Sales	Sales[Amount]
+Profit	[Sales] - [Costs]	Sales;Costs		Sales	
+```
+
+### Extracting model.json
+1. Use Power BI REST API to get model metadata
+2. Or export from Tabular Editor
+3. Save as `model.json` in the `data/` folder
 
 ## 🛡️ Security & Privacy
 
-- **Local Processing** - All analysis runs on your machine
-- **No Data Upload** - Your Power BI data stays private
-- **Optional AI** - AI features can be disabled completely
-- **Secure Headers** - Production-ready security configuration
+- **Local Processing** - All analysis runs on your local machine
+- **No Cloud Dependencies** - Works completely offline
+- **Data Privacy** - Your Power BI data never leaves your computer
+- **No External APIs** - All processing is done locally
 
-## 🔄 Version History
+## ❓ Common Issues
 
-### v2.0.0 (2024-12-19) - Major UI/UX Redesign
+### Missing Data Files
+**Error**: "Report data file not found"
+**Solution**: Ensure you have placed the required JSON/TSV files in the `data/` directory
 
-- ✨ Complete modern interface redesign
-- 🎨 Enhanced metrics with animations
-- 🔧 Improved mobile responsiveness
-- 🛡️ Added security headers
-- 📋 Comprehensive documentation
-- 🐛 Fixed multiple UI issues
+### Empty Visualizations
+**Issue**: Lineage diagram or tables show no data
+**Cause**: Data files may be malformed or empty
+**Solution**: Verify your exported files contain the expected data structure
 
-### v1.0.0 - Initial Release
-
-- 🏗️ Core analysis features
-- 🤖 Basic AI integration
-- 📊 Essential reporting tools
-
-## 🚀 Future Roadmap
-
-### High Priority
-
-- 🌙 **Dark Mode Support** - Toggle between light/dark themes
-- 📤 **Export Functionality** - PDF/Excel report generation
-- 🔄 **Real-time Refresh** - Live data updates
-
-### Medium Priority
-
-- 🔍 **Advanced Filtering** - Enhanced search capabilities
-- 👤 **User Preferences** - Personalized settings
-- 📈 **Performance Metrics** - Detailed analytics dashboard
-
-See [ISSUES.md](ISSUES.md) for the complete roadmap.
+### Performance Issues
+**Issue**: Slow loading with large reports
+**Solution**: The tool is designed for offline analysis; large reports may take time to process
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [CHANGELOG.md](CHANGELOG.md) for development guidelines.
-
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/new-feature`)
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
@@ -263,20 +248,18 @@ This project is licensed under a **Custom Non-Commercial License**. See [LICENSE
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/plagiagia/PowerBI_AnalysisTool/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/plagiagia/PowerBI_AnalysisTool/discussions)
-- 📚 **Documentation**: Check [CHANGELOG.md](CHANGELOG.md) and [ISSUES.md](ISSUES.md)
+- 📚 **Documentation**: Check code comments and templates
 
 ## 🌟 Acknowledgments
 
-Built with ❤️ using:
-
+Built with:
 - **Flask** - Python web framework
-- **Vis.js** - Network visualization
+- **Vis.js** - Network visualization library
 - **Prism.js** - Syntax highlighting
-- **OpenAI** - AI-powered features
-- **Modern Web Standards** - HTML5, CSS3, ES6+
+- **Modern Web Standards** - HTML5, CSS3, JavaScript ES6+
 
 ---
 
-**Power BI Analytics Hub v2.0.0** - Transforming Power BI analysis with modern design and AI intelligence.
+**Power BI Analytics Hub v2.0.0** - Offline Power BI report analysis with modern web interface.
 
-© 2024 Power BI Analytics Hub - Built for the Power BI Community
+© 2025 Power BI Analytics Hub - Non-commercial educational tool
