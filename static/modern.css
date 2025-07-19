@@ -542,7 +542,7 @@ body::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-fill-color: transparent;
+  color: transparent; /* Fallback for non-webkit browsers */
   animation: gradientShift 8s ease-in-out infinite;
 }
 
@@ -596,7 +596,7 @@ body::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-fill-color: transparent;
+  color: transparent; /* Fallback for non-webkit browsers */
   line-height: 1;
   margin-bottom: var(--space-xs);
 }
