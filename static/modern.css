@@ -357,53 +357,6 @@ body::before {
   border-top: 1px solid var(--glass-border);
 }
 
-.user-section {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-md);
-  transition: var(--transition-fast);
-}
-
-.user-section:hover {
-  background: var(--bg-hover);
-  border-color: var(--color-primary);
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  background: var(--gradient-primary);
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.25rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-glow);
-}
-
-.user-info {
-  flex: 1;
-}
-
-.user-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-
-.user-role {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
 .footer-actions {
   display: flex;
   justify-content: center;
