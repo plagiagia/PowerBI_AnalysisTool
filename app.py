@@ -194,7 +194,17 @@ def create_app(config_object=None) -> Flask:
     @app.route('/table-view')
     def table_view() -> str:
         dp = get_data_processor()
-        return render_template('table_view.html', table_data=dp.visuals_data)
+        metrics = get_report_metrics()  # This already calculates unique pages
+        
+        # Extract unique pages for the template
+        unique_pages = {row[0] for row in dp.visuals_data if row and row[0]}
+        
+        return render_template(
+            'table_view.html', 
+            table_data=dp.visuals_data,
+            unique_pages=list(unique_pages),
+            metrics=metrics  # Optional: pass full metrics if needed elsewhere
+        )
 
     @app.route('/lineage-view')
     def lineage_view_route() -> str:
