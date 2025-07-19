@@ -13,59 +13,39 @@
 <section class="enhanced-metrics-section">
   <div class="metrics-container">
     <!-- Visual Analytics Card -->
-    <div class="metric-card-enhanced primary">
-      <div class="card-background">
-        <div class="card-icon">
-          <i class="fas fa-chart-bar"></i>
-        </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon">
+        <i class="fas fa-chart-bar"></i>
       </div>
-      <div class="card-content">
-        <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 121 }}">0</div>
-        <div class="metric-label">Total Visuals</div>
-      </div>
-      <div class="card-glow"></div>
+      <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 121 }}">0</div>
+      <div class="metric-label">Total Visuals</div>
     </div>
 
     <!-- Measures Card -->
-    <div class="metric-card-enhanced secondary">
-      <div class="card-background">
-        <div class="card-icon">
-          <i class="fas fa-calculator"></i>
-        </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon">
+        <i class="fas fa-calculator"></i>
       </div>
-      <div class="card-content">
-        <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 258 }}">0</div>
-        <div class="metric-label">DAX Measures</div>
-      </div>
-      <div class="card-glow"></div>
+      <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 258 }}">0</div>
+      <div class="metric-label">DAX Measures</div>
     </div>
 
     <!-- Pages Card -->
-    <div class="metric-card-enhanced accent">
-      <div class="card-background">
-        <div class="card-icon">
-          <i class="fas fa-file-alt"></i>
-        </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon">
+        <i class="fas fa-file-alt"></i>
       </div>
-      <div class="card-content">
-        <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 18 }}">0</div>
-        <div class="metric-label">Report Pages</div>
-      </div>
-      <div class="card-glow"></div>
+      <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 18 }}">0</div>
+      <div class="metric-label">Report Pages</div>
     </div>
 
     <!-- Performance Card -->
-    <div class="metric-card-enhanced warning">
-      <div class="card-background">
-        <div class="card-icon">
-          <i class="fas fa-exclamation-triangle"></i>
-        </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon">
+        <i class="fas fa-exclamation-triangle"></i>
       </div>
-      <div class="card-content">
-        <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 4 }}">0</div>
-        <div class="metric-label">Unused Measures</div>
-      </div>
-      <div class="card-glow"></div>
+      <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 4 }}">0</div>
+      <div class="metric-label">Unused Measures</div>
     </div>
   </div>
 </section>
