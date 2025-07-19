@@ -28,84 +28,99 @@
 {% endblock %} 
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title"><i class="fas fa-table"></i> Visual Fields Table</h1>
-  <p class="page-description">
-    Explore all fields used across visuals in your Power BI report with advanced
-    filtering and search capabilities.
-  </p>
-</div>
-
-<!-- Control Panel -->
-<div class="control-panel">
-  <!-- Search Bar -->
-  <div class="search-container">
-    <div class="search-input-wrapper">
-      <i class="fas fa-search"></i>
-      <input
-        type="search"
-        id="searchBox"
-        placeholder="Search visuals, fields, or pages..."
-        aria-label="Search visual fields"
-      />
-      <button
-        id="clearSearch"
-        class="clear-search"
-        style="display: none"
-        aria-label="Clear search"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="search-count" aria-live="polite"></div>
+<!-- Modern Filter Section -->
+<div class="modern-filter-section">
+  <div class="filter-header">
+    <h3 class="filter-title">
+      <i class="fas fa-filter"></i>
+      Filters & Search
+    </h3>
+    <button id="resetAllFilters" class="reset-button" title="Clear all filters">
+      <i class="fas fa-times"></i>
+      <span>Clear All</span>
+    </button>
   </div>
 
-  <!-- Filters Section -->
-  <div class="filter-section">
-    <div class="filter-controls">
-      <div class="filter-group">
-          <label for="pageFilter" class="filter-label">Page(s):</label>
-        <div class="select-wrapper">
-            <select id="pageFilter" class="filter-select" multiple size="3">
-              <!-- <option value="">All Pages</option> Will be handled by empty selection -->
-            <!-- Will be populated dynamically via JS -->
-          </select>
+  <div class="filter-grid">
+    <!-- Pages Filter -->
+    <div class="filter-group">
+      <label class="filter-label">
+        <i class="fas fa-file-alt"></i>
+        Pages
+      </label>
+      <div class="multi-select-dropdown" id="pageFilterDropdown">
+        <div class="dropdown-trigger">
+          <span class="selected-text">All Pages</span>
           <i class="fas fa-chevron-down"></i>
         </div>
-      </div>
-
-      <div class="filter-group">
-          <label for="visualTypeFilter" class="filter-label">Visual Type(s):</label>
-        <div class="select-wrapper">
-            <select id="visualTypeFilter" class="filter-select" multiple size="3">
-              <!-- <option value="">All Visual Types</option> Will be handled by empty selection -->
-            <!-- Will be populated dynamically via JS -->
-          </select>
-          <i class="fas fa-chevron-down"></i>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label for="fieldFilter" class="filter-label">Field Contains:</label>
-        <div class="select-wrapper">
-          <input
-            type="text"
-            id="fieldFilter"
-            class="filter-input"
-            placeholder="Enter field name..."
-          />
+        <div class="dropdown-content">
+          <div class="select-all-option">
+            <label class="checkbox-label">
+              <input type="checkbox" id="selectAllPages" checked>
+              <span class="checkmark"></span>
+              <span class="label-text">Select All</span>
+            </label>
+          </div>
+          <div class="options-container" id="pageOptions">
+            <!-- Options will be populated via JavaScript -->
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="filter-actions">
-      <button id="applyFilters" class="action-button primary">
-        <i class="fas fa-filter"></i> Apply Filters
-      </button>
-      <button id="resetFilters" class="action-button secondary">
-        <i class="fas fa-undo"></i> Reset
-      </button>
+    <!-- Visual Types Filter -->
+    <div class="filter-group">
+      <label class="filter-label">
+        <i class="fas fa-chart-bar"></i>
+        Visual Types
+      </label>
+      <div class="multi-select-dropdown" id="visualTypeFilterDropdown">
+        <div class="dropdown-trigger">
+          <span class="selected-text">All Types</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="dropdown-content">
+          <div class="select-all-option">
+            <label class="checkbox-label">
+              <input type="checkbox" id="selectAllVisualTypes" checked>
+              <span class="checkmark"></span>
+              <span class="label-text">Select All</span>
+            </label>
+          </div>
+          <div class="options-container" id="visualTypeOptions">
+            <!-- Options will be populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Everything -->
+    <div class="filter-group">
+      <label class="filter-label">
+        <i class="fas fa-search"></i>
+        Search Everything
+      </label>
+      <div class="search-input-container">
+        <input
+          type="text"
+          id="globalSearchInput"
+          class="field-search-input"
+          placeholder="Search visuals, fields, pages..."
+        />
+        <button id="clearGlobalSearch" class="clear-search-btn" style="display: none;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Filters Display -->
+  <div class="active-filters" id="activeFilters" style="display: none;">
+    <div class="active-filters-header">
+      <span class="active-filters-title">Active Filters:</span>
+    </div>
+    <div class="active-filters-list" id="activeFiltersList">
+      <!-- Active filter tags will be populated here -->
     </div>
   </div>
 </div>
@@ -236,7 +251,7 @@
   </div>
 </div>
 
-<!-- Pagination (if needed for large tables) -->
+<!-- Pagination -->
 <div class="pagination-container" id="pagination">
   <div class="pagination-info">
     Showing <span id="showingStart">1</span>-<span id="showingEnd">10</span> of
@@ -272,20 +287,12 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Cache DOM elements
-    const searchBox = document.getElementById("searchBox");
-    const clearSearch = document.getElementById("clearSearch");
     const visualsTable = document.getElementById("visualsTable");
     const tableRows = visualsTable.querySelectorAll("tbody tr");
     const emptyState = document.getElementById("emptyState");
-    const pageFilter = document.getElementById("pageFilter");
-    const visualTypeFilter = document.getElementById("visualTypeFilter");
-    const fieldFilter = document.getElementById("fieldFilter");
-    const applyFilters = document.getElementById("applyFilters");
-    const resetFilters = document.getElementById("resetFilters");
     const clearEmptyState = document.getElementById("clearEmptyState");
     const resultCount = document.getElementById("resultCount");
     const exportCSV = document.getElementById("exportCSV");
-    const searchCount = document.querySelector(".search-count");
 
     // Pagination elements
     const pagination = document.getElementById("pagination");
@@ -319,79 +326,235 @@
       }
     });
 
-    // Populate the filters
-    populateFilterDropdowns();
-
-    // Initialize the view - calculate and update the count of visible rows first
+    // Initialize the view
     currentVisibleRows = tableRows.length;
     updateResultCount();
-    setupPagination(); // Make sure pagination is initialized on page load
-    applyPagination(); // Apply pagination immediately
+    setupPagination();
+    applyPagination();
+
+    // Initialize modern filters
+    initializeModernFilters();
 
     // Set up event listeners
     setupEventListeners();
 
     /**
-     * Populate filter dropdowns with unique values
+     * Initialize modern filter system
      */
-    function populateFilterDropdowns() {
-      // Populate page filter dropdown
-      Array.from(uniquePages)
-        .sort()
-        .forEach((page) => {
-          const option = document.createElement("option");
-          option.value = page;
-          option.textContent = page;
-          pageFilter.appendChild(option);
+    function initializeModernFilters() {
+      const pageDropdown = document.getElementById('pageFilterDropdown');
+      const visualTypeDropdown = document.getElementById('visualTypeFilterDropdown');
+      const globalSearchInput = document.getElementById('globalSearchInput');
+      const clearGlobalSearch = document.getElementById('clearGlobalSearch');
+      const resetAllFilters = document.getElementById('resetAllFilters');
+      const activeFilters = document.getElementById('activeFilters');
+      const activeFiltersList = document.getElementById('activeFiltersList');
+
+      // Initialize dropdowns
+      initializeDropdown(pageDropdown, 'pageOptions', 'selectAllPages');
+      initializeDropdown(visualTypeDropdown, 'visualTypeOptions', 'selectAllVisualTypes');
+
+      // Populate dropdown options
+      populatePageOptions();
+      populateVisualTypeOptions();
+
+      // Global search functionality
+      globalSearchInput.addEventListener('input', function() {
+        const hasValue = this.value.trim().length > 0;
+        clearGlobalSearch.style.display = hasValue ? 'block' : 'none';
+        applyFiltersAndSearch();
+      });
+
+      clearGlobalSearch.addEventListener('click', function() {
+        globalSearchInput.value = '';
+        this.style.display = 'none';
+        globalSearchInput.focus();
+        applyFiltersAndSearch();
+      });
+
+      // Reset all filters
+      resetAllFilters.addEventListener('click', function() {
+        resetAllFilterValues();
+        applyFiltersAndSearch();
+      });
+
+      function initializeDropdown(dropdown, optionsContainerId, selectAllId) {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const content = dropdown.querySelector('.dropdown-content');
+        const selectAll = document.getElementById(selectAllId);
+
+        // Toggle dropdown
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const isActive = content.classList.contains('show');
+          
+          // Close all other dropdowns
+          document.querySelectorAll('.dropdown-content.show').forEach(dc => {
+            dc.classList.remove('show');
+            dc.parentElement.querySelector('.dropdown-trigger').classList.remove('active');
+          });
+
+          if (!isActive) {
+            content.classList.add('show');
+            trigger.classList.add('active');
+          }
         });
 
-      // Populate visual type filter dropdown
-      Array.from(uniqueVisualTypes)
-        .sort()
-        .forEach((type) => {
-          const option = document.createElement("option");
-          option.value = type;
-          option.textContent = type;
-          visualTypeFilter.appendChild(option);
+        // Select all functionality
+        selectAll.addEventListener('change', function() {
+          const checkboxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]');
+          checkboxes.forEach(cb => cb.checked = this.checked);
+          updateDropdownText(dropdown);
+          applyFiltersAndSearch();
         });
+
+        // Individual option changes
+        dropdown.addEventListener('change', function(e) {
+          if (e.target.type === 'checkbox' && e.target !== selectAll) {
+            updateSelectAllState(dropdown, selectAllId);
+            updateDropdownText(dropdown);
+            applyFiltersAndSearch();
+          }
+        });
+      }
+
+      function updateSelectAllState(dropdown, selectAllId) {
+        const selectAll = document.getElementById(selectAllId);
+        const checkboxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]');
+        const checkedBoxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]:checked');
+        
+        selectAll.checked = checkboxes.length === checkedBoxes.length;
+        selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
+      }
+
+      function updateDropdownText(dropdown) {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const selectedText = trigger.querySelector('.selected-text');
+        const checkboxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]:checked');
+        
+        if (checkboxes.length === 0) {
+          selectedText.textContent = 'None selected';
+        } else if (checkboxes.length === 1) {
+          selectedText.textContent = checkboxes[0].parentElement.querySelector('.label-text').textContent;
+        } else {
+          selectedText.textContent = `${checkboxes.length} selected`;
+        }
+      }
+
+      function updateActiveFilters() {
+        const activeFilterTags = [];
+
+        // Check page filters
+        const selectedPages = Array.from(document.querySelectorAll('#pageOptions input[type="checkbox"]:checked'))
+          .map(cb => cb.parentElement.querySelector('.label-text').textContent);
+        
+        if (selectedPages.length > 0 && selectedPages.length < uniquePages.size) {
+          activeFilterTags.push({
+            type: 'pages',
+            text: `Pages: ${selectedPages.length === 1 ? selectedPages[0] : selectedPages.length + ' pages'}`,
+            value: selectedPages
+          });
+        }
+
+        // Check visual type filters
+        const selectedTypes = Array.from(document.querySelectorAll('#visualTypeOptions input[type="checkbox"]:checked'))
+          .map(cb => cb.parentElement.querySelector('.label-text').textContent);
+        
+        if (selectedTypes.length > 0 && selectedTypes.length < uniqueVisualTypes.size) {
+          activeFilterTags.push({
+            type: 'visualTypes',
+            text: `Types: ${selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length + ' types'}`,
+            value: selectedTypes
+          });
+        }
+
+        // Check global search
+        const globalSearch = globalSearchInput.value.trim();
+        if (globalSearch) {
+          activeFilterTags.push({
+            type: 'globalSearch',
+            text: `Search: "${globalSearch}"`,
+            value: globalSearch
+          });
+        }
+
+        // Update active filters display
+        if (activeFilterTags.length > 0) {
+          activeFilters.style.display = 'block';
+          activeFiltersList.innerHTML = activeFilterTags.map(tag => 
+            `<div class="filter-tag">
+              <span>${tag.text}</span>
+              <button class="filter-tag-remove" onclick="removeFilter('${tag.type}')" title="Remove filter">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>`
+          ).join('');
+        } else {
+          activeFilters.style.display = 'none';
+        }
+      }
+
+      function resetAllFilterValues() {
+        // Reset page filters
+        document.querySelectorAll('#pageOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
+        document.getElementById('selectAllPages').checked = true;
+        
+        // Reset visual type filters
+        document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
+        document.getElementById('selectAllVisualTypes').checked = true;
+        
+        // Reset global search
+        globalSearchInput.value = '';
+        clearGlobalSearch.style.display = 'none';
+        
+        // Update dropdown texts
+        document.querySelector('#pageFilterDropdown .selected-text').textContent = 'All Pages';
+        document.querySelector('#visualTypeFilterDropdown .selected-text').textContent = 'All Types';
+      }
+
+      function populatePageOptions() {
+        const container = document.getElementById('pageOptions');
+        const pages = Array.from(uniquePages).sort();
+        
+        container.innerHTML = pages.map(page => 
+          `<label class="checkbox-label">
+            <input type="checkbox" value="${page}" checked>
+            <span class="checkmark"></span>
+            <span class="label-text">${page}</span>
+          </label>`
+        ).join('');
+      }
+
+      function populateVisualTypeOptions() {
+        const container = document.getElementById('visualTypeOptions');
+        const types = Array.from(uniqueVisualTypes).sort();
+        
+        container.innerHTML = types.map(type => 
+          `<label class="checkbox-label">
+            <input type="checkbox" value="${type}" checked>
+            <span class="checkmark"></span>
+            <span class="label-text">${type}</span>
+          </label>`
+        ).join('');
+      }
+
+      // Make functions accessible globally
+      window.updateActiveFilters = updateActiveFilters;
+      window.resetAllFilterValues = resetAllFilterValues;
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.dropdown-content.show').forEach(content => {
+          content.classList.remove('show');
+          content.parentElement.querySelector('.dropdown-trigger').classList.remove('active');
+        });
+      });
     }
 
     /**
      * Set up event listeners for interactive elements
      */
     function setupEventListeners() {
-      // Search box
-      if (searchBox) {
-        searchBox.addEventListener("input", function () {
-          clearSearch.style.display = this.value ? "block" : "none";
-          // Use debounce to improve search performance
-          clearTimeout(this.searchTimeout);
-          this.searchTimeout = setTimeout(() => {
-            applyFiltersAndSearch();
-          }, 300);
-        });
-      }
-
-      // Clear search button
-      if (clearSearch) {
-        clearSearch.addEventListener("click", function () {
-          searchBox.value = "";
-          clearSearch.style.display = "none";
-          applyFiltersAndSearch();
-          searchBox.focus();
-        });
-      }
-
-      // Apply filters button
-      if (applyFilters) {
-        applyFilters.addEventListener("click", applyFiltersAndSearch);
-      }
-
-      // Reset filters button
-      if (resetFilters) {
-        resetFilters.addEventListener("click", resetAllFilters);
-      }
-
       // Clear empty state button
       if (clearEmptyState) {
         clearEmptyState.addEventListener("click", resetAllFilters);
@@ -440,10 +603,9 @@
     }
 
     /**
-     * Improved search function - searches all content including nested elements
+     * Search function - searches all content including nested elements
      */
     function searchInElement(element, term) {
-      // Get all text content, including text in child elements
       const allText = element.textContent.toLowerCase();
       return allText.includes(term);
     }
@@ -452,10 +614,16 @@
      * Apply all filters and search
      */
     function applyFiltersAndSearch() {
-      const searchValue = searchBox ? searchBox.value.toLowerCase() : "";
-      const selectedPages = pageFilter ? Array.from(pageFilter.selectedOptions).map(option => option.value) : [];
-      const selectedVisualTypes = visualTypeFilter ? Array.from(visualTypeFilter.selectedOptions).map(option => option.value) : [];
-      const fieldText = fieldFilter ? fieldFilter.value.toLowerCase() : "";
+      // Get global search value
+      const searchValue = document.getElementById('globalSearchInput')?.value.toLowerCase() || "";
+      
+      // Get selected pages from dropdown
+      const selectedPages = Array.from(document.querySelectorAll('#pageOptions input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
+      
+      // Get selected visual types from dropdown  
+      const selectedVisualTypes = Array.from(document.querySelectorAll('#visualTypeOptions input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
 
       let visibleItems = 0;
 
@@ -473,18 +641,13 @@
         const cells = row.querySelectorAll("td");
         const pageCell = cells[0].textContent.trim();
         const visualTypeCell = cells[1].textContent.trim();
-        const fieldsCell = cells[3]; // Now using the element, not just text
 
         const pageMatches = selectedPages.length === 0 || selectedPages.includes(pageCell);
         const typeMatches = selectedVisualTypes.length === 0 || selectedVisualTypes.includes(visualTypeCell.trim());
         
-        // Improved field filtering - search both regular text and inner HTML
-        const fieldMatches = !fieldText || searchInElement(fieldsCell, fieldText);
-
-        // Improved search approach that searches the entire row's content
+        // Global search - search entire row content
         let searchMatches = true;
         if (searchValue) {
-          // First check if the row contains the search term anywhere
           searchMatches = searchInElement(row, searchValue);
           
           // If it matches, highlight occurrences in appropriate cells
@@ -498,7 +661,7 @@
           }
         }
 
-        const isVisible = pageMatches && typeMatches && fieldMatches && searchMatches;
+        const isVisible = pageMatches && typeMatches && searchMatches;
         row.classList.toggle("filtered-out", !isVisible);
 
         if (isVisible) visibleItems++;
@@ -510,33 +673,20 @@
       updateEmptyState();
       setupPagination();
       applyPagination();
-
-      // Update search count display
-      if (searchCount && searchValue) {
-        searchCount.textContent = `${visibleItems} matches`;
-      } else if (searchCount) {
-        searchCount.textContent = "";
-      }
+      window.updateActiveFilters && window.updateActiveFilters();
     }
 
     /**
      * Reset all filters and search
      */
     function resetAllFilters() {
-      if (searchBox) searchBox.value = "";
-      if (pageFilter) {
-          Array.from(pageFilter.options).forEach(option => option.selected = false);
-      }
-      if (visualTypeFilter) {
-          Array.from(visualTypeFilter.options).forEach(option => option.selected = false);
-      }
-      if (fieldFilter) fieldFilter.value = "";
-      if (clearSearch) clearSearch.style.display = "none";
+      // Reset modern filters
+      window.resetAllFilterValues && window.resetAllFilterValues();
 
       // Clear highlights
       document.querySelectorAll(".search-highlight").forEach((el) => {
         const parent = el.parentNode;
-        parent.textContent = parent.textContent; // Remove highlight by replacing with text
+        parent.textContent = parent.textContent;
       });
 
       // Show all rows
@@ -553,20 +703,12 @@
       updateEmptyState();
       setupPagination();
       applyPagination();
-
-      // Clear search count
-      if (searchCount) {
-        searchCount.textContent = "";
-      }
     }
 
     /**
      * Highlight search term in a cell
-     * @param {HTMLElement} cell - Cell element containing text
-     * @param {string} term - Term to highlight
      */
     function highlightSearchTerm(cell, term) {
-      // Skip cells with complex HTML structure
       if (cell.children.length > 0 && !cell.classList.contains("field-list")) {
         return;
       }
@@ -574,7 +716,6 @@
       const originalText = cell.textContent;
       const regex = new RegExp("(" + escapeRegExp(term) + ")", "gi");
 
-      // Only apply highlighting to simple text cells
       if (cell.children.length === 0) {
         cell.innerHTML = originalText.replace(
           regex,
@@ -585,8 +726,6 @@
 
     /**
      * Escape special characters in a string for use in a regex
-     * @param {string} string - String to escape
-     * @returns {string} Escaped string
      */
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -620,18 +759,13 @@
     function setupPagination() {
       if (!pagination) return;
 
-      // Calculate total pages
       totalPages = Math.ceil(currentVisibleRows / itemsPerPage);
-      
-      // Make sure total pages is at least 1
       totalPages = Math.max(1, totalPages);
 
-      // Adjust current page if needed
       if (currentPage > totalPages) {
         currentPage = Math.max(1, totalPages);
       }
 
-      // Update pagination controls
       if (prevPage) {
         prevPage.disabled = currentPage <= 1;
       }
@@ -640,25 +774,20 @@
         nextPage.disabled = currentPage >= totalPages;
       }
 
-      // Generate page buttons
       if (paginationPages) {
         paginationPages.innerHTML = "";
 
-        // Determine page range to show
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, startPage + 4);
 
-        // Adjust if we're near the end
         if (endPage - startPage < 4) {
           startPage = Math.max(1, endPage - 4);
         }
 
-        // First page button if not at the beginning
         if (startPage > 1) {
           addPageButton(1);
 
           if (startPage > 2) {
-            // Add ellipsis
             const ellipsis = document.createElement("span");
             ellipsis.className = "pagination-ellipsis";
             ellipsis.textContent = "...";
@@ -666,15 +795,12 @@
           }
         }
 
-        // Page buttons
         for (let i = startPage; i <= endPage; i++) {
           addPageButton(i);
         }
 
-        // Last page button if not at the end
         if (endPage < totalPages) {
           if (endPage < totalPages - 1) {
-            // Add ellipsis
             const ellipsis = document.createElement("span");
             ellipsis.className = "pagination-ellipsis";
             ellipsis.textContent = "...";
@@ -685,11 +811,9 @@
         }
       }
 
-      // Update "showing" text
       let start = (currentPage - 1) * itemsPerPage + 1;
       let end = Math.min(start + itemsPerPage - 1, currentVisibleRows);
       
-      // Handle case with 0 items
       if (currentVisibleRows === 0) {
         start = 0;
         end = 0;
@@ -698,7 +822,6 @@
       if (showingStart) showingStart.textContent = start;
       if (showingEnd) showingEnd.textContent = end;
 
-      // Show pagination always, just disable controls if only one page
       if (pagination) {
         pagination.style.display = "flex";
       }
@@ -706,7 +829,6 @@
 
     /**
      * Add a page button to the pagination controls
-     * @param {number} pageNum - Page number
      */
     function addPageButton(pageNum) {
       const button = document.createElement("button");
@@ -723,14 +845,11 @@
 
     /**
      * Go to a specific page
-     * @param {number} pageNum - Page number to go to
      */
     function goToPage(pageNum) {
       currentPage = pageNum;
       setupPagination();
       applyPagination();
-
-      // Scroll to top of table
       visualsTable.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
@@ -741,7 +860,6 @@
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage;
 
-      // Apply to table rows
       let visibleIndex = 0;
       tableRows.forEach((row) => {
         if (!row.classList.contains("filtered-out")) {
@@ -754,28 +872,22 @@
 
     /**
      * Sort the table by a specific column
-     * @param {string} column - Column to sort by ('page', 'type', or 'name')
      */
     function sortTable(column) {
       const header = document.querySelector(`th[data-sort="${column}"]`);
       const isAscending = !header.classList.contains("sort-asc");
 
-      // Update sort indicators on all headers
       document.querySelectorAll("th.sortable").forEach((th) => {
         th.classList.remove("sort-asc", "sort-desc");
       });
 
-      // Add appropriate sort indicator to the current header
       header.classList.add(isAscending ? "sort-asc" : "sort-desc");
 
-      // Get index of the column
       const headerCells = Array.from(visualsTable.querySelectorAll("thead th"));
       const columnIndex = headerCells.indexOf(header);
 
-      // Create array of rows for sorting
       const rows = Array.from(tableRows);
 
-      // Sort rows
       rows.sort((a, b) => {
         const cellA = a.querySelectorAll("td")[columnIndex].textContent.trim();
         const cellB = b.querySelectorAll("td")[columnIndex].textContent.trim();
@@ -785,11 +897,9 @@
           : cellB.localeCompare(cellA);
       });
 
-      // Reinsert rows in new order
       const tbody = visualsTable.querySelector("tbody");
       rows.forEach((row) => tbody.appendChild(row));
 
-      // Reset to first page and apply pagination
       currentPage = 1;
       setupPagination();
       applyPagination();
@@ -799,23 +909,18 @@
      * Export the current visible data as CSV
      */
     function exportTableToCSV() {
-      // Get headers
       const headers = Array.from(visualsTable.querySelectorAll("thead th")).map(
         (th) => th.textContent.trim().replace(/[\n\r]+/g, " ")
       );
 
-      // Prepare CSV rows
       const csvRows = [];
       csvRows.push(headers.join(","));
 
-      // Add visible data rows
       tableRows.forEach((row) => {
         if (!row.classList.contains("filtered-out")) {
           const cells = row.querySelectorAll("td");
           const values = Array.from(cells).map((cell) => {
-            // Get text and clean it for CSV
             let text = cell.textContent.trim().replace(/[\n\r]+/g, " ");
-            // Escape quotes and wrap in quotes if contains comma
             if (text.includes(",") || text.includes('"')) {
               text = '"' + text.replace(/"/g, '""') + '"';
             }
@@ -825,10 +930,8 @@
         }
       });
 
-      // Create CSV content
       const csvContent = csvRows.join("\n");
 
-      // Create download link
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -837,14 +940,11 @@
       link.style.display = "none";
       document.body.appendChild(link);
 
-      // Trigger download
       link.click();
 
-      // Clean up
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      // Show notification
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
           "Data exported to CSV successfully",
@@ -853,7 +953,29 @@
       }
     }
 
-    // Initial setup - apply pagination and update counts
+    // Make removeFilter function global for the filter tags
+    window.removeFilter = function(filterType) {
+      switch(filterType) {
+        case 'pages':
+          document.querySelectorAll('#pageOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
+          document.getElementById('selectAllPages').checked = true;
+          document.querySelector('#pageFilterDropdown .selected-text').textContent = 'All Pages';
+          break;
+        case 'visualTypes':
+          document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
+          document.getElementById('selectAllVisualTypes').checked = true;
+          document.querySelector('#visualTypeFilterDropdown .selected-text').textContent = 'All Types';
+          break;
+        case 'globalSearch':
+          document.getElementById('globalSearchInput').value = '';
+          document.getElementById('clearGlobalSearch').style.display = 'none';
+          break;
+      }
+      
+      applyFiltersAndSearch();
+    };
+
+    // Initial setup
     currentVisibleRows = tableRows.length;
     updateResultCount();
     applyPagination();
