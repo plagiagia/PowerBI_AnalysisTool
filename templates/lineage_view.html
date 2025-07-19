@@ -26,10 +26,6 @@ data lineage{% endblock %}
 <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <!-- Include FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<!-- Include Showdown.js for Markdown to HTML conversion -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-<!-- Include AI features CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='lineage-ai.css') }}" />
 <style>
   /* Ensure network diagram container takes available space */
   .network-container {
@@ -38,6 +34,7 @@ data lineage{% endblock %}
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
   }
+
   .network-diagram {
     height: 100%;
     width: 100%;
@@ -276,12 +273,6 @@ data lineage{% endblock %}
             <button id="expandedTab" class="measure-tab">
               <i class="fas fa-expand"></i> Expanded Definition
             </button>
-            <button id="optimizedTab" class="measure-tab">
-              <i class="fas fa-magic"></i> Optimized
-            </button>
-            <button id="explanationTab" class="measure-tab">
-              <i class="fas fa-book-open"></i> Explanation
-            </button>
           </div>
 
           <!-- Measure content -->
@@ -300,27 +291,6 @@ data lineage{% endblock %}
               </div>
             </div>
 
-            <!-- Optimized definition tab content -->
-            <div id="optimizedDefinition" class="tab-content">
-              <div class="code-container">
-                <pre><code id="optimizedCode" class="language-dax">Select a measure to view its optimized definition</code></pre>
-              </div>
-              <div class="ai-loading" id="optimizedLoading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">AI is optimizing the measure...</div>
-              </div>
-            </div>
-
-            <!-- Explanation tab content -->
-            <div id="explanationDefinition" class="tab-content">
-              <div class="explanation-container" id="explanationContent">
-                <div class="placeholder-text">Select a measure to view its explanation</div>
-              </div>
-              <div class="ai-loading" id="explanationLoading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">AI is generating explanation...</div>
-              </div>
-            </div>
           </div>
 
           <!-- Referenced measures section -->
@@ -355,8 +325,6 @@ data lineage{% endblock %}
 <!-- Include Vis Network JS -->
 <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
 
-<!-- Include AI features JS -->
-<script src="{{ url_for('static', filename='lineage-ai.js') }}"></script>
 
 <!-- Data for the network diagram -->
 <script>
@@ -418,7 +386,7 @@ data lineage{% endblock %}
     updateStatistics();
 
     // Listen for theme changes from base.html
-    document.addEventListener('themeChanged', function(event) {
+    document.addEventListener('themeChanged', function (event) {
       if (network) { // Check if network is initialized
         const isDarkMode = event.detail.theme === 'dark';
         const optionsToSet = getVisOptions(isDarkMode);
@@ -426,132 +394,132 @@ data lineage{% endblock %}
 
         // Update node colors directly as setOptions might not refresh them from dataset
         if (nodeDataset) {
-            const allNodes = nodeDataset.get({ returnType: 'Array' });
-            const updatedNodes = allNodes.map(node => {
-                // Ensure node.nodeType is used, which is set in processNodesAndEdges
-                const newColors = getNodeColor(node, isDarkMode);
-                return { ...node, id: node.id, color: newColors }; // Ensure id is part of the update object
-            });
-            if (updatedNodes.length > 0) {
-                 nodeDataset.update(updatedNodes);
-            }
+          const allNodes = nodeDataset.get({ returnType: 'Array' });
+          const updatedNodes = allNodes.map(node => {
+            // Ensure node.nodeType is used, which is set in processNodesAndEdges
+            const newColors = getNodeColor(node, isDarkMode);
+            return { ...node, id: node.id, color: newColors }; // Ensure id is part of the update object
+          });
+          if (updatedNodes.length > 0) {
+            nodeDataset.update(updatedNodes);
+          }
         }
       }
     });
 
     function getCSSVariable(variableName, defaultValue = '#000000') {
-        if (typeof window === 'undefined') return defaultValue; // Guard for server-side or pre-DOM environments
-        const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
-        return value || defaultValue;
+      if (typeof window === 'undefined') return defaultValue; // Guard for server-side or pre-DOM environments
+      const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+      return value || defaultValue;
     }
 
     function getVisOptions(isDarkMode) {
-        const commonNodeOptions = {
-            shape: "dot",
-            size: 16,
-            borderWidth: 2,
-            shadow: true,
-        };
+      const commonNodeOptions = {
+        shape: "dot",
+        size: 16,
+        borderWidth: 2,
+        shadow: true,
+      };
 
-        const commonEdgeOptions = {
-            width: 1,
-            arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-            smooth: { enabled: true, type: "dynamic", roundness: 0.5 }
-        };
+      const commonEdgeOptions = {
+        width: 1,
+        arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+        smooth: { enabled: true, type: "dynamic", roundness: 0.5 }
+      };
 
-        const commonInteractionOptions = {
-            hover: true,
-            tooltipDelay: 200,
-            hideEdgesOnDrag: true,
-            navigationButtons: false,
-            keyboard: { enabled: true, speed: { x: 10, y: 10, zoom: 0.1 } },
-            zoomView: true
-        };
+      const commonInteractionOptions = {
+        hover: true,
+        tooltipDelay: 200,
+        hideEdgesOnDrag: true,
+        navigationButtons: false,
+        keyboard: { enabled: true, speed: { x: 10, y: 10, zoom: 0.1 } },
+        zoomView: true
+      };
 
-        const commonPhysicsOptions = {
-            enabled: true,
-            barnesHut: {
-                gravitationalConstant: -2000,
-                centralGravity: 0.1,
-                springLength: 95,
-                springConstant: 0.04,
-                damping: 0.09
-            },
-            stabilization: {
-                enabled: true,
-                iterations: 1000,
-                updateInterval: 50
-            }
-        };
-
-        const commonLayoutOptions = {
-            improvedLayout: true,
-            // Hierarchical settings are applied conditionally in applyHierarchicalLayout / applyForceDirectedLayout
-        };
-
-        if (isDarkMode) {
-            return {
-                nodes: {
-                    ...commonNodeOptions,
-                    font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#e0e0e0') }
-                },
-                edges: {
-                    ...commonEdgeOptions,
-                    color: {
-                        color: getCSSVariable('--gray-500', '#6f6f6f'),
-                        highlight: getCSSVariable('--primary-light', '#5fa0e6')
-                    }
-                },
-                physics: commonPhysicsOptions,
-                layout: commonLayoutOptions,
-                interaction: commonInteractionOptions,
-                // Canvas background for Vis.js is typically handled by styling the container div.
-                // Ensure #mynetwork or .network-container background is themed via CSS.
-            };
-        } else { // Light Mode
-            return {
-                nodes: {
-                    ...commonNodeOptions,
-                    font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#212529') }
-                },
-                edges: {
-                    ...commonEdgeOptions,
-                    color: {
-                        color: "#aaa",
-                        highlight: "#3498db"
-                    }
-                },
-                physics: commonPhysicsOptions,
-                layout: commonLayoutOptions,
-                interaction: commonInteractionOptions
-            };
+      const commonPhysicsOptions = {
+        enabled: true,
+        barnesHut: {
+          gravitationalConstant: -2000,
+          centralGravity: 0.1,
+          springLength: 95,
+          springConstant: 0.04,
+          damping: 0.09
+        },
+        stabilization: {
+          enabled: true,
+          iterations: 1000,
+          updateInterval: 50
         }
+      };
+
+      const commonLayoutOptions = {
+        improvedLayout: true,
+        // Hierarchical settings are applied conditionally in applyHierarchicalLayout / applyForceDirectedLayout
+      };
+
+      if (isDarkMode) {
+        return {
+          nodes: {
+            ...commonNodeOptions,
+            font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#e0e0e0') }
+          },
+          edges: {
+            ...commonEdgeOptions,
+            color: {
+              color: getCSSVariable('--gray-500', '#6f6f6f'),
+              highlight: getCSSVariable('--primary-light', '#5fa0e6')
+            }
+          },
+          physics: commonPhysicsOptions,
+          layout: commonLayoutOptions,
+          interaction: commonInteractionOptions,
+          // Canvas background for Vis.js is typically handled by styling the container div.
+          // Ensure #mynetwork or .network-container background is themed via CSS.
+        };
+      } else { // Light Mode
+        return {
+          nodes: {
+            ...commonNodeOptions,
+            font: { size: 12, face: "Inter, Segoe UI, sans-serif", color: getCSSVariable('--text-primary', '#212529') }
+          },
+          edges: {
+            ...commonEdgeOptions,
+            color: {
+              color: "#aaa",
+              highlight: "#3498db"
+            }
+          },
+          physics: commonPhysicsOptions,
+          layout: commonLayoutOptions,
+          interaction: commonInteractionOptions
+        };
+      }
     }
 
     function getNodeColor(node, isDarkMode) {
-        let baseColors;
-        // node.type comes from backend (Python: self.nodes.append({'id': ..., 'type': 'column'})
-        // node.nodeType is a JS-assigned property for more detailed classification.
-        // Prefer node.nodeType if available, otherwise fallback to node.type for columns.
-        const type = node.nodeType || (node.type === "column" ? "column" : "unknown");
+      let baseColors;
+      // node.type comes from backend (Python: self.nodes.append({'id': ..., 'type': 'column'})
+      // node.nodeType is a JS-assigned property for more detailed classification.
+      // Prefer node.nodeType if available, otherwise fallback to node.type for columns.
+      const type = node.nodeType || (node.type === "column" ? "column" : "unknown");
 
-        if (type === "column") {
-            baseColors = isDarkMode ? { background: getCSSVariable('--accent', '#17a2b8'), border: getCSSVariable('--primary-dark', '#0052a3') }
-                                    : { background: "#ADD8E6", border: "#87CEEB" };
-        } else if (type === "parent") { // Pure parent or intermediate treated as parent for color
-            baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
-                                    : { background: "#F1C83B", border: "#DAA520" };
-        } else if (type === "final") { // Pure child
-            baseColors = isDarkMode ? { background: getCSSVariable('--success', '#28a745'), border: getCSSVariable('--primary-dark', '#0052a3') }
-                                    : { background: "#23C4A7", border: "#20B2AA" };
-        } else if (type === "intermediate") { // Explicit intermediate if ever needed (currently same as parent)
-             baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
-                                    : { background: "#F1C83B", border: "#DAA520" };
-        } else { // Isolated or unknown
-            baseColors = isDarkMode ? { background: getCSSVariable('--gray-600', '#495057'), border: getCSSVariable('--gray-700', '#343a40') }
-                                    : { background: "#CCCCCC", border: "#999999" };
-        }
-        return baseColors;
+      if (type === "column") {
+        baseColors = isDarkMode ? { background: getCSSVariable('--accent', '#17a2b8'), border: getCSSVariable('--primary-dark', '#0052a3') }
+          : { background: "#ADD8E6", border: "#87CEEB" };
+      } else if (type === "parent") { // Pure parent or intermediate treated as parent for color
+        baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
+          : { background: "#F1C83B", border: "#DAA520" };
+      } else if (type === "final") { // Pure child
+        baseColors = isDarkMode ? { background: getCSSVariable('--success', '#28a745'), border: getCSSVariable('--primary-dark', '#0052a3') }
+          : { background: "#23C4A7", border: "#20B2AA" };
+      } else if (type === "intermediate") { // Explicit intermediate if ever needed (currently same as parent)
+        baseColors = isDarkMode ? { background: getCSSVariable('--warning', '#ffc107'), border: getCSSVariable('--primary-dark', '#0052a3') }
+          : { background: "#F1C83B", border: "#DAA520" };
+      } else { // Isolated or unknown
+        baseColors = isDarkMode ? { background: getCSSVariable('--gray-600', '#495057'), border: getCSSVariable('--gray-700', '#343a40') }
+          : { background: "#CCCCCC", border: "#999999" };
+      }
+      return baseColors;
     }
 
     /**
@@ -580,7 +548,7 @@ data lineage{% endblock %}
         applyHierarchicalLayout();
       } else if (forceDirectedRadio && forceDirectedRadio.checked) {
         // Ensure physics are enabled for force-directed if it was turned off after stabilization
-        network.setOptions({ physics: { enabled: true }});
+        network.setOptions({ physics: { enabled: true } });
       }
 
 
@@ -590,7 +558,7 @@ data lineage{% endblock %}
         }
         // Turn off physics after initial stabilization for performance if not hierarchical
         if (forceDirectedRadio && forceDirectedRadio.checked) {
-             network.setOptions({ physics: { enabled: false } });
+          network.setOptions({ physics: { enabled: false } });
         }
       });
 
@@ -629,17 +597,17 @@ data lineage{% endblock %}
 
       nodesArray.forEach((node) => {
         if (node.type === "column") {
-            node.nodeType = "column";
-            node.shape = "box";
-            columnNodeIds.add(node.id);
+          node.nodeType = "column";
+          node.shape = "box";
+          columnNodeIds.add(node.id);
         } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-            node.nodeType = "parent";
+          node.nodeType = "parent";
         } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-            node.nodeType = "final";
+          node.nodeType = "final";
         } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-            node.nodeType = "intermediate"; // Explicitly intermediate
+          node.nodeType = "intermediate"; // Explicitly intermediate
         } else {
-            node.nodeType = "isolated";
+          node.nodeType = "isolated";
         }
         node.color = getNodeColor(node, isDarkMode);
       });
@@ -835,14 +803,14 @@ data lineage{% endblock %}
       network.setOptions({
         layout: { hierarchical: { enabled: false } },
         physics: {
-            enabled: true,
-            stabilization: { enabled: true, iterations: 1000 } // Re-enable stabilization
+          enabled: true,
+          stabilization: { enabled: true, iterations: 1000 } // Re-enable stabilization
         }
       });
       // Turn off physics after stabilization
-        network.once("stabilizationIterationsDone", function () {
-            network.setOptions({ physics: { enabled: false } });
-        });
+      network.once("stabilizationIterationsDone", function () {
+        network.setOptions({ physics: { enabled: false } });
+      });
     }
 
     /**
@@ -986,8 +954,8 @@ data lineage{% endblock %}
     const clearMeasureSearch = document.getElementById("clearMeasureSearch");
     const exportMeasure = document.getElementById("exportMeasure");
 
-    if (originalTab) originalTab.addEventListener("click", () => window.LineageAI.switchTab("original"));
-    if (expandedTab) expandedTab.addEventListener("click", () => window.LineageAI.switchTab("expanded"));
+    if (originalTab) originalTab.addEventListener("click", () => switchTab("original"));
+    if (expandedTab) expandedTab.addEventListener("click", () => switchTab("expanded"));
     if (copyMeasure) copyMeasure.addEventListener("click", copyMeasureDefinition);
     if (expandCollapseAll) expandCollapseAll.addEventListener("click", toggleExpandCollapse);
     if (searchMeasure) searchMeasure.addEventListener("input", (e) => searchInMeasure(e.target.value));
@@ -1034,10 +1002,6 @@ data lineage{% endblock %}
       if (originalCode && node.dax) originalCode.textContent = node.dax; else if (originalCode) originalCode.textContent = "N/A";
       if (expandedCode) expandedCode.textContent = generateExpandedDefinition(node); else if (expandedCode) expandedCode.textContent = "N/A";
 
-      // Reset AI tabs
-      if (window.LineageAI && typeof window.LineageAI.resetAITabs === 'function') {
-        window.LineageAI.resetAITabs();
-      }
 
 
       if (referencedMeasuresList) {
@@ -1050,19 +1014,19 @@ data lineage{% endblock %}
     }
 
     function appendReferencedMeasure(node, typeClass, listElement) {
-        const refEl = document.createElement("div");
-        refEl.className = `measure-reference ${typeClass}`;
-        refEl.textContent = node.label;
-        refEl.setAttribute("data-id", node.id);
-        refEl.addEventListener("click", function () {
-            if (network) {
-                network.selectNodes([node.id], { highlightEdges: false });
-                // Need to ensure the node object passed to updateMeasureDetails is from nodeDataset
-                const fullNodeObject = nodeDataset.get(node.id);
-                if (fullNodeObject) updateMeasureDetails(fullNodeObject);
-            }
-        });
-        listElement.appendChild(refEl);
+      const refEl = document.createElement("div");
+      refEl.className = `measure-reference ${typeClass}`;
+      refEl.textContent = node.label;
+      refEl.setAttribute("data-id", node.id);
+      refEl.addEventListener("click", function () {
+        if (network) {
+          network.selectNodes([node.id], { highlightEdges: false });
+          // Need to ensure the node object passed to updateMeasureDetails is from nodeDataset
+          const fullNodeObject = nodeDataset.get(node.id);
+          if (fullNodeObject) updateMeasureDetails(fullNodeObject);
+        }
+      });
+      listElement.appendChild(refEl);
     }
 
 
@@ -1094,7 +1058,7 @@ data lineage{% endblock %}
       else if (activeTab.id === "optimizedTab" && document.getElementById("optimizedCode")) textToCopy = document.getElementById("optimizedCode").textContent;
 
 
-      if (textToCopy && textToCopy !== "Select a measure to view its definition" && textToCopy !== "Optimizing..." &&  textToCopy !== "Select a measure to view its optimized definition") {
+      if (textToCopy && textToCopy !== "Select a measure to view its definition" && textToCopy !== "Optimizing..." && textToCopy !== "Select a measure to view its optimized definition") {
         navigator.clipboard.writeText(textToCopy).then(
           () => window.PowerBIExplorer && window.PowerBIExplorer.showNotification("Definition copied", "success"),
           (err) => console.error("Copy failed: ", err)
@@ -1156,6 +1120,25 @@ data lineage{% endblock %}
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         if (window.PowerBIExplorer) window.PowerBIExplorer.showNotification("Definition exported", "success");
+      }
+    }
+
+    function switchTab(tabName) {
+      // Remove active class from all tabs
+      const tabs = document.querySelectorAll(".measure-tab");
+      tabs.forEach(tab => tab.classList.remove("active"));
+      
+      // Remove active class from all tab contents
+      const contents = document.querySelectorAll(".tab-content");
+      contents.forEach(content => content.classList.remove("active"));
+      
+      // Add active class to selected tab and content
+      if (tabName === "original") {
+        if (originalTab) originalTab.classList.add("active");
+        if (originalDefinition) originalDefinition.classList.add("active");
+      } else if (tabName === "expanded") {
+        if (expandedTab) expandedTab.classList.add("active");
+        if (expandedDefinition) expandedDefinition.classList.add("active");
       }
     }
   });

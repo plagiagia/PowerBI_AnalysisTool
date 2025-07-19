@@ -7,7 +7,7 @@
 
 ## 📋 Overview
 
-The **Power BI Analytics Hub** provides a modern, intuitive interface to explore the structure and components of your Power BI reports. With AI-powered insights and a completely redesigned user experience, it helps you understand complex data models, optimize measure usage, and identify opportunities for improvement.
+The **Power BI Analytics Hub** provides a modern, intuitive interface to explore the structure and components of your Power BI reports. With a completely redesigned user experience, it helps you understand complex data models, optimize measure usage, and identify opportunities for improvement.
 
 ## ✨ Key Features
 
@@ -16,16 +16,9 @@ The **Power BI Analytics Hub** provides a modern, intuitive interface to explore
 - **📊 Modern Dashboard** - Comprehensive overview with animated metrics and clean UI
 - **🔍 Visual Fields Explorer** - Advanced filtering and search capabilities for all report fields
 - **🔗 Data Lineage Diagram** - Interactive network visualization of measure dependencies
-- **💻 DAX Code Analyzer** - AI-powered DAX analysis with syntax highlighting
-- **🗃️ Source Query Explorer** - M query examination with intelligent insights
+- **💻 DAX Code Analyzer** - DAX analysis with syntax highlighting and similarity detection
+- **🗃️ Source Query Explorer** - M query examination with code highlighting
 - **⚡ Performance Optimizer** - Unused measure detection and optimization recommendations
-
-### 🤖 **AI-Powered Features**
-
-- **DAX Optimization** - Get AI suggestions for improving DAX formulas
-- **DAX Explanation** - Understand complex DAX with AI-generated explanations
-- **M Query Analysis** - Step-by-step breakdown of Power Query transformations
-- **Smart Insights** - Intelligent recommendations for report improvements
 
 ### 🎨 **Modern User Experience (v2.0.0)**
 
@@ -128,18 +121,18 @@ Understand your data relationships:
 Master your DAX formulas:
 
 - **Syntax Highlighting** - Professional code presentation
-- **AI Analysis** - Get optimization suggestions
 - **Similarity Detection** - Find redundant measures
 - **Copy & Export** - Easy code sharing
+- **Search & Filter** - Quickly find specific measures
 
 ### 🗃️ Source Query Explorer
 
 M query insights:
 
 - **Code Highlighting** - Clear M language syntax
-- **AI Explanations** - Understand complex transformations
-- **Performance Tips** - Optimization recommendations
 - **Query Documentation** - Export for team sharing
+- **Search Functionality** - Find specific queries quickly
+- **Copy & Export** - Share query code easily
 
 ### ⚡ Performance Optimizer
 
@@ -147,8 +140,8 @@ Boost your report performance:
 
 - **Unused Detection** - Find measures not in use
 - **Impact Analysis** - Understand removal consequences
-- **Optimization Tips** - AI-powered recommendations
-- **Cleanup Scripts** - Automated optimization tools
+- **Cleanup Recommendations** - Identify optimization opportunities
+- **Export Results** - Document unused measures
 
 ## 🔧 Configuration
 

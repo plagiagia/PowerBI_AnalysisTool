@@ -10,7 +10,6 @@ from flask import Flask, render_template, g, current_app, abort, request, jsonif
 from data_processor import DataProcessor
 from lineage_view import LineageView
 from config import get_config
-from ai_utils import get_ai_service
 
 def create_app(config_object=None) -> Flask:
     """
@@ -270,77 +269,6 @@ def create_app(config_object=None) -> Flask:
         return render_template('unused_measures.html', unused_measures=unused_final_measures)
 
 
-    @app.route('/api/analyze-m-query', methods=['POST'])
-    def analyze_m_query():
-        """API endpoint to analyze an M query using AI."""
-        # Check if AI features are enabled in config
-        if not app.config.get('ENABLE_AI_FEATURES', True):
-            return jsonify({"error": "AI features are currently disabled."}), 404
-
-        try:
-            data = request.json
-            if not data or 'query' not in data:
-                return jsonify({"error": "No query provided"}), 400
-
-            m_query = data['query']
-            table_name = data.get('tableName', 'Unknown Table')
-
-            ai_service = get_ai_service()
-            result = ai_service.analyze_m_query(m_query)
-
-            # Add table name to the result
-            result['tableName'] = table_name
-
-            return jsonify(result)
-        except Exception as e:
-            current_app.logger.error(f"Error analyzing M query: {e}")
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/api/optimize-dax', methods=['POST'])
-    def optimize_dax():
-        """API endpoint to optimize a DAX measure using AI."""
-        # Check if AI features are enabled in config
-        if not app.config.get('ENABLE_AI_FEATURES', True):
-            return jsonify({"error": "AI features are currently disabled."}), 404
-
-        try:
-            data = request.json
-            if not data or 'dax' not in data:
-                return jsonify({"error": "No DAX expression provided"}), 400
-
-            dax_expression = data['dax']
-            measure_name = data.get('measureName', '')
-
-            ai_service = get_ai_service()
-            result = ai_service.optimize_dax_measure(dax_expression, measure_name)
-
-            return jsonify({"optimized_dax": result})
-        except Exception as e:
-            current_app.logger.error(f"Error optimizing DAX measure: {e}")
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/api/explain-dax', methods=['POST'])
-    def explain_dax():
-        """API endpoint to explain a DAX measure using AI."""
-        # Check if AI features are enabled in config
-        if not app.config.get('ENABLE_AI_FEATURES', True):
-            return jsonify({"error": "AI features are currently disabled."}), 404
-
-        try:
-            data = request.json
-            if not data or 'dax' not in data:
-                return jsonify({"error": "No DAX expression provided"}), 400
-
-            dax_expression = data['dax']
-            measure_name = data.get('measureName', '')
-
-            ai_service = get_ai_service()
-            result = ai_service.explain_dax_measure(dax_expression, measure_name)
-
-            return jsonify({"explanation": result})
-        except Exception as e:
-            current_app.logger.error(f"Error explaining DAX measure: {e}")
-            return jsonify({"error": str(e)}), 500
 
     @app.route('/api/model-json', methods=['GET'])
     def get_model_json():
