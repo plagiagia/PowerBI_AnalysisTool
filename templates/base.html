@@ -23,7 +23,8 @@
   <link rel="preload" href="{{ url_for('static', filename='modern.css') }}" as="style" />
 
   <!-- Google Fonts: Inter and JetBrains Mono -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
 
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -31,7 +32,8 @@
   <!-- Main CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" id="prismLightTheme" />
   <!-- Prism.js Tomorrow Night theme (Dark) - Initially disabled -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prismDarkTheme" disabled />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    id="prismDarkTheme" disabled />
 
   <title>{% block title %}Power BI Explorer{% endblock %}</title>
 
@@ -159,7 +161,8 @@
         </div>
       </div>
       <div class="footer-actions">
-        <button id="themeSwitcher" class="action-button theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <button id="themeSwitcher" class="action-button theme-toggle" aria-label="Toggle dark mode"
+          title="Toggle theme">
           <i class="fas fa-moon"></i>
         </button>
         <button class="action-button settings-button" aria-label="Settings">
@@ -195,8 +198,7 @@
             <span class="title-text">{% block header_title %}Power BI Analytics Hub{% endblock %}</span>
           </h1>
           <p class="modern-subtitle">
-            {% block header_subtitle %}Advanced analytics and insights for your Power BI reports with AI-powered
-            recommendations{% endblock %}
+            {% block header_subtitle %}Advanced analytics and insights for your Power BI reports.{% endblock %}
           </p>
         </div>
         <div class="header-stats">
@@ -239,10 +241,10 @@
   <!-- Page-specific scripts -->
   {% block scripts %}{% endblock %}
 
-<script>
-// Theme handling is now managed by modern.js
-// This ensures consistency with the new modern theme system
-</script>
+  <script>
+    // Theme handling is now managed by modern.js
+    // This ensures consistency with the new modern theme system
+  </script>
 </body>
 
 </html>

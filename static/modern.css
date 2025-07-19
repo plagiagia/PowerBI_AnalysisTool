@@ -824,16 +824,6 @@ main {
   box-shadow: var(--shadow-md);
 }
 
-.tool-badge.ai {
-  background: var(--gradient-secondary);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
 .tool-content {
   padding: var(--space-xl);
   flex: 1;
@@ -964,18 +954,6 @@ main {
   background: var(--gradient-warning);
   color: white;
   box-shadow: var(--shadow-md);
-}
-
-.modern-button.ai {
-  background: var(--gradient-secondary);
-  color: white;
-  box-shadow: var(--shadow-md);
-  animation: aiPulse 2s ease-in-out infinite;
-}
-
-@keyframes aiPulse {
-  0%, 100% { box-shadow: var(--shadow-md); }
-  50% { box-shadow: var(--shadow-lg), 0 0 30px rgba(240, 147, 251, 0.5); }
 }
 
 /* ===== CONTROL PANEL & FORMS ===== */
