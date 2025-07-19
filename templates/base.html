@@ -240,77 +240,8 @@
   {% block scripts %}{% endblock %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const themeSwitcher = document.getElementById('themeSwitcher');
-    const body = document.body;
-    const moonIconClass = 'fa-moon';
-    const sunIconClass = 'fa-sun';
-    const prismLightTheme = document.getElementById('prismLightTheme'); // Assuming modern.css contains or implies light prism theme
-    const prismDarkTheme = document.getElementById('prismDarkTheme');
-
-    // Function to update icon
-    function updateIcon(isDarkMode) {
-        if (themeSwitcher) {
-            const icon = themeSwitcher.querySelector('i');
-            if (isDarkMode) {
-                icon.classList.remove(moonIconClass);
-                icon.classList.add(sunIconClass);
-                themeSwitcher.title = "Switch to Light Mode";
-            } else {
-                icon.classList.remove(sunIconClass);
-                icon.classList.add(moonIconClass);
-                themeSwitcher.title = "Switch to Dark Mode";
-            }
-        }
-    }
-
-    // Function to enable dark mode
-    function enableDarkMode() {
-        body.classList.add('dark-mode');
-        if (prismDarkTheme) prismDarkTheme.disabled = false;
-        // if (prismLightTheme) prismLightTheme.disabled = true; // Only disable if it's exclusively a light theme
-        localStorage.setItem('theme', 'dark');
-        updateIcon(true);
-        // Dispatch event for other components (like Vis.js)
-        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'dark' } }));
-    }
-
-    // Function to disable dark mode
-    function disableDarkMode() {
-        body.classList.remove('dark-mode');
-        if (prismDarkTheme) prismDarkTheme.disabled = true;
-        // if (prismLightTheme) prismLightTheme.disabled = false; // Re-enable light theme
-        localStorage.setItem('theme', 'light');
-        updateIcon(false);
-        // Dispatch event for other components (like Vis.js)
-        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: 'light' } }));
-    }
-
-    // Event listener for the switcher
-    if (themeSwitcher) {
-        themeSwitcher.addEventListener('click', () => {
-            if (body.classList.contains('dark-mode')) {
-                disableDarkMode();
-            } else {
-                enableDarkMode();
-            }
-        });
-    }
-
-    // Apply theme on initial load
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme === 'dark') {
-        enableDarkMode();
-    } else if (savedTheme === 'light') {
-        disableDarkMode();
-    } else if (systemPrefersDark) {
-        enableDarkMode(); // Default to system preference if no saved theme
-    } else {
-        disableDarkMode(); // Default to light if no saved and no system preference for dark
-    }
-});
+// Theme handling is now managed by modern.js
+// This ensures consistency with the new modern theme system
 </script>
 </body>
 
