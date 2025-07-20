@@ -19,8 +19,6 @@
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
-<!-- We're not using Prism's toolbar to avoid conflicts with our custom copy button -->
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/toolbar/prism-toolbar.min.css" /> -->
 {% endblock %} 
 
 {% block breadcrumbs %}
@@ -59,7 +57,7 @@
 </div>
 
 <!-- Queries Section -->
-<div id="queriesContainer" class="queries-section">
+<div id="queriesContainer" class="queries-section improved">
   <div class="table-toolbar">
     <div class="table-info">
       <div class="results-count">
@@ -81,33 +79,56 @@
     </div>
   </div>
 
-  <!-- Queries List -->
-  <div id="queriesList" class="queries-list">
+  <!-- Queries List with Improved Layout -->
+  <div id="queriesList" class="improved-queries-list">
     {% for query in m_queries_info %}
-    <div class="query-item expanded" data-table="{{ query.table_name }}">
-      <div class="query-item-header">
-        <div class="query-info">
-          <h3 class="query-name">
-            <span class="table-icon"><i class="fas fa-database"></i></span>
-            {{ query.table_name }}
-          </h3>
+    <div class="improved-query-card" data-table="{{ query.table_name }}">
+      <!-- Card Header with Better Spacing -->
+      <div class="improved-query-header">
+        <div class="query-title-section">
+          <div class="table-icon-wrapper">
+            <i class="fas fa-database"></i>
+          </div>
+          <div class="query-title-content">
+            <h3 class="improved-query-name">{{ query.table_name }}</h3>
+            <div class="query-meta">
+              <span class="query-type">
+                <i class="fas fa-code"></i>
+                M Query
+              </span>
+              <span class="query-lines">
+                <i class="fas fa-file-lines"></i>
+                {{ query.m_query.count('\n') + 1 }} lines
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="query-actions">
+        <div class="improved-query-actions">
           <button class="icon-button copy-name" title="Copy table name" data-copy="{{ query.table_name }}">
             <i class="fas fa-tag"></i>
           </button>
-          <button class="icon-button toggle-expand" title="Collapse">
-            <i class="fas fa-chevron-up"></i>
+          <button class="icon-button toggle-expand" title="Toggle view">
+            <i class="fas fa-chevron-down"></i>
           </button>
         </div>
       </div>
-      <div class="query-item-content">
-        <div class="code-container">
-          <pre><code class="language-powerquery">{{ query.m_query }}</code></pre>
-          <div class="code-actions">
-            <button class="copy-button" onclick="copyToClipboard(this)">
-              <i class="fas fa-copy"></i> Copy
-            </button>
+
+      <!-- Expanded Content with Better Layout -->
+      <div class="improved-query-content">
+        <div class="improved-code-container">
+          <div class="code-header">
+            <span class="code-label">
+              <i class="fas fa-code"></i>
+              M Query Definition
+            </span>
+            <div class="code-actions">
+              <button class="copy-button" onclick="copyToClipboard(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+          <div class="code-wrapper">
+            <pre><code class="language-powerquery">{{ query.m_query }}</code></pre>
           </div>
         </div>
       </div>
@@ -142,7 +163,7 @@
     const clearSearch = document.getElementById("clearSearch");
     const resultCount = document.getElementById("resultCount");
     const queriesList = document.getElementById("queriesList");
-    const queryItems = document.querySelectorAll(".query-item");
+    const queryCards = document.querySelectorAll(".improved-query-card");
     const emptyState = document.getElementById("emptyState");
     const clearEmptyStateBtn = document.getElementById("clearEmptyState");
     const expandAllBtn = document.getElementById("expandAll");
@@ -151,7 +172,7 @@
     const searchCount = document.querySelector(".search-count");
     
     // Variables for state
-    let currentVisibleItems = queryItems.length;
+    let currentVisibleItems = queryCards.length;
     
     // Set up event listeners
     setupEventListeners();
@@ -197,10 +218,10 @@
       // Expand all button
       if (expandAllBtn) {
         expandAllBtn.addEventListener("click", function() {
-          queryItems.forEach(item => {
-            const button = item.querySelector(".toggle-expand");
-            if (!item.classList.contains("expanded")) {
-              toggleQueryItem(item, button);
+          queryCards.forEach(card => {
+            const button = card.querySelector(".toggle-expand");
+            if (!card.classList.contains("expanded")) {
+              toggleQueryCard(card, button);
             }
           });
         });
@@ -209,10 +230,10 @@
       // Collapse all button
       if (collapseAllBtn) {
         collapseAllBtn.addEventListener("click", function() {
-          queryItems.forEach(item => {
-            const button = item.querySelector(".toggle-expand");
-            if (item.classList.contains("expanded")) {
-              toggleQueryItem(item, button);
+          queryCards.forEach(card => {
+            const button = card.querySelector(".toggle-expand");
+            if (card.classList.contains("expanded")) {
+              toggleQueryCard(card, button);
             }
           });
         });
@@ -226,8 +247,8 @@
       // Toggle expand buttons for each query
       document.querySelectorAll(".toggle-expand").forEach(button => {
         button.addEventListener("click", function() {
-          const item = this.closest(".query-item");
-          toggleQueryItem(item, this);
+          const card = this.closest(".improved-query-card");
+          toggleQueryCard(card, this);
         });
       });
       
@@ -241,14 +262,14 @@
     }
     
     /**
-     * Toggle expansion state of a query item
-     * @param {HTMLElement} item - The query item element
+     * Toggle expansion state of a query card
+     * @param {HTMLElement} card - The query card element
      * @param {HTMLElement} button - The toggle button element
      */
-    function toggleQueryItem(item, button) {
-      if (!item || !button) return;
+    function toggleQueryCard(card, button) {
+      if (!card || !button) return;
       
-      const isExpanded = item.classList.toggle("expanded");
+      const isExpanded = card.classList.toggle("expanded");
       
       // Update button icon
       button.innerHTML = isExpanded ? 
@@ -275,10 +296,10 @@
         parent.normalize();
       });
       
-      // Filter query items
-      queryItems.forEach(item => {
-        const tableName = item.getAttribute("data-table");
-        const queryText = item.querySelector("code").textContent.toLowerCase();
+      // Filter query cards
+      queryCards.forEach(card => {
+        const tableName = card.getAttribute("data-table");
+        const queryText = card.querySelector("code").textContent.toLowerCase();
         
         let matches = true;
         if (searchValue) {
@@ -287,11 +308,11 @@
           
           // Highlight matches in table name
           if (tableName.toLowerCase().includes(searchValue)) {
-            highlightSearchTerm(item.querySelector(".query-name"), searchValue);
+            highlightSearchTerm(card.querySelector(".improved-query-name"), searchValue);
           }
         }
         
-        item.style.display = matches ? "" : "none";
+        card.style.display = matches ? "" : "none";
         
         if (matches) visibleItems++;
       });
@@ -317,23 +338,14 @@
     function highlightSearchTerm(element, term) {
       if (!element) return;
       
-      const icon = element.querySelector(".table-icon");
-      let text = element.textContent;
-      
-      if (icon) {
-        text = text.replace(icon.textContent, "").trim();
-      }
+      const text = element.textContent;
       
       // Create highlighted version
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
       const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
       
       // Update element content
-      if (icon) {
-        element.innerHTML = icon.outerHTML + " " + highlightedText;
-      } else {
-        element.innerHTML = highlightedText;
-      }
+      element.innerHTML = highlightedText;
     }
     
     /**
@@ -362,15 +374,15 @@
      * Export all visible queries to a file
      */
     function exportAllQueries() {
-      const visibleQueries = Array.from(queryItems).filter(
-        item => item.style.display !== "none"
+      const visibleCards = Array.from(queryCards).filter(
+        card => card.style.display !== "none"
       );
       
-      if (visibleQueries.length === 0) return;
+      if (visibleCards.length === 0) return;
       
-      const content = visibleQueries.map(item => {
-        const tableName = item.getAttribute("data-table");
-        const query = item.querySelector("code").textContent;
+      const content = visibleCards.map(card => {
+        const tableName = card.getAttribute("data-table");
+        const query = card.querySelector("code").textContent;
         return `-- Table: ${tableName}\r\n${query}\r\n\r\n`;
       }).join('');
       
@@ -473,202 +485,338 @@
      * @param {HTMLElement} button - The copy button element
      */
     window.copyToClipboard = function(button) {
-      const codeElement = button.closest(".code-container").querySelector("code");
+      const codeElement = button.closest(".improved-code-container").querySelector("code");
       copyToClipboardWithAnimation(button, codeElement.textContent);
     };
   });
 </script>
 
 <style>
-/* Query Items */
-.queries-list {
+/* Improved Source Explorer Styles */
+.queries-section.improved {
+  margin-bottom: var(--space-3xl);
+}
+
+/* Improved Queries List with Better Spacing */
+.improved-queries-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2xl); /* Increased gap between items */
   margin-bottom: var(--space-6);
 }
 
-.query-item {
-  background-color: var(--bg-primary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+/* Improved Query Card */
+.improved-query-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: var(--transition-smooth);
+  position: relative;
 }
 
-.query-item:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--primary);
+.improved-query-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border-color: var(--color-primary);
 }
 
-.query-item-header {
+/* Improved Query Header */
+.improved-query-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-xl);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--glass-border);
+  min-height: 100px; /* Ensure adequate height */
 }
 
-.query-info {
+.query-title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
   flex: 1;
   min-width: 0;
 }
 
-.query-name {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.table-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--primary);
+.table-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-primary);
   color: white;
-  margin-right: var(--space-2);
-}
-
-.query-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.icon-button {
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-tertiary);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  font-size: 24px;
+  box-shadow: var(--shadow-glow);
+  flex-shrink: 0;
 }
 
-.icon-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.query-title-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.improved-query-name {
+  font-family: var(--font-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
   color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  word-break: break-word;
 }
 
-.query-item-content {
+.query-meta {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.query-type,
+.query-lines {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.query-type i,
+.query-lines i {
+  color: var(--color-primary);
+}
+
+.improved-query-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.improved-query-actions .icon-button {
+  width: 44px;
+  height: 44px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.improved-query-actions .icon-button:hover {
+  background: var(--bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Improved Query Content */
+.improved-query-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height var(--transition-normal), padding var(--transition-normal);
+  transition: max-height 0.4s ease-out, padding 0.4s ease-out;
 }
 
-.query-item.expanded .query-item-content {
-  max-height: 2000px;
-  padding: var(--space-4);
+.improved-query-card.expanded .improved-query-content {
+  max-height: 2500px; /* Increased max height */
+  padding: var(--space-xl);
 }
 
-.code-container {
-  position: relative;
-  margin: 0;
-  border-radius: var(--radius-md);
+/* Improved Code Container */
+.improved-code-container {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
   overflow: hidden;
+  position: relative;
 }
 
-.code-container pre {
-  margin: 0;
-  padding: var(--space-3);
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  max-height: 400px;
-  overflow: auto;
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.code-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.95rem;
+}
+
+.code-label i {
+  color: var(--color-primary);
 }
 
 .code-actions {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
   display: flex;
-  gap: var(--space-2);
-  z-index: 10; /* Ensure our buttons are on top */
+  gap: var(--space-sm);
 }
 
 .copy-button {
-  padding: var(--space-1) var(--space-2);
-  background-color: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
+  background: var(--gradient-primary);
+  color: white;
   border: none;
+  padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-/* Hide any Prism copy buttons if they appear */
-.code-toolbar > .toolbar {
-  display: none !important;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .copy-button:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Search highlight */
-.search-highlight {
-  background-color: rgba(255, 193, 7, 0.3);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 -2px;
+.code-wrapper {
+  position: relative;
 }
 
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8);
-  text-align: center;
+.code-wrapper pre {
+  margin: 0;
+  padding: var(--space-xl); /* Increased padding for better readability */
+  background: var(--bg-primary);
+  max-height: 500px; /* Increased max height */
+  overflow: auto;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9rem; /* Slightly larger font */
+  line-height: 1.6; /* Better line spacing */
 }
 
-.empty-state-icon {
-  font-size: 48px;
-  color: var(--text-tertiary);
-  margin-bottom: var(--space-4);
-}
-
-.empty-state-title {
-  font-size: var(--font-size-xl);
+.code-wrapper code {
   color: var(--text-primary);
-  margin-bottom: var(--space-2);
 }
 
-.empty-state-message {
-  color: var(--text-secondary);
-  margin-bottom: var(--space-4);
-  max-width: 400px;
+/* Search highlight improvements */
+.search-highlight {
+  background: var(--gradient-warning);
+  color: var(--text-primary);
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
 }
 
+/* Empty state improvements */
+.empty-state {
+  padding: var(--space-3xl);
+  text-align: center;
+  background: var(--glass-bg);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  margin-top: var(--space-xl);
+}
 
-/* Responsive adjustments */
+/* Responsive improvements */
 @media (max-width: 768px) {
-  .query-item-header {
+  .improved-query-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-lg);
+    min-height: auto;
+    padding: var(--space-lg);
   }
   
-  .query-actions {
-    margin-top: var(--space-2);
+  .query-title-section {
+    width: 100%;
+    gap: var(--space-md);
+  }
+  
+  .table-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .improved-query-name {
+    font-size: 1.25rem;
+  }
+  
+  .query-meta {
+    gap: var(--space-sm);
+  }
+  
+  .improved-query-actions {
     align-self: flex-end;
   }
   
+  .improved-queries-list {
+    gap: var(--space-xl);
+  }
+  
+  .code-wrapper pre {
+    padding: var(--space-lg);
+    font-size: 0.8rem;
+  }
+  
+  .code-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  
+  .code-actions {
+    align-self: flex-end;
+  }
+}
+
+/* Animation for card expansion */
+@keyframes cardExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.improved-query-card.expanded .improved-query-content {
+  animation: cardExpand 0.3s ease-out;
+}
+
+/* Better scrollbar for code blocks */
+.code-wrapper pre::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-wrapper pre::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.code-wrapper pre::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: var(--radius-sm);
+}
+
+.code-wrapper pre::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 </style>
 {% endblock %}
