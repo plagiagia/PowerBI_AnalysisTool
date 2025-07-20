@@ -2,7 +2,7 @@
 {% block title %}Unused Measures - Power BI Explorer{% endblock %}
 
 {% block header_icon %}<i class="fas fa-exclamation-triangle"></i>{% endblock %}
-{% block header_title %}Unused Measures Optimizer{% endblock %}
+{% block header_title %}Performance Optimizer{% endblock %}
 {% block header_subtitle %}Identify and manage measures not used in any visuals to optimize your Power BI model
 performance{% endblock %}
 
@@ -20,150 +20,319 @@ performance{% endblock %}
 
 {% block breadcrumbs %}
 <li>
-  <a href="/unused-measures"><i class="fas fa-exclamation-triangle"></i><span class="breadcrumb-text">Unused
-      Measures</span></a>
+  <a href="/unused-measures" aria-current="page">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span class="breadcrumb-text">Unused Measures</span>
+  </a>
 </li>
 {% endblock %}
 
 {% block content %}
 <!-- Page Header -->
 <div class="page-header">
-  <h1 class="page-title"><i class="fas fa-exclamation-triangle"></i> Unused Measures</h1>
+  <h1 class="page-title">
+    <i class="fas fa-exclamation-triangle"></i>
+    Performance Optimizer
+  </h1>
   <p class="page-description">
-    Identify measures not used in any visuals to optimize your Power BI model.
+    Identify measures not used in any visuals to optimize your Power BI model performance and reduce complexity.
   </p>
 </div>
 
 <!-- Control Panel -->
-<div class="control-panel">
-  <div class="search-container">
-    <div class="search-input-wrapper">
-      <i class="fas fa-search"></i>
-      <input type="search" id="searchMeasures" placeholder="Search measures..." aria-label="Search unused measures" />
-      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
-        <i class="fas fa-times"></i>
+<div class="modern-filter-section">
+  <div class="filter-header">
+    <h3 class="filter-title">
+      <i class="fas fa-tools"></i>
+      Optimization Tools
+    </h3>
+    <div class="header-actions">
+      <button id="helpButton" class="action-button outline" title="Show help information">
+        <i class="fas fa-question-circle"></i>
+        <span>Help</span>
       </button>
     </div>
-    <div class="search-count" aria-live="polite"></div>
   </div>
 
-  <div class="filter-actions">
-    <button id="exportMeasures" class="action-button outline">
-      <i class="fas fa-download"></i> Export Measures
-    </button>
-    <button id="copyScript" class="action-button primary">
-      <i class="fas fa-copy"></i> Copy Script
-    </button>
+  <div class="filter-grid">
+    <!-- Bulk Actions -->
+    <div class="filter-group">
+      <label class="filter-label">
+        <i class="fas fa-tasks"></i>
+        Bulk Actions
+      </label>
+      <div class="bulk-actions">
+        <button id="selectAll" class="action-button secondary">
+          <i class="fas fa-check-square"></i>
+          <span>Select All</span>
+        </button>
+        <button id="unselectAll" class="action-button secondary">
+          <i class="fas fa-square"></i>
+          <span>Clear Selection</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="filter-group">
+      <label class="filter-label">
+        <i class="fas fa-download"></i>
+        Export & Scripts
+      </label>
+      <div class="export-actions">
+        <button id="exportMeasures" class="action-button outline">
+          <i class="fas fa-download"></i>
+          <span>Export CSV</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Metrics Section -->
-<section class="metrics-section">
-  <div class="metrics-grid">
-    <!-- Total Unused Measures Metric -->
-    <div class="metric-card">
-      <div class="metric-icon">
-        <i class="fas fa-calculator"></i>
-      </div>
-      <div class="metric-info">
-        <div class="metric-title">Unused Measures</div>
-        <div class="metric-value" data-value="{{ unused_measures|length }}">
-          {{ unused_measures|length }}
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Measures List -->
+<!-- Measures Table Section -->
 <div id="measuresContainer" class="measures-section">
   <div class="table-toolbar">
     <div class="table-info">
       <div class="results-count">
-        <span id="resultCount">{{ unused_measures|length }}</span> unused measures found
+        <span id="resultCount">{{ unused_measures|length }}</span>
+        <span id="resultLabel">unused measures found</span>
+      </div>
+      <div class="selection-info" id="selectionInfo" style="display: none;">
+        <span id="selectedInfo">0 measures selected</span>
       </div>
     </div>
+
     <div class="table-actions">
-      <button id="selectAll" class="action-button secondary">
-        <i class="fas fa-check-square"></i> Select All
-      </button>
-      <button id="unselectAll" class="action-button secondary">
-        <i class="fas fa-square"></i> Unselect All
-      </button>
+      <div class="sort-controls">
+        <label for="sortSelect" class="sort-label">Sort by:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="length-asc">Length (Short first)</option>
+          <option value="length-desc">Length (Long first)</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <!-- Measures Table -->
-  <div class="table-container">
-    <table id="measuresTable" class="data-table">
+  <!-- Enhanced Measures Table -->
+  <div class="table-container enhanced">
+    <table id="measuresTable" class="data-table enhanced" role="table" aria-label="Unused measures table">
       <thead>
-        <tr>
-          <th style="width: 50px;"></th>
-          <th class="sortable" data-sort="name">
-            Measure Name <i class="fas fa-sort"></i>
+        <tr role="row">
+          <th style="width: 60px;" scope="col">
+            <div class="header-content">
+              <input type="checkbox" id="selectAllCheckbox" class="header-checkbox" aria-label="Select all measures" />
+            </div>
+          </th>
+          <th scope="col" class="sortable main-column" data-sort="name" tabindex="0" role="columnheader"
+            aria-sort="none">
+            <div class="header-content">
+              <span>Measure Name</span>
+              <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+            </div>
+          </th>
+          <th scope="col" style="width: 120px;">
+            <div class="header-content">
+              <span>Estimated Impact</span>
+            </div>
+          </th>
+          <th scope="col" style="width: 100px;">
+            <div class="header-content">
+              <span>Actions</span>
+            </div>
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody role="rowgroup">
         {% for measure in unused_measures %}
-        <tr data-measure="{{ measure }}">
-          <td>
-            <button class="icon-button mark-measure" title="Mark for deletion">
-              <i class="far fa-square"></i>
-            </button>
+        <tr role="row" data-measure="{{ measure }}" class="measure-row">
+          <td role="gridcell">
+            <div class="checkbox-container">
+              <input type="checkbox" class="measure-checkbox" id="measure-{{ loop.index }}" value="{{ measure }}"
+                aria-label="Select {{ measure }}" />
+              <label for="measure-{{ loop.index }}" class="checkbox-label">
+                <span class="checkmark"></span>
+              </label>
+            </div>
           </td>
-          <td data-label="Measure Name">{{ measure }}</td>
+          <td role="gridcell" data-label="Measure Name" class="measure-name-cell">
+            <div class="measure-info">
+              <span class="measure-name">{{ measure }}</span>
+              <div class="measure-meta">
+                <span class="measure-length">{{ measure|length }} chars</span>
+              </div>
+            </div>
+          </td>
+          <td role="gridcell" data-label="Impact" class="impact-cell">
+            <div class="impact-indicator low">
+              <span class="impact-label">Low</span>
+            </div>
+          </td>
+          <td role="gridcell" data-label="Actions" class="actions-cell">
+            <div class="row-actions">
+              <button class="icon-button copy-measure" title="Copy measure name"
+                aria-label="Copy {{ measure }} to clipboard" data-measure="{{ measure }}">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button class="icon-button info-measure" title="More information"
+                aria-label="Show information about {{ measure }}" data-measure="{{ measure }}">
+                <i class="fas fa-info-circle"></i>
+              </button>
+            </div>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <!-- Empty State -->
-  <div id="emptyState" class="empty-state" style="display: none">
+  <!-- Enhanced Empty State -->
+  <div id="emptyState" class="empty-state enhanced" style="display: none" role="status" aria-live="polite">
     <div class="empty-state-icon">
-      <i class="fas fa-search"></i>
+      <i class="fas fa-filter"></i>
     </div>
-    <h3 class="empty-state-title">No matching measures found</h3>
-    <p class="empty-state-message">Try adjusting your search term.</p>
-    <button id="clearEmptyState" class="action-button primary">
-      <i class="fas fa-undo"></i> Clear Search
-    </button>
+    <h3 class="empty-state-title">No measures to display</h3>
+    <p class="empty-state-message">
+      All measures appear to be in use or there are no unused measures in your model.
+    </p>
+  </div>
+
+  <!-- Success State -->
+  <div id="successState" class="success-state" style="display: none" role="status" aria-live="polite">
+    <div class="success-state-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h3 class="success-state-title">Excellent Performance!</h3>
+    <p class="success-state-message">
+      No unused measures detected. Your Power BI model is well-optimized.
+    </p>
   </div>
 </div>
 
-<!-- Tabular Editor Script Section -->
-<div class="script-section">
-  <h2 class="section-title"><i class="fas fa-code"></i> Tabular Editor Script</h2>
-  <p class="section-description">
-    You can use this C# script in Tabular Editor to help manage unused measures.
-  </p>
-
-  <div class="code-container">
-    <pre><code class="language-csharp" id="tabularScript">// C# script for Tabular Editor
-var unusedMeasures = new List&lt;string&gt; {
-    {% for measure in unused_measures %}
-    "{{ measure }}"{% if not loop.last %}, {% endif %}
-    {% endfor %}
-};
-
-foreach (var measureName in unusedMeasures)
-{
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
-    {
-        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
-    }
-}</code></pre>
-    <button class="copy-button" id="copyCodeButton">
-      <i class="fas fa-copy"></i> Copy
-    </button>
+<!-- Enhanced Script Generation Section -->
+<div class="script-section enhanced">
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-code"></i>
+      Auto-Generated Tabular Editor Script
+    </h2>
+    <div class="section-actions">
+      <div class="script-options">
+        <label class="option-label">
+          <input type="radio" name="scriptAction" value="rename" checked>
+          <span>Break measures (insert dot)</span>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="scriptAction" value="delete">
+          <span>Delete measures</span>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="scriptAction" value="folder">
+          <span>Move to folder</span>
+        </label>
+      </div>
+    </div>
   </div>
 
-  <div class="script-alert">
-    <i class="fas fa-info-circle"></i>
-    <p>The above script will prepend a dot to unused measure names, making them easier to identify and potentially
-      remove.</p>
+  <div class="section-description">
+    <p>
+      C# scripts for Tabular Editor are automatically generated based on your selection and chosen action.
+      The "Break measures" option inserts dots into measure names to break references,
+      causing errors in visuals that actually use these measures - this helps you identify which measures are truly
+      unused.
+    </p>
+  </div>
+
+  <div class="script-container">
+    <div class="script-header">
+      <div class="script-info">
+        <span class="script-title">Auto-Generated Script</span>
+        <span class="script-count" id="scriptMeasureCount">{{ unused_measures|length }} measures</span>
+      </div>
+      <div class="script-actions">
+        <button id="copyScript" class="action-button outline">
+          <i class="fas fa-copy"></i>
+          <span>Copy Script</span>
+        </button>
+        <button id="downloadScript" class="action-button secondary">
+          <i class="fas fa-download"></i>
+          <span>Download</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="code-container enhanced">
+      <pre><code class="language-csharp" id="tabularScript">// Loading script...</code></pre>
+    </div>
+  </div>
+
+  <div class="script-help">
+    <div class="help-card">
+      <div class="help-icon">
+        <i class="fas fa-lightbulb"></i>
+      </div>
+      <div class="help-content">
+        <h4>How to use this tool:</h4>
+        <ol>
+          <li>Select the measures you want to test using the checkboxes</li>
+          <li>The script is automatically generated based on your selection</li>
+          <li>Copy the generated script to your clipboard</li>
+          <li>Open Tabular Editor and connect to your model</li>
+          <li>Go to Advanced Scripting (Ctrl+Shift+A)</li>
+          <li>Paste the script and run it</li>
+          <li>Save and deploy your changes</li>
+          <li><strong>Check your visuals for errors</strong> - measures that show errors are actually being used</li>
+          <li>Remove dots from measures that are being used, delete the ones that aren't</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="helpModal" class="modal" style="display: none;" role="dialog" aria-labelledby="helpModalTitle"
+  aria-hidden="true">
+  <div class="modal-overlay" aria-hidden="true"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="helpModalTitle">Performance Optimizer Help</h3>
+      <button class="modal-close" aria-label="Close help modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="help-section">
+        <h4><i class="fas fa-question-circle"></i> What are unused measures?</h4>
+        <p>Unused measures are DAX calculations that exist in your model but are not referenced by any visuals, other
+          measures, or calculated columns. Removing them can improve model performance and reduce complexity.</p>
+      </div>
+
+      <div class="help-section">
+        <h4><i class="fas fa-shield-alt"></i> Safe Testing Approach</h4>
+        <p>The recommended approach is to use the "Break measures" option first:</p>
+        <ul>
+          <li>Select the measures you want to test using the checkboxes</li>
+          <li>The script is automatically generated to insert dots into measure names</li>
+          <li>This breaks references, causing visuals to show errors if they use these measures</li>
+          <li>Measures without errors are truly unused and safe to delete</li>
+          <li>You can easily restore broken measures by removing the dot</li>
+          <li>Test in a development environment first</li>
+          <li>Always create a backup of your model</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h4><i class="fas fa-tools"></i> Script Actions Explained</h4>
+        <ul>
+          <li><strong>Break measures:</strong> Inserts a dot in the middle of measure names to break references. This
+            causes errors in visuals that actually use these measures, helping you identify which ones are truly unused.
+          </li>
+          <li><strong>Delete:</strong> Permanently removes the measures from your model</li>
+          <li><strong>Move to folder:</strong> Organizes unused measures in a dedicated folder</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -171,556 +340,1409 @@ foreach (var measureName in unusedMeasures)
 
 {% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-csharp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // DOM Elements
-    const searchMeasures = document.getElementById("searchMeasures");
-    const clearSearch = document.getElementById("clearSearch");
-    const resultCount = document.getElementById("resultCount");
-    const measuresTable = document.getElementById("measuresTable");
-    const tableRows = measuresTable ? measuresTable.querySelectorAll("tbody tr") : [];
-    const emptyState = document.getElementById("emptyState");
-    const clearEmptyState = document.getElementById("clearEmptyState");
-    const copyScript = document.getElementById("copyScript");
-    const copyCodeButton = document.getElementById("copyCodeButton");
-    const exportMeasures = document.getElementById("exportMeasures");
-    const tabularScript = document.getElementById("tabularScript");
-    const searchCount = document.querySelector(".search-count");
-    const selectAll = document.getElementById("selectAll");
-    const unselectAll = document.getElementById("unselectAll");
+  /**
+   * Enhanced Unused Measures Manager
+   * Improved version with better organization, error handling, and user experience
+   */
+  class UnusedMeasuresManager {
+    constructor() {
+      this.elements = this.initializeElements();
+      this.state = {
+        selectedMeasures: new Set(),
+        allMeasures: [],
+        sortOrder: 'name-asc'
+      };
 
-    // State tracking
-    let currentVisibleItems = tableRows.length;
-    let selectedMeasures = new Set();
-
-    // Set up event listeners
-    setupEventListeners();
-
-    /**
-     * Set up event listeners for interactive elements
-     */
-    function setupEventListeners() {
-      // Search input
-      if (searchMeasures) {
-        searchMeasures.addEventListener("input", function () {
-          if (clearSearch) {
-            clearSearch.style.display = this.value ? "block" : "none";
-          }
-          performSearch();
-        });
-      }
-
-      // Clear search button
-      if (clearSearch) {
-        clearSearch.addEventListener("click", function () {
-          if (searchMeasures) {
-            searchMeasures.value = "";
-            clearSearch.style.display = "none";
-            performSearch();
-            searchMeasures.focus();
-          }
-        });
-      }
-
-      // Clear empty state button
-      if (clearEmptyState) {
-        clearEmptyState.addEventListener("click", function () {
-          if (searchMeasures) {
-            searchMeasures.value = "";
-            if (clearSearch) clearSearch.style.display = "none";
-            performSearch();
-          }
-        });
-      }
-
-      // Copy script buttons
-      if (copyScript) {
-        copyScript.addEventListener("click", copyCode);
-      }
-
-      if (copyCodeButton) {
-        copyCodeButton.addEventListener("click", copyCode);
-      }
-
-      // Export measures button
-      if (exportMeasures) {
-        exportMeasures.addEventListener("click", exportMeasuresToCSV);
-      }
-
-      // Select all button
-      if (selectAll) {
-        selectAll.addEventListener("click", selectAllMeasures);
-      }
-
-      // Unselect all button
-      if (unselectAll) {
-        unselectAll.addEventListener("click", unselectAllMeasures);
-      }
-
-      // Mark measure buttons
-      document.querySelectorAll(".mark-measure").forEach(button => {
-        button.addEventListener("click", function () {
-          const row = this.closest("tr");
-          const measureName = row.getAttribute("data-measure");
-
-          if (selectedMeasures.has(measureName)) {
-            selectedMeasures.delete(measureName);
-            this.innerHTML = '<i class="far fa-square"></i>';
-            row.classList.remove("selected");
-          } else {
-            selectedMeasures.add(measureName);
-            this.innerHTML = '<i class="fas fa-check-square"></i>';
-            row.classList.add("selected");
-          }
-
-          updateTabularScript();
-        });
-      });
-
-      // Sortable headers
-      document.querySelectorAll("th.sortable").forEach(header => {
-        header.addEventListener("click", function () {
-          sortTable(this.getAttribute("data-sort"));
-        });
-      });
+      this.initialize();
     }
 
     /**
-     * Perform search on measures
+     * Initialize DOM elements with error handling
      */
-    function performSearch() {
-      if (!searchMeasures) return;
+    initializeElements() {
+      const elements = {
+        // Table elements
+        measuresTable: document.getElementById("measuresTable"),
+        tableBody: document.querySelector("#measuresTable tbody"),
+        selectAllCheckbox: document.getElementById("selectAllCheckbox"),
 
-      const searchValue = searchMeasures.value.toLowerCase();
-      let visibleItems = 0;
+        // Control elements
+        selectAllBtn: document.getElementById("selectAll"),
+        unselectAllBtn: document.getElementById("unselectAll"),
 
-      // Remove previous search highlights
-      document.querySelectorAll(".search-highlight").forEach(el => {
-        const text = el.textContent;
-        const parent = el.parentNode;
-        const textNode = document.createTextNode(text);
-        parent.replaceChild(textNode, el);
-        parent.normalize();
-      });
+        // Info elements
+        resultCount: document.getElementById("resultCount"),
+        resultLabel: document.getElementById("resultLabel"),
+        selectedCount: document.getElementById("selectedCount"),
+        selectionInfo: document.getElementById("selectionInfo"),
+        selectedInfo: document.getElementById("selectedInfo"),
 
-      // Filter table rows
-      if (tableRows) {
-        tableRows.forEach(row => {
-          const cell = row.querySelector("td:nth-child(2)");
-          const text = cell.textContent.toLowerCase();
+        // Sort elements
+        sortSelect: document.getElementById("sortSelect"),
 
-          const isVisible = !searchValue || text.includes(searchValue);
-          row.style.display = isVisible ? "" : "none";
+        // Export elements
+        exportBtn: document.getElementById("exportMeasures"),
+        copyScriptBtn: document.getElementById("copyScript"),
+        downloadScriptBtn: document.getElementById("downloadScript"),
 
-          if (isVisible) {
-            visibleItems++;
+        // Script elements
+        tabularScript: document.getElementById("tabularScript"),
+        scriptMeasureCount: document.getElementById("scriptMeasureCount"),
+        scriptActionInputs: document.querySelectorAll('input[name="scriptAction"]'),
 
-            // Highlight match if searching
-            if (searchValue) {
-              highlightSearchTerm(cell, searchValue);
-            }
-          }
-        });
-      }
+        // State elements
+        emptyState: document.getElementById("emptyState"),
+        successState: document.getElementById("successState"),
 
-      // Update visible count
-      currentVisibleItems = visibleItems;
+        // Modal elements
+        helpButton: document.getElementById("helpButton"),
+        helpModal: document.getElementById("helpModal"),
+        modalClose: document.querySelector(".modal-close"),
+        modalOverlay: document.querySelector(".modal-overlay")
+      };
 
-      // Update count display
-      if (resultCount) {
-        resultCount.textContent = visibleItems;
-      }
-
-      // Update search count display
-      if (searchCount && searchValue) {
-        searchCount.textContent = `${visibleItems} matches`;
-      } else if (searchCount) {
-        searchCount.textContent = "";
-      }
-
-      // Show/hide empty state
-      if (emptyState) {
-        emptyState.style.display = visibleItems === 0 ? "flex" : "none";
-      }
-    }
-
-    /**
-     * Highlight search term in an element
-     * @param {HTMLElement} element - Element containing text
-     * @param {string} term - Term to highlight
-     */
-    function highlightSearchTerm(element, term) {
-      const originalText = element.textContent;
-      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
-      element.innerHTML = originalText.replace(regex, '<span class="search-highlight">$1</span>');
-    }
-
-    /**
-     * Escape special regex characters
-     * @param {string} string - String to escape
-     * @returns {string} Escaped string
-     */
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    /**
-     * Sort the table by a column
-     * @param {string} column - Column to sort by ('name')
-     */
-    function sortTable(column) {
-      const table = document.getElementById("measuresTable");
-      if (!table) return;
-
-      const header = document.querySelector(`th[data-sort="${column}"]`);
-      const isAscending = !header.classList.contains("sort-asc");
-
-      // Update sort indicators
-      document.querySelectorAll("th.sortable").forEach(th => {
-        th.classList.remove("sort-asc", "sort-desc");
-      });
-
-      header.classList.add(isAscending ? "sort-asc" : "sort-desc");
-
-      // Get table rows and sort
-      const tbody = table.querySelector("tbody");
-      const rows = Array.from(tbody.querySelectorAll("tr"));
-
-      rows.sort((a, b) => {
-        const valA = a.querySelector("td:nth-child(2)").textContent.toLowerCase();
-        const valB = b.querySelector("td:nth-child(2)").textContent.toLowerCase();
-
-        return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-      });
-
-      // Re-append rows in sorted order
-      rows.forEach(row => tbody.appendChild(row));
-    }
-
-    /**
-     * Select all measures
-     */
-    function selectAllMeasures() {
-      tableRows.forEach(row => {
-        if (row.style.display !== "none") {
-          const measureName = row.getAttribute("data-measure");
-          const button = row.querySelector(".mark-measure");
-
-          selectedMeasures.add(measureName);
-          if (button) button.innerHTML = '<i class="fas fa-check-square"></i>';
-          row.classList.add("selected");
+      // Validate critical elements
+      const criticalElements = ['measuresTable', 'tabularScript'];
+      for (const elementName of criticalElements) {
+        if (!elements[elementName]) {
+          console.warn(`Critical element missing: ${elementName}`);
         }
+      }
+
+      return elements;
+    }
+
+    /**
+     * Initialize the application
+     */
+    async initialize() {
+      try {
+        this.collectMeasures();
+        this.setupEventListeners();
+        this.updateUI();
+        this.generateScript();
+
+        // Show success state if no unused measures
+        if (this.state.allMeasures.length === 0) {
+          this.showSuccessState();
+        }
+
+        console.log('Unused Measures Manager initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Unused Measures Manager:', error);
+        this.showError('Failed to initialize the application');
+      }
+    }
+
+    /**
+     * Collect all measures from the table
+     */
+    collectMeasures() {
+      const rows = this.elements.tableBody?.querySelectorAll('.measure-row') || [];
+      this.state.allMeasures = Array.from(rows).map(row => {
+        const measureName = row.getAttribute('data-measure');
+        return {
+          name: measureName,
+          element: row,
+          checkbox: row.querySelector('.measure-checkbox'),
+          length: measureName?.length || 0
+        };
       });
 
-      updateTabularScript();
+      console.log(`Collected ${this.state.allMeasures.length} measures`);
+    }
+
+    /**
+     * Setup all event listeners
+     */
+    setupEventListeners() {
+      // Selection controls
+      this.elements.selectAllCheckbox?.addEventListener('change', this.handleSelectAllCheckbox.bind(this));
+      this.elements.selectAllBtn?.addEventListener('click', this.selectAllMeasures.bind(this));
+      this.elements.unselectAllBtn?.addEventListener('click', this.unselectAllMeasures.bind(this));
+
+      // Sort functionality
+      this.elements.sortSelect?.addEventListener('change', this.handleSort.bind(this));
+
+      // Export functionality
+      this.elements.exportBtn?.addEventListener('click', this.exportMeasures.bind(this));
+      this.elements.copyScriptBtn?.addEventListener('click', this.copyScript.bind(this));
+      this.elements.downloadScriptBtn?.addEventListener('click', this.downloadScript.bind(this));
+
+      // Script action changes - auto-generate script
+      this.elements.scriptActionInputs?.forEach(input => {
+        input.addEventListener('change', this.generateScript.bind(this));
+      });
+
+      // Individual measure checkboxes
+      this.state.allMeasures.forEach(measure => {
+        measure.checkbox?.addEventListener('change',
+          this.handleMeasureSelection.bind(this, measure.name));
+      });
+
+      // Copy and info buttons
+      document.addEventListener('click', this.handleButtonClicks.bind(this));
+
+      // Help modal
+      this.elements.helpButton?.addEventListener('click', this.showHelpModal.bind(this));
+      this.elements.modalClose?.addEventListener('click', this.hideHelpModal.bind(this));
+      this.elements.modalOverlay?.addEventListener('click', this.hideHelpModal.bind(this));
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', this.handleKeyboard.bind(this));
+
+      console.log('Event listeners setup completed');
+    }
+
+    /**
+     * Handle master checkbox selection
+     */
+    handleSelectAllCheckbox() {
+      const isChecked = this.elements.selectAllCheckbox?.checked || false;
+
+      if (isChecked) {
+        this.selectAllMeasures();
+      } else {
+        this.unselectAllMeasures();
+      }
+    }
+
+    /**
+     * Select all measures (including filtered)
+     */
+    selectAllMeasures() {
+      this.state.allMeasures.forEach(measure => {
+        this.state.selectedMeasures.add(measure.name);
+        if (measure.checkbox) {
+          measure.checkbox.checked = true;
+        }
+        measure.element?.classList.add('selected');
+      });
+
+      this.updateUI();
+      this.generateScript();
     }
 
     /**
      * Unselect all measures
      */
-    function unselectAllMeasures() {
-      selectedMeasures.clear();
+    unselectAllMeasures() {
+      this.state.selectedMeasures.clear();
 
-      tableRows.forEach(row => {
-        const button = row.querySelector(".mark-measure");
-        if (button) button.innerHTML = '<i class="far fa-square"></i>';
-        row.classList.remove("selected");
+      this.state.allMeasures.forEach(measure => {
+        if (measure.checkbox) {
+          measure.checkbox.checked = false;
+        }
+        measure.element?.classList.remove('selected');
       });
 
-      updateTabularScript();
+      this.updateUI();
+      this.generateScript();
     }
 
     /**
-     * Update tabular script based on selected measures
+     * Handle individual measure selection
      */
-    function updateTabularScript() {
-      if (!tabularScript) return;
+    handleMeasureSelection(measureName) {
+      const measure = this.state.allMeasures.find(m => m.name === measureName);
+      if (!measure) return;
 
-      if (selectedMeasures.size === 0) {
-        // Default script with all unused measures
-        const allMeasures = Array.from(tableRows)
-          .map(row => row.getAttribute("data-measure"))
-          .filter(Boolean);
+      if (measure.checkbox?.checked) {
+        this.state.selectedMeasures.add(measureName);
+        measure.element?.classList.add('selected');
+      } else {
+        this.state.selectedMeasures.delete(measureName);
+        measure.element?.classList.remove('selected');
+      }
 
-        const script = `// C# script for Tabular Editor
+      this.updateUI();
+      this.generateScript();
+    }
+
+    /**
+     * Handle sorting
+     */
+    handleSort() {
+      const sortValue = this.elements.sortSelect?.value || 'name-asc';
+      this.state.sortOrder = sortValue;
+
+      const [field, direction] = sortValue.split('-');
+      const isAscending = direction === 'asc';
+
+      this.state.allMeasures.sort((a, b) => {
+        let comparison = 0;
+
+        switch (field) {
+          case 'name':
+            comparison = a.name.localeCompare(b.name);
+            break;
+          case 'length':
+            comparison = a.length - b.length;
+            break;
+        }
+
+        return isAscending ? comparison : -comparison;
+      });
+
+      // Re-order DOM elements
+      const tbody = this.elements.tableBody;
+      if (tbody) {
+        this.state.allMeasures.forEach(measure => {
+          if (measure.element) {
+            tbody.appendChild(measure.element);
+          }
+        });
+      }
+
+      console.log(`Sorted by ${field} (${direction})`);
+    }
+
+    /**
+     * Handle button clicks with event delegation
+     */
+    handleButtonClicks(event) {
+      const button = event.target.closest('button');
+      if (!button) return;
+
+      if (button.classList.contains('copy-measure')) {
+        const measureName = button.getAttribute('data-measure');
+        this.copyToClipboard(measureName, 'Measure name');
+      } else if (button.classList.contains('info-measure')) {
+        const measureName = button.getAttribute('data-measure');
+        this.showMeasureInfo(measureName);
+      }
+    }
+
+    /**
+     * Show measure information
+     */
+    showMeasureInfo(measureName) {
+      const message = `Measure: ${measureName}\nLength: ${measureName.length} characters\nThis measure is not referenced by any visuals in your report.`;
+      this.showNotification(message, 'info');
+    }
+
+    /**
+     * Handle keyboard shortcuts
+     */
+    handleKeyboard(event) {
+      // Ctrl/Cmd + A for select all
+      if ((event.ctrlKey || event.metaKey) && event.key === 'a' &&
+        event.target === document.body) {
+        event.preventDefault();
+        this.selectAllMeasures();
+      }
+
+      // Escape to close modal
+      if (event.key === 'Escape') {
+        if (this.elements.helpModal?.style.display !== 'none') {
+          this.hideHelpModal();
+        }
+      }
+    }
+
+    /**
+     * Update UI based on current state
+     */
+    updateUI() {
+      // Update counts
+      if (this.elements.resultCount) {
+        this.elements.resultCount.textContent = this.state.allMeasures.length;
+      }
+
+      if (this.elements.resultLabel) {
+        const label = this.state.allMeasures.length === 1 ? 'unused measure found' : 'unused measures found';
+        this.elements.resultLabel.textContent = label;
+      }
+
+      // Update selection info
+      const selectedCount = this.state.selectedMeasures.size;
+      if (this.elements.selectedCount) {
+        this.elements.selectedCount.textContent = selectedCount;
+      }
+
+      if (this.elements.selectedInfo) {
+        const label = selectedCount === 1 ? 'measure selected' : 'measures selected';
+        this.elements.selectedInfo.textContent = `${selectedCount} ${label}`;
+      }
+
+      if (this.elements.selectionInfo) {
+        this.elements.selectionInfo.style.display = selectedCount > 0 ? 'block' : 'none';
+      }
+
+      // Update master checkbox
+      if (this.elements.selectAllCheckbox) {
+        const totalCount = this.state.allMeasures.length;
+        const selectedVisibleCount = this.state.allMeasures.filter(m =>
+          this.state.selectedMeasures.has(m.name)).length;
+
+        this.elements.selectAllCheckbox.checked = totalCount > 0 && selectedVisibleCount === totalCount;
+        this.elements.selectAllCheckbox.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < totalCount;
+      }
+
+      // Show/hide empty state
+      this.updateEmptyState();
+    }
+
+    /**
+     * Update empty state visibility
+     */
+    updateEmptyState() {
+      const hasResults = this.state.allMeasures.length > 0;
+
+      if (this.elements.emptyState) {
+        this.elements.emptyState.style.display = hasResults ? 'none' : 'flex';
+      }
+
+      if (this.elements.measuresTable) {
+        this.elements.measuresTable.style.display = hasResults ? '' : 'none';
+      }
+    }
+
+    /**
+     * Show success state when no unused measures
+     */
+    showSuccessState() {
+      if (this.elements.successState) {
+        this.elements.successState.style.display = 'flex';
+      }
+
+      if (this.elements.measuresContainer) {
+        this.elements.measuresContainer.style.display = 'none';
+      }
+    }
+
+    /**
+     * Generate Tabular Editor script
+     */
+    generateScript() {
+      const selectedAction = document.querySelector('input[name="scriptAction"]:checked')?.value || 'rename';
+      const measures = this.state.selectedMeasures.size > 0
+        ? Array.from(this.state.selectedMeasures)
+        : this.state.allMeasures.map(m => m.name);
+
+      let script = '';
+
+      switch (selectedAction) {
+        case 'rename':
+          script = this.generateRenameScript(measures);
+          break;
+        case 'delete':
+          script = this.generateDeleteScript(measures);
+          break;
+        case 'folder':
+          script = this.generateFolderScript(measures);
+          break;
+      }
+
+      if (this.elements.tabularScript) {
+        this.elements.tabularScript.textContent = script;
+        // Re-highlight syntax
+        if (window.Prism) {
+          Prism.highlightElement(this.elements.tabularScript);
+        }
+      }
+
+      if (this.elements.scriptMeasureCount) {
+        const label = measures.length === 1 ? 'measure' : 'measures';
+        this.elements.scriptMeasureCount.textContent = `${measures.length} ${label}`;
+      }
+    }
+
+    /**
+     * Generate rename script
+     */
+    generateRenameScript(measures) {
+      const measuresList = measures.map(m => `    "${m}"`).join(',\n');
+
+      return `// Tabular Editor Script: Break Unused Measures
+// This script inserts a dot in the middle of measure names to break references
+// This helps identify which visuals actually use these measures (they'll show errors)
+// Auto-generated on: ${new Date().toLocaleString()}
+// Selected measures: ${measures.length} out of total available
+
 var unusedMeasures = new List<string> {
-    ${allMeasures.map(m => `"${m}"`).join(",\n    ")}
+${measuresList}
 };
 
+// Break measures by inserting a dot in the middle
 foreach (var measureName in unusedMeasures)
 {
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
-    if (measure != null)
+    var measure = Model.Tables.SelectMany(t => t.Measures)
+        .FirstOrDefault(m => m.Name == measureName);
+    
+    if (measure != null && !measure.Name.Contains(" ."))
     {
-        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
+        // Store original name as description for easy reversal
+        if (string.IsNullOrEmpty(measure.Description))
+        {
+            measure.Description = "ORIGINAL_NAME: " + measure.Name;
+        }
+        
+        // Find the middle position to insert the dot
+        int midPoint = measure.Name.Length / 2;
+        
+        // If there's a space near the middle, use that position
+        int spaceIndex = measure.Name.IndexOf(' ', Math.Max(0, midPoint - 3));
+        if (spaceIndex > 0 && spaceIndex < midPoint + 3)
+        {
+            // Insert dot after the space
+            measure.Name = measure.Name.Substring(0, spaceIndex + 1) + "." + measure.Name.Substring(spaceIndex + 1);
+        }
+        else
+        {
+            // No convenient space, insert at middle position
+            measure.Name = measure.Name.Substring(0, midPoint) + "." + measure.Name.Substring(midPoint);
+        }
     }
-}`;
+}
 
-        tabularScript.textContent = script;
-      } else {
-        // Script with selected measures only
-        const script = `// C# script for Tabular Editor
-var selectedMeasures = new List<string> {
-    ${Array.from(selectedMeasures).map(m => `"${m}"`).join(",\n    ")}
+// Output summary
+Output("Modified " + unusedMeasures.Count + " unused measures with dots to break references.");
+Output("Original names stored in measure descriptions for easy reversal.");
+Output("Check your visuals for error messages to identify which measures are actually in use.");
+Output("Remove dots from measures that show errors, then delete the ones that don't.");
+
+// Uncomment the section below to restore ALL measures to their original names:
+/*
+foreach (var table in Model.Tables)
+{
+    foreach (var measure in table.Measures)
+    {
+        if (measure.Description != null && measure.Description.StartsWith("ORIGINAL_NAME: "))
+        {
+            string originalName = measure.Description.Substring("ORIGINAL_NAME: ".Length);
+            measure.Name = originalName;
+            measure.Description = measure.Description.Replace("ORIGINAL_NAME: " + originalName, "").Trim();
+            if (string.IsNullOrEmpty(measure.Description))
+                measure.Description = null;
+        }
+    }
+}
+Output("Restored all measures to original names.");
+*/`;
+    }
+
+    /**
+     * Generate delete script
+     */
+    generateDeleteScript(measures) {
+      const measuresList = measures.map(m => `    "${m}"`).join(',\n');
+
+      return `// Tabular Editor Script: Delete Unused Measures
+// WARNING: This script permanently deletes measures. Use with caution!
+// Auto-generated on: ${new Date().toLocaleString()}
+// Selected measures: ${measures.length} out of total available
+
+var unusedMeasures = new List<string> {
+${measuresList}
 };
 
-foreach (var measureName in selectedMeasures)
+var deletedCount = 0;
+
+// Delete unused measures
+foreach (var measureName in unusedMeasures)
 {
-    var measure = Model.Tables.SelectMany(t => t.Measures).FirstOrDefault(m => m.Name == measureName);
+    var measure = Model.Tables.SelectMany(t => t.Measures)
+        .FirstOrDefault(m => m.Name == measureName);
+    
     if (measure != null)
     {
-        measure.Name = "." + measure.Name; // Prepend a dot to the measure name
+        measure.Delete();
+        deletedCount++;
     }
-}`;
+}
 
-        tabularScript.textContent = script;
-      }
-
-      // Highlight the code
-      Prism.highlightElement(tabularScript);
+// Output summary
+Output("Deleted " + deletedCount + " unused measures.");`;
     }
 
     /**
-     * Copy code to clipboard
+     * Generate folder organization script
      */
-    function copyCode() {
-      if (!tabularScript) return;
+    generateFolderScript(measures) {
+      const measuresList = measures.map(m => `    "${m}"`).join(',\n');
 
-      const textToCopy = tabularScript.textContent;
+      return `// Tabular Editor Script: Organize Unused Measures
+// This script moves unused measures to a dedicated folder
+// Auto-generated on: ${new Date().toLocaleString()}
+// Selected measures: ${measures.length} out of total available
 
-      // Show animation on both buttons
-      const buttons = [copyScript, copyCodeButton].filter(Boolean);
-      const originalHTML = buttons.map(button => button.innerHTML);
+var unusedMeasures = new List<string> {
+${measuresList}
+};
 
-      buttons.forEach(button => {
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Copying...';
-      });
+var folderName = "⚠️ Unused Measures";
+var movedCount = 0;
 
-      // Try to use Clipboard API first
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(textToCopy)
-          .then(() => {
-            buttons.forEach(button => {
-              button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            });
+// Move measures to folder
+foreach (var measureName in unusedMeasures)
+{
+    var measure = Model.Tables.SelectMany(t => t.Measures)
+        .FirstOrDefault(m => m.Name == measureName);
+    
+    if (measure != null)
+    {
+        measure.DisplayFolder = folderName;
+        movedCount++;
+    }
+}
 
-            setTimeout(() => {
-              buttons.forEach((button, index) => {
-                button.innerHTML = originalHTML[index];
-              });
-            }, 2000);
-
-            // Show notification if available
-            if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-              window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
-            }
-          })
-          .catch(err => {
-            fallbackCopy(textToCopy, buttons, originalHTML);
-          });
-      } else {
-        fallbackCopy(textToCopy, buttons, originalHTML);
-      }
+// Output summary
+Output("Moved " + movedCount + " measures to folder: " + folderName);`;
     }
 
     /**
-     * Fallback method for copying to clipboard
-     * @param {string} text - Text to copy
-     * @param {Array} buttons - Buttons to update
-     * @param {Array} originalHTML - Original HTML of buttons
+     * Copy script to clipboard
      */
-    function fallbackCopy(text, buttons, originalHTML) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
+    async copyScript() {
+      const script = this.elements.tabularScript?.textContent;
+      if (!script) {
+        this.showError('No script to copy');
+        return;
+      }
 
-      let success = false;
       try {
-        success = document.execCommand("copy");
-      } catch (err) {
-        console.error("Could not copy text: ", err);
+        await this.copyToClipboard(script, 'Script');
+      } catch (error) {
+        console.error('Failed to copy script:', error);
+        this.showError('Failed to copy script to clipboard');
+      }
+    }
+
+    /**
+     * Download script as file
+     */
+    downloadScript() {
+      const script = this.elements.tabularScript?.textContent;
+      if (!script) {
+        this.showError('No script to download');
+        return;
       }
 
-      document.body.removeChild(textArea);
+      const action = document.querySelector('input[name="scriptAction"]:checked')?.value || 'break';
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const actionName = action === 'rename' ? 'break' : action;
+      const filename = `unused-measures-${actionName}-${timestamp}.csx`;
 
-      if (success) {
-        buttons.forEach(button => {
-          button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        });
-
-        // Show notification if available
-        if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-          window.PowerBIExplorer.showNotification("Script copied to clipboard", "success");
-        }
-      } else {
-        buttons.forEach(button => {
-          button.innerHTML = '<i class="fas fa-times"></i> Failed';
-        });
-      }
-
-      setTimeout(() => {
-        buttons.forEach((button, index) => {
-          button.innerHTML = originalHTML[index];
-        });
-      }, 2000);
+      this.downloadFile(script, filename, 'text/plain');
+      this.showNotification('Script downloaded successfully', 'success');
     }
 
     /**
      * Export measures to CSV
      */
-    function exportMeasuresToCSV() {
-      // Get visible measures
-      const measures = [];
+    exportMeasures() {
+      const measures = this.state.allMeasures.map(measure => ({
+        'Measure Name': measure.name,
+        'Selected': this.state.selectedMeasures.has(measure.name) ? 'Yes' : 'No',
+        'Length': measure.length,
+        'Impact': 'Low' // Could be enhanced with actual impact analysis
+      }));
 
-      tableRows.forEach(row => {
-        if (row.style.display !== "none") {
-          const measureName = row.getAttribute("data-measure");
-          const isSelected = selectedMeasures.has(measureName);
+      if (measures.length === 0) {
+        this.showError('No measures to export');
+        return;
+      }
 
-          measures.push({
-            name: measureName,
-            selected: isSelected
-          });
-        }
-      });
+      const csv = this.arrayToCSV(measures);
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `unused-measures-${timestamp}.csv`;
 
-      // Create CSV content
-      const headers = ["Measure Name", "Selected"];
-      const csvRows = [headers.join(",")];
+      this.downloadFile(csv, filename, 'text/csv');
+      this.showNotification(`Exported ${measures.length} measures to CSV`, 'success');
+    }
 
-      measures.forEach(measure => {
-        csvRows.push(`"${measure.name}",${measure.selected}`);
-      });
+    /**
+     * Show help modal
+     */
+    showHelpModal() {
+      if (this.elements.helpModal) {
+        this.elements.helpModal.style.display = 'flex';
+        this.elements.helpModal.setAttribute('aria-hidden', 'false');
 
-      const csvContent = csvRows.join("\n");
-
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "unused_measures.csv");
-      link.style.display = "none";
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Show notification if available
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification("Measures exported to CSV", "success");
+        // Focus first focusable element
+        const firstFocusable = this.elements.helpModal.querySelector('button, input, select, textarea, [tabindex]');
+        firstFocusable?.focus();
       }
     }
+
+    /**
+     * Hide help modal
+     */
+    hideHelpModal() {
+      if (this.elements.helpModal) {
+        this.elements.helpModal.style.display = 'none';
+        this.elements.helpModal.setAttribute('aria-hidden', 'true');
+
+        // Return focus to help button
+        this.elements.helpButton?.focus();
+      }
+    }
+
+    /**
+     * Utility: Copy to clipboard with feedback
+     */
+    async copyToClipboard(text, itemType = 'Content') {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          textArea.style.position = 'fixed';
+          textArea.style.opacity = '0';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+
+        this.showNotification(`${itemType} copied to clipboard`, 'success');
+      } catch (error) {
+        throw new Error(`Failed to copy ${itemType.toLowerCase()}`);
+      }
+    }
+
+    /**
+     * Utility: Download file
+     */
+    downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Utility: Convert array to CSV
+     */
+    arrayToCSV(array) {
+      if (array.length === 0) return '';
+
+      const headers = Object.keys(array[0]);
+      const csvRows = [headers.join(',')];
+
+      for (const row of array) {
+        const values = headers.map(header => {
+          const value = row[header]?.toString() || '';
+          return value.includes(',') || value.includes('"') ? `"${value.replace(/"/g, '""')}"` : value;
+        });
+        csvRows.push(values.join(','));
+      }
+
+      return csvRows.join('\n');
+    }
+
+    /**
+     * Utility: Debounce function
+     */
+    debounce(func, delay) {
+      let timeoutId;
+      return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    /**
+     * Utility: Show notification
+     */
+    showNotification(message, type = 'info') {
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(message, type);
+      } else {
+        // Fallback notification
+        console.log(`${type.toUpperCase()}: ${message}`);
+        alert(message);
+      }
+    }
+
+    /**
+     * Utility: Show error
+     */
+    showError(message) {
+      this.showNotification(message, 'error');
+    }
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    window.unusedMeasuresManager = new UnusedMeasuresManager();
   });
 </script>
 
 <style>
-  /* Selected row styling */
-  tr.selected {
-    background-color: rgba(33, 115, 70, 0.1);
+  /* Enhanced Unused Measures Styles */
+
+  /* Enhanced Actions */
+  .bulk-actions,
+  .export-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
   }
 
-  tr.selected:hover {
-    background-color: rgba(33, 115, 70, 0.15);
+  .header-actions {
+    display: flex;
+    gap: var(--space-sm);
   }
 
-  /* Search highlight */
-  .search-highlight {
-    background-color: rgba(255, 185, 0, 0.4);
-    padding: 0 2px;
-    border-radius: 2px;
-    font-weight: var(--font-weight-medium);
+  .table-container.enhanced {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
   }
 
-  /* Script section */
-  .script-section {
-    margin-top: var(--space-6);
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--space-4);
+  .data-table.enhanced {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table.enhanced thead {
+    background: var(--bg-secondary);
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+  }
+
+  .header-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+  }
+
+  .sort-icon {
+    opacity: 0.5;
+    transition: var(--transition-fast);
+  }
+
+  .sortable:hover .sort-icon {
+    opacity: 1;
+    color: var(--color-primary);
+  }
+
+  /* Enhanced Measure Rows */
+  .measure-row {
+    transition: var(--transition-fast);
+    position: relative;
+  }
+
+  .measure-row:hover {
+    background: var(--bg-hover);
+  }
+
+  .measure-row.selected {
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+  }
+
+  .measure-checkbox {
+    display: none;
+  }
+
+  .checkbox-label {
+    cursor: pointer;
+    position: relative;
+  }
+
+  .checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    position: relative;
+    transition: var(--transition-fast);
+    display: block;
+  }
+
+  .measure-checkbox:checked+.checkbox-label .checkmark {
+    background: var(--gradient-primary);
+    border-color: var(--color-primary);
+  }
+
+  .measure-checkbox:checked+.checkbox-label .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  .measure-name-cell {
+    padding: var(--space-lg);
+  }
+
+  .measure-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .measure-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+
+  .measure-meta {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .measure-length {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--glass-bg);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  /* Impact Indicators */
+  .impact-cell {
+    padding: var(--space-lg);
+  }
+
+  .impact-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .impact-indicator.low {
+    background: rgba(67, 233, 123, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(67, 233, 123, 0.3);
+  }
+
+  .impact-indicator.medium {
+    background: rgba(251, 191, 36, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+
+  .impact-indicator.high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  /* Actions Cell */
+  .actions-cell {
+    padding: var(--space-lg);
+  }
+
+  .row-actions {
+    display: flex;
+    gap: var(--space-xs);
+  }
+
+  .icon-button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+  }
+
+  .icon-button:hover {
+    background: var(--bg-hover);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Enhanced Script Section */
+  .script-section.enhanced {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    margin-top: var(--space-2xl);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   .section-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-3);
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
+    gap: var(--space-sm);
+    margin: 0;
   }
 
   .section-title i {
-    margin-right: var(--space-2);
-    color: var(--primary);
+    color: var(--color-primary);
+  }
+
+  .script-options {
+    display: flex;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .option-label input[type="radio"] {
+    accent-color: var(--color-primary);
   }
 
   .section-description {
+    margin-bottom: var(--space-xl);
     color: var(--text-secondary);
-    margin-bottom: var(--space-4);
+    line-height: 1.6;
   }
 
-  .code-container {
-    position: relative;
-    margin: 0;
-    border-radius: var(--radius-md);
+  .script-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-xl);
   }
 
-  .code-container pre {
+  .script-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .script-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .script-title {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .script-count {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .script-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .code-container.enhanced {
+    position: relative;
+    background: var(--bg-primary);
+  }
+
+  .code-container.enhanced pre {
     margin: 0;
-    padding: var(--space-3);
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    background: transparent;
     max-height: 400px;
     overflow: auto;
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
-  .copy-button {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    padding: var(--space-1) var(--space-3);
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--text-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
-    z-index: 10;
+  /* Help Card */
+  .script-help {
+    margin-top: var(--space-xl);
   }
 
-  .copy-button:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-
-  .script-alert {
+  .help-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
     display: flex;
-    align-items: flex-start;
-    padding: var(--space-3);
-    background-color: rgba(33, 150, 243, 0.1);
-    border-radius: var(--radius-md);
-    border-left: 4px solid #1976d2;
+    gap: var(--space-lg);
   }
 
-  .script-alert i {
-    margin-right: var(--space-3);
-    color: #1976d2;
-    margin-top: 3px;
+  .help-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-accent);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
   }
 
-  .script-alert p {
-    margin: 0;
+  .help-content h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .help-content ol {
     color: var(--text-secondary);
+    padding-left: var(--space-lg);
+    line-height: 1.6;
+  }
+
+  .help-content li {
+    margin-bottom: var(--space-xs);
+  }
+
+  /* Success State */
+  .success-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3xl);
+    text-align: center;
+    background: var(--glass-bg);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    margin: var(--space-xl) 0;
+  }
+
+  .success-state-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-success);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: white;
+    margin-bottom: var(--space-xl);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .success-state-title {
+    font-family: var(--font-primary);
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .success-state-message {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+  }
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .modal-header h3 {
+    font-family: var(--font-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    font-size: 1.25rem;
+  }
+
+  .modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    padding: var(--space-xl);
+  }
+
+  .help-section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .help-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .help-section h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .help-section h4 i {
+    color: var(--color-primary);
+  }
+
+  .help-section p,
+  .help-section ul {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .help-section ul {
+    padding-left: var(--space-lg);
+  }
+
+  .help-section li {
+    margin-bottom: var(--space-xs);
+  }
+
+  /* Sort Controls */
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .sort-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .sort-select {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  /* Enhanced Selection Info */
+  .selection-info {
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .script-options {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .script-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .script-actions {
+      align-self: stretch;
+    }
+
+    .help-card {
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .bulk-actions,
+    .export-actions {
+      flex-direction: column;
+    }
+
+    .sort-controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal {
+      padding: var(--space-md);
+    }
+
+    .modal-content {
+      max-height: 90vh;
+    }
+  }
+
+  /* Animation Enhancements */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Focus Management */
+  .measure-row:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* High Contrast Support */
+  @media (prefers-contrast: high) {
+    .impact-indicator.low {
+      background: #22c55e;
+      color: white;
+    }
+
+    .impact-indicator.medium {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .impact-indicator.high {
+      background: #ef4444;
+      color: white;
+    }
+  }
+
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    .success-state-icon {
+      animation: none;
+    }
+
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 </style>
+
 {% endblock %}
