@@ -3,7 +3,7 @@
 
 {% block header_icon %}<i class="fas fa-code"></i>{% endblock %}
 {% block header_title %}DAX Code Analyzer{% endblock %}
-{% block header_subtitle %}Browse and analyze DAX formulas with similarity analysis{% endblock %}
+{% block header_subtitle %}Browse and analyze DAX formulas with advanced features{% endblock %}
 
 {% block header_stats %}
 <div class="quick-stat">
@@ -11,15 +11,15 @@
   <span class="stat-label">DAX Expressions</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number">{{ (dax_expressions|map(attribute='1')|map('length')|sum / 1000)|round|int if
-    dax_expressions else 0 }}</span>
-  <span class="stat-label">Total Lines (K)</span>
+  <span class="stat-number">{{ (dax_expressions|map(attribute='1')|map('length')|sum / 1000)|round(1) if dax_expressions
+    else 0 }}K</span>
+  <span class="stat-label">Total Characters</span>
 </div>
 {% endblock %}
 
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" />
 <!-- Include FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 {% endblock %}
@@ -35,73 +35,211 @@
 <div class="page-header">
   <h1 class="page-title"><i class="fas fa-code"></i> DAX Explorer</h1>
   <p class="page-description">
-    Browse and analyze DAX formulas used in your Power BI report.
+    Browse, analyze, and optimize your DAX formulas with advanced search and similarity detection.
   </p>
 </div>
 
-<!-- Simple Search Bar -->
-<div class="search-container">
-  <div class="search-input-wrapper">
-    <i class="fas fa-search"></i>
-    <input type="search" id="searchDax" placeholder="Search DAX expressions..." aria-label="Search DAX expressions" />
-    <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="search-count" aria-live="polite"></div>
-</div>
+<!-- DAX Statistics Overview -->
+<div class="dax-stats-overview">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-calculator"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value" id="totalMeasures">{{ dax_expressions|length }}</div>
+        <div class="stat-label">Total Measures</div>
+      </div>
+    </div>
 
-<!-- DAX Measure Count -->
-<div class="table-toolbar">
-  <div class="table-info">
-    <div class="results-count">
-      <span id="expressionCount">{{ dax_expressions|length }}</span> expressions found
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-code-branch"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value" id="complexMeasures">0</div>
+        <div class="stat-label">Complex Measures</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-clone"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value" id="similarPairs">0</div>
+        <div class="stat-label">Similar Pairs</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-align-left"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value" id="avgLength">0</div>
+        <div class="stat-label">Avg. Length</div>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- Enhanced Search and Filter Bar -->
+<div class="search-filter-container">
+  <div class="search-section">
+    <div class="search-input-wrapper large">
+      <i class="fas fa-search"></i>
+      <input type="search" id="searchDax" placeholder="Search measure names or DAX code..."
+        aria-label="Search DAX expressions" />
+      <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-options">
+      <label class="search-option">
+        <input type="checkbox" id="searchInCode" checked>
+        <span>Search in code</span>
+      </label>
+      <label class="search-option">
+        <input type="checkbox" id="caseSensitive">
+        <span>Case sensitive</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-group">
+      <label class="filter-label">Complexity</label>
+      <select id="complexityFilter" class="filter-select">
+        <option value="all">All Complexity</option>
+        <option value="simple">Simple (< 100 chars)</option>
+        <option value="moderate">Moderate (100-500 chars)</option>
+        <option value="complex">Complex (> 500 chars)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Functions</label>
+      <select id="functionFilter" class="filter-select">
+        <option value="all">All Functions</option>
+        <option value="CALCULATE">CALCULATE</option>
+        <option value="SUMX">SUMX/AVERAGEX</option>
+        <option value="FILTER">FILTER</option>
+        <option value="IF">IF/SWITCH</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- View Options and Actions -->
+<div class="table-toolbar enhanced">
+  <div class="table-info">
+    <div class="results-count">
+      <span class="count-number" id="visibleCount">{{ dax_expressions|length }}</span>
+      <span class="count-label">of</span>
+      <span class="count-total" id="totalCount">{{ dax_expressions|length }}</span>
+      <span class="count-label">measures shown</span>
+    </div>
+  </div>
+
   <div class="table-actions">
+    <div class="view-options">
+      <button id="compactView" class="view-button active" title="Compact view">
+        <i class="fas fa-th-list"></i>
+      </button>
+      <button id="expandedView" class="view-button" title="Expanded view">
+        <i class="fas fa-th-large"></i>
+      </button>
+    </div>
+
     <button id="analyzeSimilarity" class="action-button secondary">
       <i class="fas fa-fingerprint"></i> Analyze Similarity
     </button>
-    <button id="expandAll" class="action-button secondary">
+
+    <button id="expandAll" class="action-button outline">
       <i class="fas fa-expand-alt"></i> Expand All
     </button>
-    <button id="collapseAll" class="action-button secondary">
+
+    <button id="collapseAll" class="action-button outline">
       <i class="fas fa-compress-alt"></i> Collapse All
     </button>
-    <button id="exportDax" class="action-button outline">
+
+    <button id="exportDax" class="action-button primary">
       <i class="fas fa-download"></i> Export
     </button>
   </div>
 </div>
 
-<!-- DAX Expressions List -->
-<div id="queriesContainer" class="queries-section">
+<!-- DAX Expressions Container -->
+<div id="daxContainer" class="dax-container">
   <!-- DAX List -->
-  <div id="daxList" class="queries-list">
+  <div id="daxList" class="dax-list">
     {% for label, expression in dax_expressions %}
-    <div class="query-item" data-measure="{{ label }}">
-      <div class="query-item-header">
-        <div class="query-info">
-          <h3 class="query-name">
-            <span class="measure-icon"><i class="fas fa-calculator"></i></span>
-            {{ label }}
-          </h3>
+    <div class="dax-card" data-measure="{{ label }}" data-length="{{ expression|length }}">
+      <div class="dax-card-header">
+        <div class="measure-info">
+          <div class="measure-icon">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <div class="measure-details">
+            <h3 class="measure-name">{{ label }}</h3>
+            <div class="measure-metadata">
+              <span class="metadata-item">
+                <i class="fas fa-text-width"></i>
+                {{ expression|length }} characters
+              </span>
+              <span class="metadata-item complexity-badge" data-complexity="">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="complexity-text">Analyzing...</span>
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="query-actions">
+
+        <div class="measure-actions">
           <button class="icon-button copy-name" title="Copy measure name" data-copy="{{ label }}">
             <i class="fas fa-tag"></i>
+          </button>
+          <button class="icon-button copy-code" title="Copy DAX code" data-measure="{{ label }}">
+            <i class="fas fa-copy"></i>
           </button>
           <button class="icon-button toggle-expand" title="Expand/collapse">
             <i class="fas fa-chevron-down"></i>
           </button>
         </div>
       </div>
-      <div class="query-item-content">
+
+      <div class="dax-card-content">
         <div class="code-container">
-          <pre><code class="language-dax">{{ expression }}</code></pre>
-          <button class="copy-button" onclick="copyToClipboard(this)">
-            <i class="fas fa-copy"></i> Copy
-          </button>
+          <div class="code-header">
+            <span class="code-label">DAX Expression</span>
+            <div class="code-actions">
+              <button class="code-action format-code" title="Format code">
+                <i class="fas fa-indent"></i>
+              </button>
+              <button class="code-action analyze-dependencies" title="Analyze dependencies">
+                <i class="fas fa-project-diagram"></i>
+              </button>
+            </div>
+          </div>
+          <pre class="line-numbers"><code class="language-dax">{{ expression }}</code></pre>
+        </div>
+
+        <div class="measure-analysis" style="display: none;">
+          <div class="analysis-section">
+            <h4><i class="fas fa-puzzle-piece"></i> Functions Used</h4>
+            <div class="function-tags" data-measure="{{ label }}">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="analysis-section">
+            <h4><i class="fas fa-link"></i> Referenced Measures</h4>
+            <div class="reference-list" data-measure="{{ label }}">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -114,951 +252,1795 @@
       <i class="fas fa-search"></i>
     </div>
     <h3 class="empty-state-title">No DAX expressions found</h3>
-    <p class="empty-state-message">Try adjusting your search terms.</p>
-    <button id="clearEmptyState" class="action-button primary">
-      <i class="fas fa-undo"></i> Clear Search
+    <p class="empty-state-message">Try adjusting your search terms or filters.</p>
+    <button id="clearFilters" class="action-button primary">
+      <i class="fas fa-undo"></i> Clear All Filters
     </button>
   </div>
 </div>
 
-<!-- Similarity Analysis Section -->
-<div id="similaritySection" class="similarity-section" style="display: none;">
-  <div class="section-header">
-    <h2 class="section-title"><i class="fas fa-project-diagram"></i> Measure Similarity Analysis</h2>
-    <button id="closeSimilarity" class="action-button secondary">
-      <i class="fas fa-times"></i> Close Analysis
-    </button>
-  </div>
-
-  <div class="control-panel">
-    <div class="filter-group">
-      <label for="similarityThreshold" class="filter-label">Similarity Threshold:</label>
-      <input type="range" id="similarityThreshold" min="0.5" max="0.95" step="0.05" value="0.7" class="slider">
-      <span id="thresholdValue">70%</span>
+<!-- Enhanced Similarity Analysis Modal -->
+<div id="similarityModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content large">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-fingerprint"></i>
+        Measure Similarity Analysis
+      </h2>
+      <button id="closeSimilarity" class="modal-close">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
-    <div class="analysis-stats">
-      <div class="stat-item">
-        <div class="stat-value" id="similarPairsCount">0</div>
-        <div class="stat-label">Similar Pairs</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="highestSimilarity">0%</div>
-        <div class="stat-label">Highest Similarity</div>
-      </div>
-    </div>
-  </div>
+    <div class="modal-body">
+      <div class="similarity-controls">
+        <div class="control-group">
+          <label for="similarityThreshold">Similarity Threshold</label>
+          <div class="threshold-control">
+            <input type="range" id="similarityThreshold" min="50" max="95" step="5" value="70">
+            <span class="threshold-value" id="thresholdValue">70%</span>
+          </div>
+        </div>
 
-  <div class="similarity-results">
-    <div class="similarity-table-container">
-      <table id="similarityTable" class="data-table">
-        <thead>
-          <tr>
-            <th>Measure 1</th>
-            <th>Measure 2</th>
-            <th>Similarity</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+        <div class="similarity-stats">
+          <div class="stat-item">
+            <span class="stat-value" id="totalPairs">0</span>
+            <span class="stat-label">Total Pairs</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="similarPairsCount">0</span>
+            <span class="stat-label">Similar Pairs</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="highestSimilarityValue">0%</span>
+            <span class="stat-label">Highest Match</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="similarity-results">
+        <div class="results-header">
+          <h3>Similar Measure Pairs</h3>
+          <button id="exportSimilarity" class="action-button secondary">
+            <i class="fas fa-download"></i> Export Results
+          </button>
+        </div>
+
+        <div id="similarityGrid" class="similarity-grid">
           <!-- Will be populated by JavaScript -->
-        </tbody>
-      </table>
-    </div>
-
-    <div id="comparisonView" class="comparison-view" style="display: none;">
-      <div class="comparison-header">
-        <h3>Comparing Measures</h3>
-        <button id="closeComparison" class="icon-button">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="comparison-content">
-        <div class="comparison-item">
-          <h4 id="measure1Name"></h4>
-          <pre><code id="measure1Code" class="language-dax"></code></pre>
-        </div>
-        <div class="comparison-item">
-          <h4 id="measure2Name"></h4>
-          <pre><code id="measure2Code" class="language-dax"></code></pre>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Analyzing measures...</div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-<!-- Include Prism.js DAX language component -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-dax.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dax.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // DOM Elements
-    const searchDax = document.getElementById("searchDax");
-    const clearSearch = document.getElementById("clearSearch");
-    const daxList = document.getElementById("daxList");
-    const queryItems = document.querySelectorAll(".query-item");
-    const emptyState = document.getElementById("emptyState");
-    const clearEmptyState = document.getElementById("clearEmptyState");
-    const expressionCount = document.getElementById("expressionCount");
-    const expandAll = document.getElementById("expandAll");
-    const collapseAll = document.getElementById("collapseAll");
-    const exportDax = document.getElementById("exportDax");
-    const searchCount = document.querySelector(".search-count");
-    const daxLoading = document.getElementById("daxLoading");
-    const analyzeSimilarityBtn = document.getElementById("analyzeSimilarity");
-    const closeSimilarityBtn = document.getElementById("closeSimilarity");
-    const similaritySection = document.getElementById("similaritySection");
-    const similarityThreshold = document.getElementById("similarityThreshold");
-    const thresholdValue = document.getElementById("thresholdValue");
-    const closeComparisonBtn = document.getElementById("closeComparison");
-    const comparisonView = document.getElementById("comparisonView");
+  class DAXExplorer {
+    constructor() {
+      this.daxExpressions = this.collectDAXExpressions();
+      this.filteredExpressions = [...this.daxExpressions];
+      this.similarityResults = [];
+      this.viewMode = 'compact';
 
-    // Set up event listeners
-    setupEventListeners();
+      this.init();
+    }
 
-    /**
-     * Set up event listeners for interactive elements
-     */
-    function setupEventListeners() {
-      // Search input
-      if (searchDax) {
-        searchDax.addEventListener("input", function () {
-          const searchTerm = this.value;
+    init() {
+      this.setupEventListeners();
+      this.analyzeComplexity();
+      this.updateStats();
+      this.applyInitialHighlighting();
+    }
 
-          // Toggle clear button visibility
-          if (clearSearch) {
-            clearSearch.style.display = searchTerm ? "block" : "none";
-          }
+    collectDAXExpressions() {
+      const expressions = [];
+      document.querySelectorAll('.dax-card').forEach(card => {
+        const name = card.getAttribute('data-measure');
+        const codeElement = card.querySelector('code');
+        if (name && codeElement) {
+          expressions.push({
+            name: name,
+            code: codeElement.textContent,
+            element: card,
+            length: parseInt(card.getAttribute('data-length') || '0')
+          });
+        }
+      });
+      return expressions;
+    }
 
-          // Debounce search
-          clearTimeout(this.debounceTimer);
-          this.debounceTimer = setTimeout(() => {
-            searchDaxExpressions(searchTerm);
-          }, 300);
-        });
-      }
+    setupEventListeners() {
+      // Search functionality
+      const searchInput = document.getElementById('searchDax');
+      const clearSearch = document.getElementById('clearSearch');
+      const searchInCode = document.getElementById('searchInCode');
+      const caseSensitive = document.getElementById('caseSensitive');
 
-      // Clear search button
-      if (clearSearch) {
-        clearSearch.addEventListener("click", function () {
-          if (searchDax) {
-            searchDax.value = "";
-            clearSearch.style.display = "none";
-            searchDaxExpressions("");
-            searchDax.focus();
-          }
-        });
-      }
+      searchInput?.addEventListener('input', this.debounce(() => {
+        clearSearch.style.display = searchInput.value ? 'block' : 'none';
+        this.performSearch();
+      }, 300));
 
-      // Clear empty state button
-      if (clearEmptyState) {
-        clearEmptyState.addEventListener("click", function () {
-          if (searchDax) {
-            searchDax.value = "";
-            clearSearch.style.display = "none";
-            searchDaxExpressions("");
-          }
-        });
-      }
-
-      // Copy measure name buttons
-      document.querySelectorAll(".copy-name").forEach((button) => {
-        button.addEventListener("click", function () {
-          const measureName = this.getAttribute("data-copy");
-          copyToClipboardWithAnimation(this, measureName);
-        });
+      clearSearch?.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearch.style.display = 'none';
+        this.performSearch();
       });
 
-      // Toggle expand buttons
-      document.querySelectorAll(".toggle-expand").forEach((button) => {
-        button.addEventListener("click", function () {
-          const item = this.closest(".query-item");
-          toggleItem(item, this);
+      searchInCode?.addEventListener('change', () => this.performSearch());
+      caseSensitive?.addEventListener('change', () => this.performSearch());
+
+      // Filters
+      document.getElementById('complexityFilter')?.addEventListener('change', () => this.applyFilters());
+      document.getElementById('functionFilter')?.addEventListener('change', () => this.applyFilters());
+
+      // View options
+      document.getElementById('compactView')?.addEventListener('click', () => this.setViewMode('compact'));
+      document.getElementById('expandedView')?.addEventListener('click', () => this.setViewMode('expanded'));
+
+      // Bulk actions
+      document.getElementById('expandAll')?.addEventListener('click', () => this.toggleAllCards(true));
+      document.getElementById('collapseAll')?.addEventListener('click', () => this.toggleAllCards(false));
+
+      // Export
+      document.getElementById('exportDax')?.addEventListener('click', () => this.exportDAX());
+
+      // Similarity analysis
+      document.getElementById('analyzeSimilarity')?.addEventListener('click', () => this.showSimilarityAnalysis());
+      document.getElementById('closeSimilarity')?.addEventListener('click', () => this.hideSimilarityAnalysis());
+      document.getElementById('similarityThreshold')?.addEventListener('input', (e) => this.updateSimilarityThreshold(e));
+      document.getElementById('exportSimilarity')?.addEventListener('click', () => this.exportSimilarityResults());
+
+      // Card interactions
+      this.setupCardInteractions();
+
+      // Clear filters
+      document.getElementById('clearFilters')?.addEventListener('click', () => this.clearAllFilters());
+    }
+
+    setupCardInteractions() {
+      document.querySelectorAll('.dax-card').forEach(card => {
+        // Expand/collapse
+        const toggleBtn = card.querySelector('.toggle-expand');
+        toggleBtn?.addEventListener('click', () => this.toggleCard(card));
+
+        // Copy buttons
+        const copyNameBtn = card.querySelector('.copy-name');
+        const copyCodeBtn = card.querySelector('.copy-code');
+
+        copyNameBtn?.addEventListener('click', (e) => {
+          const name = e.currentTarget.getAttribute('data-copy');
+          this.copyToClipboard(name, 'Measure name');
         });
+
+        copyCodeBtn?.addEventListener('click', (e) => {
+          const measureName = e.currentTarget.getAttribute('data-measure');
+          const measure = this.daxExpressions.find(m => m.name === measureName);
+          if (measure) {
+            this.copyToClipboard(measure.code, 'DAX code');
+          }
+        });
+
+        // Format code button
+        const formatBtn = card.querySelector('.format-code');
+        formatBtn?.addEventListener('click', () => this.formatDAXCode(card));
+
+        // Analyze dependencies
+        const analyzeBtn = card.querySelector('.analyze-dependencies');
+        analyzeBtn?.addEventListener('click', () => this.analyzeMeasureDependencies(card));
+      });
+    }
+
+    analyzeComplexity() {
+      let complexCount = 0;
+
+      this.daxExpressions.forEach(expr => {
+        const complexity = this.calculateComplexity(expr.code);
+        const card = expr.element;
+        const badge = card.querySelector('.complexity-badge');
+        const text = badge?.querySelector('.complexity-text');
+
+        if (badge && text) {
+          badge.setAttribute('data-complexity', complexity);
+          text.textContent = complexity.charAt(0).toUpperCase() + complexity.slice(1);
+
+          // Add appropriate class
+          badge.classList.remove('simple', 'moderate', 'complex');
+          badge.classList.add(complexity);
+
+          if (complexity === 'complex') complexCount++;
+        }
+
+        // Analyze functions used
+        const functions = this.extractFunctions(expr.code);
+        const functionTags = card.querySelector('.function-tags');
+        if (functionTags) {
+          functionTags.innerHTML = functions.map(fn =>
+            `<span class="function-tag">${fn}</span>`
+          ).join('');
+        }
+
+        // Find referenced measures
+        const references = this.findReferencedMeasures(expr.code);
+        const referenceList = card.querySelector('.reference-list');
+        if (referenceList) {
+          if (references.length > 0) {
+            referenceList.innerHTML = references.map(ref =>
+              `<span class="reference-item">[${ref}]</span>`
+            ).join('');
+          } else {
+            referenceList.innerHTML = '<span class="no-references">No measure references found</span>';
+          }
+        }
       });
 
-      // Expand All button
-      if (expandAll) {
-        expandAll.addEventListener("click", function () {
-          queryItems.forEach((item) => {
-            const button = item.querySelector(".toggle-expand");
-            if (!item.classList.contains("expanded")) {
-              toggleItem(item, button);
-            }
-          });
-        });
+      // Update complex measures count
+      document.getElementById('complexMeasures').textContent = complexCount;
+    }
+
+    calculateComplexity(code) {
+      const length = code.length;
+      const functionCount = (code.match(/\b(CALCULATE|SUMX|AVERAGEX|FILTER|IF|SWITCH|VAR|RETURN)\b/gi) || []).length;
+      const nestedParens = this.countNestedParentheses(code);
+
+      // Simple heuristic for complexity
+      if (length < 100 && functionCount <= 1 && nestedParens <= 2) return 'simple';
+      if (length > 500 || functionCount > 5 || nestedParens > 4) return 'complex';
+      return 'moderate';
+    }
+
+    countNestedParentheses(code) {
+      let maxDepth = 0;
+      let currentDepth = 0;
+
+      for (let char of code) {
+        if (char === '(') {
+          currentDepth++;
+          maxDepth = Math.max(maxDepth, currentDepth);
+        } else if (char === ')') {
+          currentDepth = Math.max(0, currentDepth - 1);
+        }
       }
 
-      // Collapse All button
-      if (collapseAll) {
-        collapseAll.addEventListener("click", function () {
-          queryItems.forEach((item) => {
-            const button = item.querySelector(".toggle-expand");
-            if (item.classList.contains("expanded")) {
-              toggleItem(item, button);
-            }
-          });
-        });
+      return maxDepth;
+    }
+
+    extractFunctions(code) {
+      const functionPattern = /\b([A-Z][A-Z0-9]*(?:\.[A-Z][A-Z0-9]*)?)\s*\(/g;
+      const functions = new Set();
+      let match;
+
+      while ((match = functionPattern.exec(code)) !== null) {
+        functions.add(match[1]);
       }
 
-      // Export DAX button
-      if (exportDax) {
-        exportDax.addEventListener("click", exportDaxExpressions);
+      return Array.from(functions).slice(0, 5); // Limit to 5 most relevant
+    }
+
+    findReferencedMeasures(code) {
+      const references = new Set();
+
+      // Look for [MeasureName] pattern
+      const measurePattern = /\[([^\[\]]+)\]/g;
+      let match;
+
+      while ((match = measurePattern.exec(code)) !== null) {
+        const potentialMeasure = match[1];
+        // Check if this is actually a measure (exists in our list)
+        if (this.daxExpressions.some(expr => expr.name === potentialMeasure)) {
+          references.add(potentialMeasure);
+        }
       }
 
-      // Analyze similarity button
-      if (analyzeSimilarityBtn) {
-        analyzeSimilarityBtn.addEventListener("click", analyzeSimilarity);
+      return Array.from(references);
+    }
+
+    updateStats() {
+      const totalMeasures = this.daxExpressions.length;
+      const totalChars = this.daxExpressions.reduce((sum, expr) => sum + expr.length, 0);
+      const avgLength = totalMeasures > 0 ? Math.round(totalChars / totalMeasures) : 0;
+
+      document.getElementById('totalMeasures').textContent = totalMeasures;
+      document.getElementById('avgLength').textContent = avgLength;
+
+      // These will be updated after similarity analysis
+      document.getElementById('similarPairs').textContent = '0';
+    }
+
+    performSearch() {
+      const searchTerm = document.getElementById('searchDax').value.toLowerCase();
+      const searchInCode = document.getElementById('searchInCode').checked;
+      const caseSensitive = document.getElementById('caseSensitive').checked;
+
+      this.clearHighlights();
+
+      if (!searchTerm) {
+        this.applyFilters();
+        return;
       }
 
-      // Close similarity analysis button
-      if (closeSimilarityBtn) {
-        closeSimilarityBtn.addEventListener("click", function () {
-          similaritySection.style.display = "none";
-          daxList.style.display = "flex";
-        });
+      const searchTermActual = caseSensitive ? document.getElementById('searchDax').value : searchTerm;
+
+      this.filteredExpressions = this.daxExpressions.filter(expr => {
+        const nameMatch = caseSensitive ?
+          expr.name.includes(searchTermActual) :
+          expr.name.toLowerCase().includes(searchTerm);
+
+        const codeMatch = searchInCode && (caseSensitive ?
+          expr.code.includes(searchTermActual) :
+          expr.code.toLowerCase().includes(searchTerm));
+
+        const matches = nameMatch || codeMatch;
+
+        if (matches && searchTerm) {
+          this.highlightSearchTerm(expr.element, searchTermActual, nameMatch, codeMatch);
+        }
+
+        return matches;
+      });
+
+      this.updateDisplay();
+    }
+
+    highlightSearchTerm(card, searchTerm, inName, inCode) {
+      if (inName) {
+        const nameElement = card.querySelector('.measure-name');
+        if (nameElement) {
+          const regex = new RegExp(`(${this.escapeRegExp(searchTerm)})`, 'gi');
+          nameElement.innerHTML = nameElement.textContent.replace(regex, '<mark>$1</mark>');
+        }
       }
 
-      // Similarity threshold slider
-      if (similarityThreshold) {
-        similarityThreshold.addEventListener("input", function () {
-          const threshold = parseFloat(this.value);
-          thresholdValue.textContent = `${Math.round(threshold * 100)}%`;
-          updateSimilarityTable(threshold);
-        });
-      }
-
-      // Close comparison view button
-      if (closeComparisonBtn) {
-        closeComparisonBtn.addEventListener("click", function () {
-          comparisonView.style.display = "none";
-        });
+      if (inCode && card.classList.contains('expanded')) {
+        const codeElement = card.querySelector('code');
+        if (codeElement) {
+          const regex = new RegExp(`(${this.escapeRegExp(searchTerm)})`, 'gi');
+          const originalCode = codeElement.textContent;
+          codeElement.innerHTML = originalCode.replace(regex, '<mark>$1</mark>');
+          // Re-apply syntax highlighting
+          Prism.highlightElement(codeElement);
+        }
       }
     }
 
-    /**
-     * Toggle expansion state of an item
-     * @param {HTMLElement} item - The item element to toggle
-     * @param {HTMLElement} button - The toggle button
-     */
-    function toggleItem(item, button) {
-      const isExpanded = item.classList.toggle("expanded");
-
-      // Update button icon
-      if (button) {
-        button.innerHTML = isExpanded
-          ? '<i class="fas fa-chevron-up"></i>'
-          : '<i class="fas fa-chevron-down"></i>';
-
-        button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
-      }
-    }
-
-    /**
-     * Search DAX expressions
-     * @param {string} searchTerm - Term to search for
-     */
-    function searchDaxExpressions(searchTerm) {
-      // Convert to lowercase for case-insensitive search
-      searchTerm = searchTerm.toLowerCase();
-
-      let visibleCount = 0;
-
-      // Clear previous search highlights
-      document.querySelectorAll(".search-highlight").forEach((el) => {
-        const text = el.textContent;
-        const parent = el.parentNode;
-
-        // Replace highlighted element with text
-        const textNode = document.createTextNode(text);
-        parent.replaceChild(textNode, el);
-
-        // Normalize the parent to combine adjacent text nodes
+    clearHighlights() {
+      document.querySelectorAll('.measure-name mark').forEach(mark => {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
         parent.normalize();
       });
 
-      // Process DAX items
-      queryItems.forEach((item) => {
-        const measureNameElement = item.querySelector(".query-name");
-        const measureName = measureNameElement.textContent.trim();
-        const codeElement = item.querySelector("code");
-        const daxExpression = codeElement.textContent.toLowerCase();
+      document.querySelectorAll('code mark').forEach(mark => {
+        const parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      });
+    }
 
-        // Check if item matches search
-        const matches =
-          searchTerm === "" ||
-          measureName.toLowerCase().includes(searchTerm) ||
-          daxExpression.includes(searchTerm);
+    applyFilters() {
+      const searchTerm = document.getElementById('searchDax').value.toLowerCase();
+      const complexity = document.getElementById('complexityFilter').value;
+      const functionFilter = document.getElementById('functionFilter').value;
 
-        // Set item visibility
-        item.style.display = matches ? "" : "none";
+      this.filteredExpressions = this.daxExpressions.filter(expr => {
+        let matches = true;
 
-        if (matches) {
-          visibleCount++;
+        // Search filter (if any)
+        if (searchTerm) {
+          const searchInCode = document.getElementById('searchInCode').checked;
+          matches = expr.name.toLowerCase().includes(searchTerm) ||
+            (searchInCode && expr.code.toLowerCase().includes(searchTerm));
+        }
 
-          // Highlight matches in measure name if there's a search term
-          if (searchTerm && measureNameElement) {
-            const nameText = measureNameElement.textContent;
-            if (nameText.toLowerCase().includes(searchTerm)) {
-              const icon = measureNameElement.querySelector(".measure-icon");
-              const textWithoutIcon = nameText
-                .replace(icon.textContent, "")
-                .trim();
+        // Complexity filter
+        if (complexity !== 'all' && matches) {
+          const exprComplexity = expr.element.querySelector('.complexity-badge').getAttribute('data-complexity');
+          matches = exprComplexity === complexity;
+        }
 
-              // Create highlighted version
-              const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
-              const highlightedText = textWithoutIcon.replace(
-                regex,
-                '<span class="search-highlight">$1</span>'
-              );
+        // Function filter
+        if (functionFilter !== 'all' && matches) {
+          if (functionFilter === 'other') {
+            matches = !expr.code.match(/\b(CALCULATE|SUMX|AVERAGEX|FILTER|IF|SWITCH)\b/i);
+          } else if (functionFilter === 'SUMX') {
+            matches = expr.code.match(/\b(SUMX|AVERAGEX)\b/i);
+          } else {
+            matches = expr.code.match(new RegExp(`\\b${functionFilter}\\b`, 'i'));
+          }
+        }
 
-              // Keep the icon, replace the text
-              measureNameElement.innerHTML = `<span class="measure-icon"><i class="fas fa-calculator"></i></span> ${highlightedText}`;
-            }
+        return matches;
+      });
+
+      this.updateDisplay();
+    }
+
+    updateDisplay() {
+      // Hide all cards first
+      this.daxExpressions.forEach(expr => {
+        expr.element.style.display = 'none';
+      });
+
+      // Show filtered cards
+      this.filteredExpressions.forEach(expr => {
+        expr.element.style.display = '';
+      });
+
+      // Update counts
+      document.getElementById('visibleCount').textContent = this.filteredExpressions.length;
+      document.getElementById('totalCount').textContent = this.daxExpressions.length;
+
+      // Show/hide empty state
+      const emptyState = document.getElementById('emptyState');
+      const daxList = document.getElementById('daxList');
+
+      if (this.filteredExpressions.length === 0) {
+        emptyState.style.display = 'flex';
+        daxList.style.display = 'none';
+      } else {
+        emptyState.style.display = 'none';
+        daxList.style.display = '';
+      }
+    }
+
+    setViewMode(mode) {
+      this.viewMode = mode;
+
+      // Update button states
+      document.getElementById('compactView').classList.toggle('active', mode === 'compact');
+      document.getElementById('expandedView').classList.toggle('active', mode === 'expanded');
+
+      // Update card display
+      const daxList = document.getElementById('daxList');
+      daxList.classList.toggle('expanded-view', mode === 'expanded');
+
+      if (mode === 'expanded') {
+        this.toggleAllCards(true);
+      } else {
+        this.toggleAllCards(false);
+      }
+    }
+
+    toggleCard(card) {
+      const isExpanded = card.classList.contains('expanded');
+      card.classList.toggle('expanded');
+
+      const toggleBtn = card.querySelector('.toggle-expand i');
+      if (toggleBtn) {
+        toggleBtn.className = isExpanded ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+      }
+
+      // Show/hide analysis section
+      const analysisSection = card.querySelector('.measure-analysis');
+      if (analysisSection) {
+        analysisSection.style.display = isExpanded ? 'none' : 'block';
+      }
+
+      // Re-highlight if needed
+      const searchTerm = document.getElementById('searchDax').value;
+      if (searchTerm && !isExpanded) {
+        const measure = this.daxExpressions.find(expr => expr.element === card);
+        if (measure && measure.code.toLowerCase().includes(searchTerm.toLowerCase())) {
+          this.highlightSearchTerm(card, searchTerm, false, true);
+        }
+      }
+    }
+
+    toggleAllCards(expand) {
+      this.filteredExpressions.forEach(expr => {
+        const card = expr.element;
+        card.classList.toggle('expanded', expand);
+
+        const toggleBtn = card.querySelector('.toggle-expand i');
+        if (toggleBtn) {
+          toggleBtn.className = expand ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        }
+
+        const analysisSection = card.querySelector('.measure-analysis');
+        if (analysisSection) {
+          analysisSection.style.display = expand ? 'block' : 'none';
+        }
+      });
+    }
+
+    formatDAXCode(card) {
+      const codeElement = card.querySelector('code');
+      if (!codeElement) return;
+
+      let code = codeElement.textContent;
+
+      // Basic DAX formatting
+      code = this.formatDAX(code);
+
+      codeElement.textContent = code;
+      Prism.highlightElement(codeElement);
+
+      this.showNotification('DAX code formatted', 'success');
+    }
+
+    formatDAX(code) {
+      // Basic DAX formatter
+      let formatted = code;
+
+      // Add newlines after commas in function calls
+      formatted = formatted.replace(/,(?![^\(]*\))/g, ',\n    ');
+
+      // Add newlines before RETURN
+      formatted = formatted.replace(/(\s*)RETURN/gi, '\n$1RETURN');
+
+      // Add newlines after VAR declarations
+      formatted = formatted.replace(/VAR\s+(\w+)\s*=/gi, 'VAR $1 =');
+      formatted = formatted.replace(/(VAR\s+\w+\s*=.*?)(?=VAR|RETURN|$)/gi, '$1\n');
+
+      // Format CALCULATE
+      formatted = formatted.replace(/CALCULATE\s*\(/gi, 'CALCULATE(\n    ');
+
+      // Clean up extra spaces
+      formatted = formatted.replace(/\n\s*\n/g, '\n');
+      formatted = formatted.trim();
+
+      return formatted;
+    }
+
+    analyzeMeasureDependencies(card) {
+      const measureName = card.getAttribute('data-measure');
+      const measure = this.daxExpressions.find(m => m.name === measureName);
+
+      if (!measure) return;
+
+      // This would integrate with the lineage view data
+      // For now, just show what we can detect from the code
+      const references = this.findReferencedMeasures(measure.code);
+      const referencedBy = this.findMeasuresReferencingThis(measureName);
+
+      let message = `<strong>${measureName}</strong><br><br>`;
+
+      if (references.length > 0) {
+        message += `<strong>References:</strong><br>`;
+        message += references.map(ref => `• [${ref}]`).join('<br>');
+        message += '<br><br>';
+      }
+
+      if (referencedBy.length > 0) {
+        message += `<strong>Referenced by:</strong><br>`;
+        message += referencedBy.map(ref => `• [${ref}]`).join('<br>');
+      }
+
+      if (references.length === 0 && referencedBy.length === 0) {
+        message += 'No dependencies found.';
+      }
+
+      this.showNotification(message, 'info', 5000);
+    }
+
+    findMeasuresReferencingThis(measureName) {
+      const referencedBy = [];
+
+      this.daxExpressions.forEach(expr => {
+        if (expr.name !== measureName) {
+          const pattern = new RegExp(`\\[${this.escapeRegExp(measureName)}\\]`, 'g');
+          if (pattern.test(expr.code)) {
+            referencedBy.push(expr.name);
           }
         }
       });
 
-      // Update counters
-      if (expressionCount) {
-        expressionCount.textContent = visibleCount;
-      }
-
-      if (searchCount && searchTerm) {
-        searchCount.textContent = `${visibleCount} matches`;
-      } else if (searchCount) {
-        searchCount.textContent = "";
-      }
-
-      // Show/hide empty state
-      if (emptyState) {
-        emptyState.style.display = visibleCount === 0 ? "flex" : "none";
-      }
-
-      if (daxList) {
-        daxList.style.display = visibleCount === 0 ? "none" : "";
-      }
+      return referencedBy;
     }
 
-    /**
-     * Export DAX expressions
-     */
-    function exportDaxExpressions() {
-      // Prepare data for export
-      const data = [];
+    showSimilarityAnalysis() {
+      const modal = document.getElementById('similarityModal');
+      const loadingOverlay = document.getElementById('loadingOverlay');
 
-      // Get visible DAX items
-      const visibleItems = Array.from(queryItems).filter(
-        (item) => item.style.display !== "none"
-      );
+      modal.style.display = 'flex';
+      loadingOverlay.style.display = 'flex';
 
-      // Convert to array of objects
-      visibleItems.forEach((item) => {
-        const measureName = item.getAttribute("data-measure");
-        const daxExpression = item.querySelector("code").textContent;
-
-        data.push({
-          MeasureName: measureName,
-          DAXExpression: daxExpression,
-        });
-      });
-
-      // Create CSV content
-      const headers = ["MeasureName", "DAXExpression"];
-      const csvRows = [headers.join(",")];
-
-      data.forEach((row) => {
-        const values = headers.map((header) => {
-          const value = row[header] || "";
-          // Escape quotes and wrap in quotes if contains commas or quotes
-          return value.includes(",") || value.includes('"')
-            ? `"${value.replace(/"/g, '""')}"`
-            : value;
-        });
-        csvRows.push(values.join(","));
-      });
-
-      // Create CSV content
-      const csvContent = csvRows.join("\n");
-
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "dax_expressions.csv");
-      link.style.display = "none";
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Show notification if available
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification(
-          "DAX expressions exported to CSV",
-          "success"
-        );
-      }
-    }
-
-    /**
-     * Copy text to clipboard with animation
-     * @param {HTMLElement} button - Button element
-     * @param {string} text - Text to copy
-     */
-    function copyToClipboardWithAnimation(button, text) {
-      const originalHTML = button.innerHTML;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text)
-          .then(() => {
-            button.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => {
-              button.innerHTML = originalHTML;
-            }, 2000);
-          })
-          .catch(() => {
-            fallbackCopy(text, button, originalHTML);
-          });
-      } else {
-        fallbackCopy(text, button, originalHTML);
-      }
-    }
-
-    /**
-     * Fallback method for copying text
-     */
-    function fallbackCopy(text, button, originalHTML) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        document.execCommand("copy");
-        button.innerHTML = '<i class="fas fa-check"></i>';
-      } catch (err) {
-        button.innerHTML = '<i class="fas fa-times"></i>';
-      }
-
-      document.body.removeChild(textArea);
+      // Perform similarity analysis
       setTimeout(() => {
-        button.innerHTML = originalHTML;
-      }, 2000);
+        this.analyzeSimilarity();
+        loadingOverlay.style.display = 'none';
+      }, 100);
     }
 
-    /**
-     * Function to copy code to clipboard
-     */
-    window.copyToClipboard = function (button) {
-      const codeElement = button.closest(".code-container").querySelector("code");
-      copyToClipboardWithAnimation(button, codeElement.textContent);
-    };
-
-    /**
-     * Escape special characters in string for regex
-     * @param {string} string - String to escape
-     * @returns {string} Escaped string
-     */
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    hideSimilarityAnalysis() {
+      document.getElementById('similarityModal').style.display = 'none';
     }
 
-    /**
-     * Calculate similarity between DAX expressions
-     * @param {string} dax1 - First DAX expression
-     * @param {string} dax2 - Second DAX expression
-     * @returns {number} Similarity score between 0 and 1
-     */
-    function calculateSimilarity(dax1, dax2) {
-      // Normalize expressions (remove extra whitespace, comments, etc.)
-      const normalize = (dax) => {
-        return dax
-          .replace(/--.*$/gm, '') // Remove single-line comments
-          .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim()
-          .toLowerCase();
-      };
+    analyzeSimilarity() {
+      this.similarityResults = [];
+      const threshold = parseInt(document.getElementById('similarityThreshold').value) / 100;
 
-      const normalized1 = normalize(dax1);
-      const normalized2 = normalize(dax2);
+      // Compare all pairs
+      for (let i = 0; i < this.daxExpressions.length; i++) {
+        for (let j = i + 1; j < this.daxExpressions.length; j++) {
+          const similarity = this.calculateSimilarity(
+            this.daxExpressions[i].code,
+            this.daxExpressions[j].code
+          );
 
-      // For very different length expressions, use early return
-      const lengthRatio = Math.min(normalized1.length, normalized2.length) /
-        Math.max(normalized1.length, normalized2.length);
-      if (lengthRatio < 0.5) return lengthRatio * 0.5; // Low similarity for very different lengths
-
-      // Token-based similarity
-      const tokens1 = normalized1.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
-      const tokens2 = normalized2.split(/[\s,.()\[\]{}=<>!+\-*\/]+/).filter(t => t.length > 0);
-
-      // Calculate Jaccard similarity coefficient
-      const set1 = new Set(tokens1);
-      const set2 = new Set(tokens2);
-
-      const intersection = new Set([...set1].filter(x => set2.has(x)));
-      const union = new Set([...set1, ...set2]);
-
-      const jaccardSimilarity = intersection.size / union.size;
-
-      // Calculate token sequence similarity (for detecting similar structure)
-      let sequenceSimilarity = 0;
-      const minLength = Math.min(tokens1.length, tokens2.length);
-      let matches = 0;
-
-      for (let i = 0; i < minLength; i++) {
-        if (tokens1[i] === tokens2[i]) matches++;
-      }
-
-      if (minLength > 0) {
-        sequenceSimilarity = matches / minLength;
-      }
-
-      // Combine different similarity metrics
-      return (jaccardSimilarity * 0.6) + (sequenceSimilarity * 0.4);
-    }
-
-    /**
-     * Analyze similarity between all DAX expressions
-     */
-    function analyzeSimilarity() {
-      const measures = [];
-
-      // Collect all measures and their expressions
-      queryItems.forEach(item => {
-        if (item.style.display !== "none") { // Only include visible items
-          const name = item.getAttribute("data-measure");
-          const expression = item.querySelector("code").textContent;
-
-          measures.push({
-            name: name,
-            expression: expression
-          });
-        }
-      });
-
-      // Show loading notification if available
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification(
-          "Analyzing measure similarities...",
-          "info"
-        );
-      }
-
-      // Calculate similarity for all pairs
-      const similarityResults = [];
-
-      for (let i = 0; i < measures.length; i++) {
-        for (let j = i + 1; j < measures.length; j++) {
-          const measure1 = measures[i];
-          const measure2 = measures[j];
-
-          const similarity = calculateSimilarity(measure1.expression, measure2.expression);
-
-          // Store result if similarity is above minimum threshold (0.5)
-          if (similarity > 0.5) {
-            similarityResults.push({
-              measure1: measure1.name,
-              measure2: measure2.name,
-              expression1: measure1.expression,
-              expression2: measure2.expression,
+          if (similarity >= 0.5) { // Store all results above 50%
+            this.similarityResults.push({
+              measure1: this.daxExpressions[i].name,
+              measure2: this.daxExpressions[j].name,
+              code1: this.daxExpressions[i].code,
+              code2: this.daxExpressions[j].code,
               similarity: similarity
             });
           }
         }
       }
 
-      // Sort by similarity (highest first)
-      similarityResults.sort((a, b) => b.similarity - a.similarity);
-
-      // Store results for later use
-      window.similarityResults = similarityResults;
-
-      // Show similarity section
-      daxList.style.display = "none";
-      similaritySection.style.display = "block";
-
-      // Update UI with initial threshold of 70%
-      updateSimilarityTable(0.7);
-
-      // Show completion notification if available
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification(
-          `Analysis complete: Found ${similarityResults.length} similar measure pairs`,
-          "success"
-        );
-      }
-    }
-
-    /**
-     * Update similarity table based on threshold
-     * @param {number} threshold - Similarity threshold (0-1)
-     */
-    function updateSimilarityTable(threshold) {
-      const similarityTable = document.getElementById("similarityTable").querySelector("tbody");
-      similarityTable.innerHTML = "";
-
-      const filteredResults = window.similarityResults.filter(result => result.similarity >= threshold);
+      // Sort by similarity
+      this.similarityResults.sort((a, b) => b.similarity - a.similarity);
 
       // Update stats
-      document.getElementById("similarPairsCount").textContent = filteredResults.length;
+      const totalPairs = (this.daxExpressions.length * (this.daxExpressions.length - 1)) / 2;
+      document.getElementById('totalPairs').textContent = totalPairs;
 
-      if (window.similarityResults.length > 0) {
-        const highest = Math.round(window.similarityResults[0].similarity * 100);
-        document.getElementById("highestSimilarity").textContent = `${highest}%`;
-      } else {
-        document.getElementById("highestSimilarity").textContent = "0%";
+      // Update similar pairs count in main stats
+      const similarPairs = this.similarityResults.filter(r => r.similarity >= 0.7).length;
+      document.getElementById('similarPairs').textContent = similarPairs;
+
+      // Update similarity threshold
+      this.updateSimilarityDisplay(threshold);
+    }
+
+    calculateSimilarity(code1, code2) {
+      // Normalize codes
+      const normalize = (code) => {
+        return code
+          .replace(/\/\/.*$/gm, '') // Remove comments
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .toLowerCase()
+          .trim();
+      };
+
+      const n1 = normalize(code1);
+      const n2 = normalize(code2);
+
+      // Quick length check
+      const lengthRatio = Math.min(n1.length, n2.length) / Math.max(n1.length, n2.length);
+      if (lengthRatio < 0.5) return lengthRatio;
+
+      // Token-based similarity
+      const tokens1 = this.tokenizeDAX(n1);
+      const tokens2 = this.tokenizeDAX(n2);
+
+      // Jaccard similarity
+      const set1 = new Set(tokens1);
+      const set2 = new Set(tokens2);
+      const intersection = new Set([...set1].filter(x => set2.has(x)));
+      const union = new Set([...set1, ...set2]);
+
+      const jaccardSim = intersection.size / union.size;
+
+      // Levenshtein distance for structure similarity
+      const maxLen = Math.max(n1.length, n2.length);
+      const levenDist = this.levenshteinDistance(n1, n2);
+      const levenSim = 1 - (levenDist / maxLen);
+
+      // Combined similarity
+      return (jaccardSim * 0.6) + (levenSim * 0.4);
+    }
+
+    tokenizeDAX(code) {
+      // Extract meaningful tokens from DAX
+      return code.match(/\b\w+\b/g) || [];
+    }
+
+    levenshteinDistance(str1, str2) {
+      const matrix = [];
+
+      for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
       }
 
-      // Populate table
-      filteredResults.forEach((result, index) => {
-        const row = document.createElement("tr");
+      for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+      }
 
-        // Determine similarity class
-        let similarityClass = "low-similarity";
-        if (result.similarity > 0.85) {
-          similarityClass = "high-similarity";
-        } else if (result.similarity > 0.7) {
-          similarityClass = "medium-similarity";
+      for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+          if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
         }
+      }
 
-        row.innerHTML = `
-          <td>${result.measure1}</td>
-          <td>${result.measure2}</td>
-          <td><span class="similarity-score ${similarityClass}">${Math.round(result.similarity * 100)}%</span></td>
-          <td>
-            <button class="action-button outline compare-btn" data-index="${index}">
-              <i class="fas fa-code"></i> Compare
-            </button>
-          </td>
-        `;
+      return matrix[str2.length][str1.length];
+    }
 
-        similarityTable.appendChild(row);
-      });
+    updateSimilarityThreshold(event) {
+      const threshold = parseInt(event.target.value) / 100;
+      document.getElementById('thresholdValue').textContent = `${event.target.value}%`;
+      this.updateSimilarityDisplay(threshold);
+    }
 
-      // Add event listeners to compare buttons
-      document.querySelectorAll(".compare-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-          const index = parseInt(this.getAttribute("data-index"));
-          showComparison(filteredResults[index]);
-        });
-      });
+    updateSimilarityDisplay(threshold) {
+      const filteredResults = this.similarityResults.filter(r => r.similarity >= threshold);
 
-      // Show empty message if no results
+      // Update counts
+      document.getElementById('similarPairsCount').textContent = filteredResults.length;
+
+      if (this.similarityResults.length > 0) {
+        const highest = Math.round(this.similarityResults[0].similarity * 100);
+        document.getElementById('highestSimilarityValue').textContent = `${highest}%`;
+      }
+
+      // Update grid
+      const grid = document.getElementById('similarityGrid');
+
       if (filteredResults.length === 0) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td colspan="4" class="empty-message">
-            No similar measures found above the current threshold.
-          </td>
-        `;
-        similarityTable.appendChild(row);
+        grid.innerHTML = `
+        <div class="no-similar-measures">
+          No measures found with similarity above ${Math.round(threshold * 100)}%
+        </div>
+      `;
+        return;
+      }
+
+      grid.innerHTML = filteredResults.map((result, index) => `
+      <div class="similarity-card" data-index="${index}">
+        <div class="similarity-header">
+          <div class="similarity-measures">
+            <span class="measure-1">${result.measure1}</span>
+            <i class="fas fa-exchange-alt"></i>
+            <span class="measure-2">${result.measure2}</span>
+          </div>
+          <div class="similarity-score ${this.getSimilarityClass(result.similarity)}">
+            ${Math.round(result.similarity * 100)}%
+          </div>
+        </div>
+        <div class="similarity-actions">
+          <button class="action-button outline small" onclick="daxExplorer.compareMeasures(${index})">
+            <i class="fas fa-columns"></i> Compare
+          </button>
+          <button class="action-button outline small" onclick="daxExplorer.highlightMeasures('${result.measure1}', '${result.measure2}')">
+            <i class="fas fa-highlighter"></i> Highlight
+          </button>
+        </div>
+      </div>
+    `).join('');
+    }
+
+    getSimilarityClass(similarity) {
+      if (similarity >= 0.9) return 'very-high';
+      if (similarity >= 0.8) return 'high';
+      if (similarity >= 0.7) return 'medium';
+      return 'low';
+    }
+
+    compareMeasures(index) {
+      const result = this.similarityResults[index];
+
+      // Create comparison view
+      const comparisonHTML = `
+      <div class="comparison-modal">
+        <h3>Measure Comparison</h3>
+        <div class="comparison-grid">
+          <div class="comparison-pane">
+            <h4>${result.measure1}</h4>
+            <pre><code class="language-dax">${result.code1}</code></pre>
+          </div>
+          <div class="comparison-pane">
+            <h4>${result.measure2}</h4>
+            <pre><code class="language-dax">${result.code2}</code></pre>
+          </div>
+        </div>
+        <div class="similarity-details">
+          <strong>Similarity:</strong> ${Math.round(result.similarity * 100)}%
+        </div>
+      </div>
+    `;
+
+      this.showNotification(comparisonHTML, 'info', 10000);
+    }
+
+    highlightMeasures(measure1, measure2) {
+      // Close similarity modal
+      this.hideSimilarityAnalysis();
+
+      // Clear any filters
+      this.clearAllFilters();
+
+      // Highlight the two measures
+      this.daxExpressions.forEach(expr => {
+        if (expr.name === measure1 || expr.name === measure2) {
+          expr.element.classList.add('highlighted');
+          expr.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          expr.element.classList.add('dimmed');
+        }
+      });
+
+      // Clear highlights after 5 seconds
+      setTimeout(() => {
+        document.querySelectorAll('.dax-card').forEach(card => {
+          card.classList.remove('highlighted', 'dimmed');
+        });
+      }, 5000);
+    }
+
+    exportSimilarityResults() {
+      const threshold = parseInt(document.getElementById('similarityThreshold').value) / 100;
+      const results = this.similarityResults.filter(r => r.similarity >= threshold);
+
+      const csv = [
+        ['Measure 1', 'Measure 2', 'Similarity %'],
+        ...results.map(r => [
+          r.measure1,
+          r.measure2,
+          Math.round(r.similarity * 100)
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      this.downloadFile(csv, 'dax_similarity_analysis.csv', 'text/csv');
+    }
+
+    exportDAX() {
+      const data = this.filteredExpressions.map(expr => ({
+        'Measure Name': expr.name,
+        'DAX Expression': expr.code,
+        'Length': expr.length,
+        'Complexity': expr.element.querySelector('.complexity-badge').getAttribute('data-complexity')
+      }));
+
+      const csv = this.arrayToCSV(data);
+      this.downloadFile(csv, 'dax_expressions.csv', 'text/csv');
+
+      this.showNotification('DAX expressions exported successfully', 'success');
+    }
+
+    clearAllFilters() {
+      document.getElementById('searchDax').value = '';
+      document.getElementById('clearSearch').style.display = 'none';
+      document.getElementById('complexityFilter').value = 'all';
+      document.getElementById('functionFilter').value = 'all';
+
+      this.clearHighlights();
+      this.applyFilters();
+    }
+
+    copyToClipboard(text, label) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showNotification(`${label} copied to clipboard`, 'success');
+      }).catch(() => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        this.showNotification(`${label} copied to clipboard`, 'success');
+      });
+    }
+
+    showNotification(message, type = 'info', duration = 3000) {
+      // Use the global notification system if available
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(message, type, duration);
+      } else {
+        // Fallback
+        console.log(`${type}: ${message}`);
       }
     }
 
-    /**
-     * Show comparison view for two measures
-     * @param {Object} comparisonData - Data for the two measures to compare
-     */
-    function showComparison(comparisonData) {
-      comparisonView.style.display = "block";
-
-      // Set measure names
-      document.getElementById("measure1Name").textContent = comparisonData.measure1;
-      document.getElementById("measure2Name").textContent = comparisonData.measure2;
-
-      // Set code
-      document.getElementById("measure1Code").textContent = comparisonData.expression1;
-      document.getElementById("measure2Code").textContent = comparisonData.expression2;
-
-      // Highlight code with Prism
-      Prism.highlightElement(document.getElementById("measure1Code"));
-      Prism.highlightElement(document.getElementById("measure2Code"));
-
-      // Scroll to comparison view
-      comparisonView.scrollIntoView({ behavior: "smooth" });
+    downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
+
+    arrayToCSV(data) {
+      if (data.length === 0) return '';
+
+      const headers = Object.keys(data[0]);
+      const rows = data.map(row =>
+        headers.map(header => {
+          const value = row[header] || '';
+          return value.toString().includes(',') || value.toString().includes('"')
+            ? `"${value.toString().replace(/"/g, '""')}"`
+            : value;
+        }).join(',')
+      );
+
+      return [headers.join(','), ...rows].join('\n');
+    }
+
+    escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    applyInitialHighlighting() {
+      // Apply syntax highlighting to all code blocks
+      Prism.highlightAll();
+    }
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    window.daxExplorer = new DAXExplorer();
   });
 </script>
 
 <style>
-  /* DAX Explorer base styles */
-  .dax-header {
+  /* Enhanced DAX Explorer Styles */
+
+  /* Statistics Overview */
+  .dax-stats-overview {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    transition: var(--transition-smooth);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  /* Search and Filter Container */
+  .search-filter-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    display: flex;
+    gap: var(--space-xl);
+    flex-wrap: wrap;
+  }
+
+  .search-section {
+    flex: 2;
+    min-width: 300px;
+  }
+
+  .search-input-wrapper.large {
+    position: relative;
+  }
+
+  .search-input-wrapper.large input {
+    padding: var(--space-md) var(--space-md) var(--space-md) calc(var(--space-md) * 3);
+    font-size: 1rem;
+    height: 48px;
+  }
+
+  .search-input-wrapper.large i {
+    font-size: 1.125rem;
+  }
+
+  .search-options {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-sm);
+  }
+
+  .search-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .search-option input[type="checkbox"] {
+    accent-color: var(--color-primary);
+  }
+
+  .filter-section {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .filter-group {
+    flex: 1;
+  }
+
+  .filter-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+    font-weight: 500;
+  }
+
+  /* Enhanced Table Toolbar */
+  .table-toolbar.enhanced {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--glass-border);
   }
 
-  /* Query Items styling */
-  .queries-list {
+  .results-count {
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .count-number {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.125rem;
+  }
+
+  .count-total {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .view-options {
+    display: flex;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .view-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .view-button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .view-button.active {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  /* DAX Cards */
+  .dax-container {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .dax-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
+    gap: var(--space-lg);
   }
 
-  .query-item {
-    background-color: var(--bg-primary);
+  .dax-list.expanded-view .dax-card {
+    margin-bottom: var(--space-xl);
+  }
+
+  .dax-list.expanded-view .dax-card-content {
+    max-height: none !important;
+    padding: var(--space-xl) !important;
+  }
+
+  .dax-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    transition: var(--transition-smooth);
   }
 
-  .query-item:hover {
-    box-shadow: var(--shadow-sm);
-    border-color: var(--primary);
+  .dax-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
   }
 
-  .query-item-header {
+  .dax-card.highlighted {
+    border-color: var(--color-success);
+    box-shadow: 0 0 20px rgba(67, 233, 123, 0.3);
+  }
+
+  .dax-card.dimmed {
+    opacity: 0.5;
+  }
+
+  .dax-card-header {
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-3) var(--space-4);
-    background-color: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border);
   }
 
-  .query-info {
+  .measure-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
     flex: 1;
     min-width: 0;
   }
 
-  .query-name {
-    margin: 0;
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+  .measure-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
-    white-space: nowrap;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .measure-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .measure-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xs) 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .measure-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: var(--primary);
-    color: white;
-    margin-right: var(--space-2);
-  }
-
-  .query-actions {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .icon-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--text-tertiary);
-    border: none;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-
-  .icon-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+  .measure-name mark {
+    background: var(--gradient-warning);
     color: var(--text-primary);
-  }
-
-  .query-item-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--transition-normal), padding var(--transition-normal);
-  }
-
-  .query-item.expanded .query-item-content {
-    max-height: 2000px;
-    padding: var(--space-4);
-  }
-
-  /* Code container */
-  .code-container {
-    position: relative;
-    margin: 0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-
-  .code-container pre {
-    margin: 0;
-    padding: var(--space-3);
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    max-height: 400px;
-    overflow: auto;
-  }
-
-  .copy-button {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--text-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-xs);
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
-    z-index: 10;
-  }
-
-  .copy-button:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-
-  /* Search highlight */
-  .search-highlight {
-    background-color: rgba(255, 193, 7, 0.3);
     padding: 0 2px;
-    margin: 0 -2px;
   }
 
-  /* Similarity Analysis Styles */
-  .similarity-section {
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--space-4);
-    margin-top: var(--space-6);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .section-header {
+  .measure-metadata {
     display: flex;
-    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .metadata-item {
+    display: flex;
     align-items: center;
-    margin-bottom: var(--space-4);
-  }
-
-  .slider {
-    width: 200px;
-    margin: 0 var(--space-2);
-  }
-
-  .analysis-stats {
-    display: flex;
-    gap: var(--space-4);
-    margin-top: var(--space-3);
-  }
-
-  .stat-item {
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-3);
-    text-align: center;
-    min-width: 100px;
-  }
-
-  .stat-value {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary);
-  }
-
-  .stat-label {
-    font-size: var(--font-size-xs);
+    gap: var(--space-xs);
+    font-size: 0.875rem;
     color: var(--text-secondary);
   }
 
-  .similarity-table-container {
-    margin-top: var(--space-4);
-    overflow-x: auto;
+  .metadata-item i {
+    font-size: 0.75rem;
+    opacity: 0.7;
   }
 
-  .similarity-score {
-    font-weight: var(--font-weight-bold);
-    padding: var(--space-1) var(--space-2);
+  .complexity-badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .complexity-badge.simple {
+    background: rgba(67, 233, 123, 0.2);
+    color: #43e97b;
+  }
+
+  .complexity-badge.moderate {
+    background: rgba(79, 172, 254, 0.2);
+    color: #4facfe;
+  }
+
+  .complexity-badge.complex {
+    background: rgba(250, 112, 154, 0.2);
+    color: #fa709a;
+  }
+
+  .measure-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  /* DAX Card Content */
+  .dax-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+  }
+
+  .dax-card.expanded .dax-card-content {
+    max-height: 1000px;
+    padding: var(--space-lg);
+  }
+
+  .code-container {
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
+    overflow: hidden;
   }
 
-  .high-similarity {
-    background-color: rgba(255, 0, 0, 0.2);
-    color: #d32f2f;
-  }
-
-  .medium-similarity {
-    background-color: rgba(255, 152, 0, 0.2);
-    color: #f57c00;
-  }
-
-  .low-similarity {
-    background-color: rgba(76, 175, 80, 0.2);
-    color: #388e3c;
-  }
-
-  .comparison-view {
-    margin-top: var(--space-4);
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-  }
-
-  .comparison-header {
+  .code-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-3);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
   }
 
-  .comparison-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+  .code-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
   }
 
-  .comparison-item {
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-md);
-    padding: var(--space-3);
-    overflow: auto;
+  .code-actions {
+    display: flex;
+    gap: var(--space-xs);
   }
 
-  .comparison-item pre {
+  .code-action {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .code-action:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Code styling */
+  .code-container pre {
     margin: 0;
+    padding: var(--space-md);
     max-height: 400px;
     overflow: auto;
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
-  .empty-message {
+  .code-container code {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  .code-container code mark {
+    background: rgba(255, 193, 7, 0.3);
+    color: inherit;
+    padding: 2px;
+    border-radius: 2px;
+  }
+
+  /* Measure Analysis */
+  .measure-analysis {
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
+
+  .analysis-section h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .analysis-section h4 i {
+    color: var(--color-primary);
+    font-size: 0.875rem;
+  }
+
+  .function-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .function-tag {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .reference-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .reference-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .reference-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .no-references {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Similarity Analysis Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+  }
+
+  .modal-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-content.large {
+    max-width: 1200px;
+  }
+
+  .modal-header {
+    padding: var(--space-xl);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: 0;
+  }
+
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+  }
+
+  .modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-xl);
+  }
+
+  /* Similarity Controls */
+  .similarity-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .threshold-control {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .threshold-control input[type="range"] {
+    flex: 1;
+    accent-color: var(--color-primary);
+  }
+
+  .threshold-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .similarity-stats {
+    display: flex;
+    gap: var(--space-xl);
+  }
+
+  /* Similarity Results */
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .results-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .similarity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .similarity-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: var(--transition-fast);
+  }
+
+  .similarity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+
+  .similarity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .similarity-measures {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .measure-1,
+  .measure-2 {
+    color: var(--text-primary);
+    padding: 2px 8px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+
+  .similarity-measures i {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+  }
+
+  .similarity-score {
+    font-size: 1.125rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+  }
+
+  .similarity-score.very-high {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+  }
+
+  .similarity-score.high {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+  }
+
+  .similarity-score.medium {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  .similarity-score.low {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+  }
+
+  .similarity-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .action-button.small {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.875rem;
+  }
+
+  .no-similar-measures {
     text-align: center;
-    padding: var(--space-4);
+    padding: var(--space-2xl);
     color: var(--text-secondary);
     font-style: italic;
   }
 
+  /* Loading Overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading-content {
+    text-align: center;
+  }
+
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--glass-border);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto var(--space-lg);
+  }
+
+  .loading-text {
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+
+  /* Comparison Modal */
+  .comparison-modal {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .comparison-modal h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  .comparison-pane {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    overflow: hidden;
+  }
+
+  .comparison-pane h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .comparison-pane pre {
+    margin: 0;
+    max-height: 300px;
+    overflow: auto;
+    font-size: 0.875rem;
+  }
+
+  .similarity-details {
+    text-align: center;
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .search-filter-container {
+      flex-direction: column;
+    }
+
+    .filter-section {
+      width: 100%;
+    }
+  }
+
   @media (max-width: 768px) {
-    .comparison-content {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .measure-analysis {
       grid-template-columns: 1fr;
     }
 
-    .analysis-stats {
+    .similarity-controls {
+      grid-template-columns: 1fr;
+    }
+
+    .similarity-stats {
+      flex-wrap: wrap;
+    }
+
+    .similarity-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .comparison-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .table-toolbar.enhanced {
       flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .table-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+  }
+
+  /* Animations */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 </style>
