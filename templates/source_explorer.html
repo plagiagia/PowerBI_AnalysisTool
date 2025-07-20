@@ -20,6 +20,9 @@
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
+<!-- Include Prism.js PowerQuery language support -->
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/line-numbers/prism-line-numbers.min.css" />
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -37,6 +40,12 @@
   </p>
 </div>
 
+<!-- Loading Indicator -->
+<div id="loadingIndicator" class="loading-overlay" style="display: none;">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Analyzing sources...</div>
+</div>
+
 <!-- Source Distribution Info Table -->
 <div class="source-info-section">
   <div class="info-header">
@@ -44,7 +53,7 @@
       <i class="fas fa-chart-pie"></i>
       Source Distribution
     </h2>
-    <button id="toggleInfoDetails" class="toggle-details-btn">
+    <button id="toggleInfoDetails" class="toggle-details-btn" aria-label="Toggle source details">
       <i class="fas fa-chevron-down"></i>
       <span>Show Details</span>
     </button>
@@ -112,7 +121,7 @@
           Database Sources
         </h3>
         <div class="source-list" id="databaseSources">
-          <!-- Populated by JavaScript -->
+          <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
 
@@ -122,7 +131,7 @@
           File Sources
         </h3>
         <div class="source-list" id="fileSources">
-          <!-- Populated by JavaScript -->
+          <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
 
@@ -132,7 +141,7 @@
           Web & API Sources
         </h3>
         <div class="source-list" id="webSources">
-          <!-- Populated by JavaScript -->
+          <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
 
@@ -142,7 +151,7 @@
           Query References
         </h3>
         <div class="source-list" id="referenceSources">
-          <!-- Populated by JavaScript -->
+          <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
 
@@ -152,7 +161,7 @@
           Other Sources
         </h3>
         <div class="source-list" id="otherSources">
-          <!-- Populated by JavaScript -->
+          <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
     </div>
@@ -171,6 +180,22 @@
       </button>
     </div>
     <div class="search-count" aria-live="polite"></div>
+  </div>
+
+  <!-- Quick filters -->
+  <div class="quick-filters">
+    <button class="filter-chip" data-filter="sql">
+      <i class="fas fa-database"></i> SQL Only
+    </button>
+    <button class="filter-chip" data-filter="file">
+      <i class="fas fa-file"></i> Files Only
+    </button>
+    <button class="filter-chip" data-filter="web">
+      <i class="fas fa-globe"></i> Web Only
+    </button>
+    <button class="filter-chip active" data-filter="all">
+      <i class="fas fa-border-all"></i> All Sources
+    </button>
   </div>
 </div>
 
@@ -200,7 +225,7 @@
   <!-- Queries List with Improved Layout -->
   <div id="queriesList" class="improved-queries-list">
     {% for query in m_queries_info %}
-    <div class="improved-query-card" data-table="{{ query.table_name }}">
+    <div class="improved-query-card" data-table="{{ query.table_name }}" data-query-index="{{ loop.index0 }}">
       <!-- Card Header with Better Spacing -->
       <div class="improved-query-header">
         <div class="query-title-section">
@@ -216,11 +241,11 @@
               </span>
               <span class="query-lines">
                 <i class="fas fa-file-lines"></i>
-                {{ query.m_query.count('\n') + 1 }} lines
+                <span class="line-count">{{ query.m_query.count('\n') + 1 }}</span> lines
               </span>
               <span class="query-source-type" data-table="{{ query.table_name }}">
                 <i class="fas fa-plug"></i>
-                <span class="source-type-text">Unknown</span>
+                <span class="source-type-text">Analyzing...</span>
               </span>
             </div>
           </div>
@@ -229,7 +254,10 @@
           <button class="icon-button copy-name" title="Copy table name" data-copy="{{ query.table_name }}">
             <i class="fas fa-tag"></i>
           </button>
-          <button class="icon-button toggle-expand" title="Toggle view">
+          <button class="icon-button copy-query" title="Copy query" data-table="{{ query.table_name }}">
+            <i class="fas fa-copy"></i>
+          </button>
+          <button class="icon-button toggle-expand" title="Toggle view" aria-expanded="false">
             <i class="fas fa-chevron-down"></i>
           </button>
         </div>
@@ -244,13 +272,39 @@
               M Query Definition
             </span>
             <div class="code-actions">
-              <button class="copy-button" onclick="copyToClipboard(this)">
+              <button class="code-action-btn toggle-line-numbers" title="Toggle line numbers">
+                <i class="fas fa-list-ol"></i>
+              </button>
+              <button class="code-action-btn toggle-wrap" title="Toggle word wrap">
+                <i class="fas fa-text-width"></i>
+              </button>
+              <button class="copy-button" data-table="{{ query.table_name }}">
                 <i class="fas fa-copy"></i> Copy
               </button>
             </div>
           </div>
           <div class="code-wrapper">
-            <pre><code class="language-powerquery">{{ query.m_query }}</code></pre>
+            <pre
+              class="line-numbers"><code class="language-powerquery" data-original-content="{{ query.m_query | e }}">{{ query.m_query }}</code></pre>
+          </div>
+        </div>
+
+        <!-- Query Analysis Section -->
+        <div class="query-analysis" style="display: none;">
+          <div class="analysis-header">
+            <i class="fas fa-microscope"></i>
+            <span>Query Analysis</span>
+          </div>
+          <div class="analysis-content">
+            <div class="analysis-item">
+              <strong>Source Type:</strong> <span class="analysis-source-type">-</span>
+            </div>
+            <div class="analysis-item">
+              <strong>Connection:</strong> <span class="analysis-connection">-</span>
+            </div>
+            <div class="analysis-item">
+              <strong>Dependencies:</strong> <span class="analysis-dependencies">-</span>
+            </div>
           </div>
         </div>
       </div>
@@ -264,12 +318,17 @@
       <i class="fas fa-search"></i>
     </div>
     <h3 class="empty-state-title">No matching queries found</h3>
-    <p class="empty-state-message">Try adjusting your search.</p>
+    <p class="empty-state-message">Try adjusting your search or filters.</p>
     <button id="clearEmptyState" class="action-button primary">
       <i class="fas fa-undo"></i> Clear Search
     </button>
   </div>
 </div>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="mQueriesData">
+{{ m_queries_info | tojson | safe }}
+</script>
 
 {% endblock %}
 
@@ -277,6 +336,8 @@
 <!-- Include Prism.js for syntax highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-powerquery.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -294,9 +355,16 @@
     const searchCount = document.querySelector(".search-count");
     const toggleInfoDetails = document.getElementById("toggleInfoDetails");
     const infoDetails = document.getElementById("infoDetails");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const quickFilterButtons = document.querySelectorAll(".filter-chip");
 
-    // Variables for state
+    // Get M queries data from the template
+    const mQueriesDataElement = document.getElementById("mQueriesData");
+    const mQueriesData = mQueriesDataElement ? JSON.parse(mQueriesDataElement.textContent) : [];
+
+    // State variables
     let currentVisibleItems = queryCards.length;
+    let activeFilter = 'all';
     let sourceAnalysis = {
       sql: 0,
       file: 0,
@@ -313,49 +381,131 @@
     };
 
     // Initialize
-    analyzeSourceTypes();
-    updateInfoTable();
-    setupEventListeners();
+    init();
 
-    /**
-     * Analyze source types from M queries
-     */
-    function analyzeSourceTypes() {
-      queryCards.forEach(card => {
-        const tableName = card.getAttribute("data-table");
-        const codeElement = card.querySelector("code");
-        const mQuery = codeElement ? codeElement.textContent : "";
+    async function init() {
+      try {
+        showLoading();
+        await analyzeSourceTypes();
+        updateInfoTable();
+        setupEventListeners();
+        initializeCodeFeatures();
+        hideLoading();
+      } catch (error) {
+        console.error("Initialization error:", error);
+        hideLoading();
+        showError("Failed to initialize source explorer");
+      }
+    }
 
-        const sourceInfo = identifySourceType(mQuery, tableName);
+    function showLoading() {
+      if (loadingIndicator) {
+        loadingIndicator.style.display = "flex";
+      }
+    }
 
-        // Update counters
-        sourceAnalysis[sourceInfo.category]++;
+    function hideLoading() {
+      if (loadingIndicator) {
+        loadingIndicator.style.display = "none";
+      }
+    }
 
-        // Add to details with enhanced structure
-        const categoryKey = getCategoryDetailsKey(sourceInfo.category);
-        sourceAnalysis.details[categoryKey].push({
-          table: tableName,
-          type: sourceInfo.type,
-          details: sourceInfo.details,
-          connectionKey: sourceInfo.connectionKey || sourceInfo.details
-        });
-
-        // Update the query card with source type
-        const sourceTypeElement = card.querySelector(".source-type-text");
-        if (sourceTypeElement) {
-          sourceTypeElement.textContent = sourceInfo.type;
-        }
-
-        // Add source type class to query type span
-        const querySourceSpan = card.querySelector(".query-source-type");
-        if (querySourceSpan) {
-          querySourceSpan.classList.add(`source-${sourceInfo.category}`);
-        }
-      });
+    function showError(message) {
+      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        window.PowerBIExplorer.showNotification(message, "error");
+      } else {
+        console.error(message);
+      }
     }
 
     /**
-     * Identify source type from M query
+     * Analyze source types from M queries with better error handling
+     */
+    async function analyzeSourceTypes() {
+      return new Promise((resolve) => {
+        queryCards.forEach((card, index) => {
+          try {
+            const tableName = card.getAttribute("data-table");
+            const queryData = mQueriesData[index];
+            const mQuery = queryData ? queryData.m_query : "";
+
+            const sourceInfo = identifySourceType(mQuery, tableName);
+
+            // Update counters
+            sourceAnalysis[sourceInfo.category]++;
+
+            // Add to details with enhanced structure
+            const categoryKey = getCategoryDetailsKey(sourceInfo.category);
+            sourceAnalysis.details[categoryKey].push({
+              table: tableName,
+              type: sourceInfo.type,
+              details: sourceInfo.details,
+              connectionKey: sourceInfo.connectionKey || sourceInfo.details
+            });
+
+            // Update the query card with source type
+            updateQueryCardSourceType(card, sourceInfo);
+
+            // Update analysis section
+            updateQueryAnalysis(card, sourceInfo);
+          } catch (error) {
+            console.error(`Error analyzing source for ${card.getAttribute("data-table")}:`, error);
+          }
+        });
+        resolve();
+      });
+    }
+
+    function updateQueryCardSourceType(card, sourceInfo) {
+      const sourceTypeElement = card.querySelector(".source-type-text");
+      if (sourceTypeElement) {
+        sourceTypeElement.textContent = sourceInfo.type;
+      }
+
+      // Add source type class to query type span
+      const querySourceSpan = card.querySelector(".query-source-type");
+      if (querySourceSpan) {
+        querySourceSpan.classList.add(`source-${sourceInfo.category}`);
+      }
+
+      // Add category data attribute for filtering
+      card.setAttribute("data-source-category", sourceInfo.category);
+    }
+
+    function updateQueryAnalysis(card, sourceInfo) {
+      const analysisSection = card.querySelector(".query-analysis");
+      if (analysisSection) {
+        analysisSection.querySelector(".analysis-source-type").textContent = sourceInfo.type;
+        analysisSection.querySelector(".analysis-connection").textContent = sourceInfo.details;
+
+        // Extract dependencies (references to other queries)
+        const queryIndex = parseInt(card.getAttribute("data-query-index"));
+        const queryData = mQueriesData[queryIndex];
+        if (queryData) {
+          const dependencies = extractQueryDependencies(queryData.m_query);
+          analysisSection.querySelector(".analysis-dependencies").textContent =
+            dependencies.length > 0 ? dependencies.join(", ") : "None";
+        }
+      }
+    }
+
+    function extractQueryDependencies(mQuery) {
+      const dependencies = [];
+      const regex = /(\w+)(?=\s*\[|\s*\{|\s*\()/g;
+      const matches = mQuery.match(regex) || [];
+
+      matches.forEach(match => {
+        // Check if this matches any table name
+        if (mQueriesData.some(q => q.table_name === match) && !dependencies.includes(match)) {
+          dependencies.push(match);
+        }
+      });
+
+      return dependencies;
+    }
+
+    /**
+     * Enhanced source type identification
      */
     function identifySourceType(mQuery, tableName) {
       const query = mQuery.toLowerCase();
@@ -369,7 +519,7 @@
         const connectionKey = `${server} / ${database}`;
         return {
           category: 'sql',
-          type: 'SQL Database',
+          type: 'SQL Server',
           details: connectionKey,
           connectionKey: connectionKey
         };
@@ -389,7 +539,7 @@
         const connectionDetail = extractConnectionDetail(mQuery, 'MySQL.Database');
         return {
           category: 'sql',
-          type: 'MySQL Database',
+          type: 'MySQL',
           details: connectionDetail,
           connectionKey: connectionDetail
         };
@@ -399,7 +549,7 @@
         const connectionDetail = extractConnectionDetail(mQuery, 'PostgreSQL.Database');
         return {
           category: 'sql',
-          type: 'PostgreSQL Database',
+          type: 'PostgreSQL',
           details: connectionDetail,
           connectionKey: connectionDetail
         };
@@ -410,7 +560,7 @@
         const fileDetail = extractFileDetail(mQuery, 'Excel.Workbook');
         return {
           category: 'file',
-          type: 'Excel File',
+          type: 'Excel',
           details: fileDetail,
           connectionKey: fileDetail
         };
@@ -420,14 +570,14 @@
         const fileDetail = extractFileDetail(mQuery, 'Csv.Document');
         return {
           category: 'file',
-          type: 'CSV File',
+          type: 'CSV',
           details: fileDetail,
           connectionKey: fileDetail
         };
       }
 
-      if (query.includes('folder.contents(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Folder.Contents');
+      if (query.includes('folder.contents(') || query.includes('folder.files(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Folder');
         return {
           category: 'file',
           type: 'Folder',
@@ -440,18 +590,28 @@
         const fileDetail = extractFileDetail(mQuery, 'Json.Document');
         return {
           category: 'file',
-          type: 'JSON File',
+          type: 'JSON',
+          details: fileDetail,
+          connectionKey: fileDetail
+        };
+      }
+
+      if (query.includes('xml.document(') || query.includes('xml.tables(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Xml');
+        return {
+          category: 'file',
+          type: 'XML',
           details: fileDetail,
           connectionKey: fileDetail
         };
       }
 
       // Web sources
-      if (query.includes('web.contents(')) {
-        const webDetail = extractWebDetail(mQuery, 'Web.Contents');
+      if (query.includes('web.contents(') || query.includes('web.page(')) {
+        const webDetail = extractWebDetail(mQuery, 'Web');
         return {
           category: 'web',
-          type: 'Web API/URL',
+          type: 'Web/API',
           details: webDetail,
           connectionKey: webDetail
         };
@@ -461,7 +621,7 @@
         const webDetail = extractWebDetail(mQuery, 'OData.Feed');
         return {
           category: 'web',
-          type: 'OData Service',
+          type: 'OData',
           details: webDetail,
           connectionKey: webDetail
         };
@@ -477,42 +637,34 @@
         };
       }
 
-      if (query.includes('azurestorage.')) {
+      if (query.includes('azurestorage.') || query.includes('azureblobs.')) {
         return {
           category: 'web',
           type: 'Azure Storage',
           details: 'Azure Storage Account',
-          connectionKey: 'Azure Storage Account'
+          connectionKey: 'Azure Storage'
         };
       }
 
-      // Query references
-      if (query.match(/source\s*=\s*[a-z_][a-z0-9_]*$/im)) {
-        const referenceMatch = mQuery.match(/Source\s*=\s*([A-Z_][A-Z0-9_]*)/i);
-        const referencedQuery = referenceMatch ? referenceMatch[1] : 'Unknown Reference';
+      // Query references - improved detection
+      const referenceMatch = mQuery.match(/^\s*Source\s*=\s*(\w+)\s*$/im);
+      if (referenceMatch) {
+        const referencedQuery = referenceMatch[1];
         return {
           category: 'reference',
           type: 'Query Reference',
-          details: `References: ${referencedQuery}`,
+          details: `→ ${referencedQuery}`,
           connectionKey: 'Query References'
         };
       }
 
       // Manual/Embedded data
-      if (query.includes('table.fromrows(') && query.includes('json.document(binary.decompress(')) {
-        return {
-          category: 'manual',
-          type: 'Embedded Data',
-          details: 'Manually entered data',
-          connectionKey: 'Embedded Data'
-        };
-      }
-
-      if (query.includes('table.fromrows(')) {
+      if (query.includes('table.fromrows(') || query.includes('table.fromrecords(') ||
+        query.includes('table.fromcolumns(') || query.includes('#table(')) {
         return {
           category: 'manual',
           type: 'Manual Table',
-          details: 'Manually defined table',
+          details: 'Inline data definition',
           connectionKey: 'Manual Tables'
         };
       }
@@ -520,9 +672,9 @@
       // Default fallback
       return {
         category: 'manual',
-        type: 'Other/Unknown',
-        details: 'Unable to determine source type',
-        connectionKey: 'Unknown Sources'
+        type: 'Custom/Other',
+        details: 'Custom transformation',
+        connectionKey: 'Other Sources'
       };
     }
 
@@ -539,13 +691,23 @@
      * Extract file detail from M query
      */
     function extractFileDetail(mQuery, functionName) {
-      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
-      const match = mQuery.match(regex);
-      if (match) {
-        const fullPath = match[1];
-        const fileName = fullPath.split('\\').pop().split('/').pop();
-        return fileName || fullPath;
+      // Multiple patterns to match different file access methods
+      const patterns = [
+        new RegExp(`${functionName}[^(]*\\(\\s*"([^"]+)"`, 'i'),
+        new RegExp(`File\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
+        new RegExp(`Folder\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
+        new RegExp(`Folder\\.Files\\s*\\(\\s*"([^"]+)"`, 'i')
+      ];
+
+      for (const pattern of patterns) {
+        const match = mQuery.match(pattern);
+        if (match) {
+          const fullPath = match[1];
+          const fileName = fullPath.split('\\').pop().split('/').pop();
+          return fileName || fullPath;
+        }
       }
+
       return 'File path not found';
     }
 
@@ -553,16 +715,24 @@
      * Extract web detail from M query
      */
     function extractWebDetail(mQuery, functionName) {
-      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
-      const match = mQuery.match(regex);
-      if (match) {
-        try {
-          const url = new URL(match[1]);
-          return url.hostname;
-        } catch {
-          return match[1];
+      const patterns = [
+        new RegExp(`Web\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
+        new RegExp(`Web\\.Page\\s*\\(\\s*Web\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
+        new RegExp(`OData\\.Feed\\s*\\(\\s*"([^"]+)"`, 'i')
+      ];
+
+      for (const pattern of patterns) {
+        const match = mQuery.match(pattern);
+        if (match) {
+          try {
+            const url = new URL(match[1]);
+            return url.hostname;
+          } catch {
+            return match[1];
+          }
         }
       }
+
       return 'URL not found';
     }
 
@@ -570,15 +740,24 @@
      * Extract SharePoint detail from M query
      */
     function extractSharePointDetail(mQuery) {
-      const siteMatch = mQuery.match(/SharePoint\.[^(]+\s*\(\s*"([^"]+)"/i);
-      if (siteMatch) {
-        try {
-          const url = new URL(siteMatch[1]);
-          return url.hostname;
-        } catch {
-          return siteMatch[1];
+      const patterns = [
+        /SharePoint\.[^(]+\s*\(\s*"([^"]+)"/i,
+        /SharePoint\.Tables\s*\(\s*"([^"]+)"/i,
+        /SharePoint\.Files\s*\(\s*"([^"]+)"/i
+      ];
+
+      for (const pattern of patterns) {
+        const match = mQuery.match(pattern);
+        if (match) {
+          try {
+            const url = new URL(match[1]);
+            return url.hostname;
+          } catch {
+            return match[1];
+          }
         }
       }
+
       return 'SharePoint site not found';
     }
 
@@ -600,12 +779,12 @@
      * Update info table with analysis results
      */
     function updateInfoTable() {
-      // Update summary cards
-      document.getElementById("sqlCount").textContent = sourceAnalysis.sql;
-      document.getElementById("fileCount").textContent = sourceAnalysis.file;
-      document.getElementById("webCount").textContent = sourceAnalysis.web;
-      document.getElementById("manualCount").textContent = sourceAnalysis.manual;
-      document.getElementById("referenceCount").textContent = sourceAnalysis.reference;
+      // Update summary cards with animation
+      animateCounter(document.getElementById("sqlCount"), sourceAnalysis.sql);
+      animateCounter(document.getElementById("fileCount"), sourceAnalysis.file);
+      animateCounter(document.getElementById("webCount"), sourceAnalysis.web);
+      animateCounter(document.getElementById("manualCount"), sourceAnalysis.manual);
+      animateCounter(document.getElementById("referenceCount"), sourceAnalysis.reference);
 
       // Update details sections
       updateDetailsSection("databaseSources", sourceAnalysis.details.databases);
@@ -616,11 +795,33 @@
     }
 
     /**
+     * Animate counter
+     */
+    function animateCounter(element, target) {
+      if (!element) return;
+
+      let current = 0;
+      const increment = target / 20;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+      }, 50);
+    }
+
+    /**
      * Update a details section with hierarchical grouping
      */
     function updateDetailsSection(elementId, sources) {
       const element = document.getElementById(elementId);
       if (!element) return;
+
+      // Remove loading placeholder
+      const placeholder = element.querySelector(".loading-placeholder");
+      if (placeholder) placeholder.remove();
 
       if (sources.length === 0) {
         element.innerHTML = '<div class="no-sources">No sources of this type found</div>';
@@ -644,46 +845,46 @@
       Object.keys(grouped).forEach(sourceType => {
         const totalTables = Object.values(grouped[sourceType]).flat().length;
         html += `
-          <div class="source-type-group">
-            <div class="source-type-header">
-              <i class="fas fa-chevron-down"></i>
-              <span class="source-type-title">${sourceType}</span>
-              <span class="source-type-count">${totalTables}</span>
-            </div>
-            <div class="source-type-content">
-        `;
+                <div class="source-type-group">
+                    <div class="source-type-header" role="button" tabindex="0" aria-expanded="false">
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="source-type-title">${sourceType}</span>
+                        <span class="source-type-count">${totalTables}</span>
+                    </div>
+                    <div class="source-type-content" style="display: none;">
+            `;
 
         Object.keys(grouped[sourceType]).forEach(connectionKey => {
           const tables = grouped[sourceType][connectionKey];
           html += `
-            <div class="connection-group">
-              <div class="connection-header">
-                <i class="fas fa-server"></i>
-                <span class="connection-details">${connectionKey}</span>
-                <span class="table-count">${tables.length} table${tables.length !== 1 ? 's' : ''}</span>
-              </div>
-              <div class="connection-tables">
-          `;
+                    <div class="connection-group">
+                        <div class="connection-header">
+                            <i class="fas fa-server"></i>
+                            <span class="connection-details">${connectionKey}</span>
+                            <span class="table-count">${tables.length} table${tables.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="connection-tables">
+                `;
 
           tables.forEach(table => {
             html += `
-              <div class="table-item">
-                <i class="fas fa-table"></i>
-                <span class="table-name">${table.table}</span>
-              </div>
-            `;
+                        <div class="table-item" data-table="${table.table}">
+                            <i class="fas fa-table"></i>
+                            <span class="table-name">${table.table}</span>
+                        </div>
+                    `;
           });
 
           html += `
-              </div>
-            </div>
-          `;
+                        </div>
+                    </div>
+                `;
         });
 
         html += `
-            </div>
-          </div>
-        `;
+                    </div>
+                </div>
+            `;
       });
 
       element.innerHTML = html;
@@ -691,15 +892,46 @@
       // Add click handlers for collapsible groups
       element.querySelectorAll('.source-type-header').forEach(header => {
         header.addEventListener('click', function () {
-          const content = this.nextElementSibling;
-          const icon = this.querySelector('i');
-          const isOpen = content.style.display !== 'none';
+          toggleCollapsible(this);
+        });
 
-          content.style.display = isOpen ? 'none' : 'block';
-          icon.classList.toggle('fa-chevron-down', !isOpen);
-          icon.classList.toggle('fa-chevron-right', isOpen);
+        // Keyboard support
+        header.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleCollapsible(this);
+          }
         });
       });
+
+      // Add click handlers for table items
+      element.querySelectorAll('.table-item').forEach(item => {
+        item.addEventListener('click', function () {
+          const tableName = this.getAttribute('data-table');
+          scrollToQuery(tableName);
+        });
+      });
+    }
+
+    function toggleCollapsible(header) {
+      const content = header.nextElementSibling;
+      const icon = header.querySelector('i');
+      const isOpen = content.style.display !== 'none';
+
+      content.style.display = isOpen ? 'none' : 'block';
+      icon.classList.toggle('fa-chevron-right', isOpen);
+      icon.classList.toggle('fa-chevron-down', !isOpen);
+      header.setAttribute('aria-expanded', !isOpen);
+    }
+
+    function scrollToQuery(tableName) {
+      const card = document.querySelector(`.improved-query-card[data-table="${tableName}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Flash highlight
+        card.classList.add('highlight-flash');
+        setTimeout(() => card.classList.remove('highlight-flash'), 2000);
+      }
     }
 
     /**
@@ -715,23 +947,24 @@
           const icon = this.querySelector("i");
           const text = this.querySelector("span");
 
-          if (isVisible) {
-            icon.className = "fas fa-chevron-down";
-            text.textContent = "Show Details";
-          } else {
-            icon.className = "fas fa-chevron-up";
-            text.textContent = "Hide Details";
-          }
+          icon.className = isVisible ? "fas fa-chevron-down" : "fas fa-chevron-up";
+          text.textContent = isVisible ? "Show Details" : "Hide Details";
         });
       }
 
-      // Search box
+      // Search functionality
       if (searchQueries) {
+        let searchTimeout;
         searchQueries.addEventListener("input", function () {
+          clearTimeout(searchTimeout);
+          const value = this.value;
+
           if (clearSearch) {
-            clearSearch.style.display = this.value ? "block" : "none";
+            clearSearch.style.display = value ? "block" : "none";
           }
-          performSearch();
+
+          // Debounce search
+          searchTimeout = setTimeout(() => performSearch(value), 300);
         });
       }
 
@@ -741,7 +974,7 @@
           if (searchQueries) {
             searchQueries.value = "";
             clearSearch.style.display = "none";
-            performSearch();
+            performSearch("");
             searchQueries.focus();
           }
         });
@@ -753,7 +986,9 @@
           if (searchQueries) {
             searchQueries.value = "";
             if (clearSearch) clearSearch.style.display = "none";
-            performSearch();
+            activeFilter = 'all';
+            updateQuickFilters();
+            performSearch("");
             searchQueries.focus();
           }
         });
@@ -762,9 +997,10 @@
       // Expand all button
       if (expandAllBtn) {
         expandAllBtn.addEventListener("click", function () {
-          queryCards.forEach(card => {
-            const button = card.querySelector(".toggle-expand");
+          const visibleCards = Array.from(queryCards).filter(card => card.style.display !== "none");
+          visibleCards.forEach(card => {
             if (!card.classList.contains("expanded")) {
+              const button = card.querySelector(".toggle-expand");
               toggleQueryCard(card, button);
             }
           });
@@ -774,9 +1010,10 @@
       // Collapse all button
       if (collapseAllBtn) {
         collapseAllBtn.addEventListener("click", function () {
-          queryCards.forEach(card => {
-            const button = card.querySelector(".toggle-expand");
+          const visibleCards = Array.from(queryCards).filter(card => card.style.display !== "none");
+          visibleCards.forEach(card => {
             if (card.classList.contains("expanded")) {
+              const button = card.querySelector(".toggle-expand");
               toggleQueryCard(card, button);
             }
           });
@@ -790,7 +1027,8 @@
 
       // Toggle expand buttons for each query
       document.querySelectorAll(".toggle-expand").forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
           const card = this.closest(".improved-query-card");
           toggleQueryCard(card, this);
         });
@@ -798,40 +1036,203 @@
 
       // Copy table name buttons
       document.querySelectorAll(".copy-name").forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
           const tableName = this.getAttribute("data-copy");
-          copyToClipboardWithAnimation(this, tableName);
+          copyToClipboardWithAnimation(this, tableName, "Table name");
+        });
+      });
+
+      // Copy query buttons
+      document.querySelectorAll(".copy-query").forEach(button => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const tableName = this.getAttribute("data-table");
+          const card = this.closest(".improved-query-card");
+          const codeElement = card.querySelector("code");
+          if (codeElement) {
+            const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
+            copyToClipboardWithAnimation(this, originalContent, "Query");
+          }
+        });
+      });
+
+      // Copy buttons in code headers
+      document.querySelectorAll(".copy-button").forEach(button => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const container = this.closest(".improved-code-container");
+          const codeElement = container.querySelector("code");
+          if (codeElement) {
+            const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
+            copyToClipboardWithAnimation(this, originalContent, "Query");
+          }
+        });
+      });
+
+      // Quick filter buttons
+      quickFilterButtons.forEach(button => {
+        button.addEventListener("click", function () {
+          activeFilter = this.getAttribute("data-filter");
+          updateQuickFilters();
+          applyFilters();
+        });
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        // Ctrl/Cmd + F for search focus
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+          e.preventDefault();
+          if (searchQueries) searchQueries.focus();
+        }
+
+        // Escape to clear search
+        if (e.key === 'Escape' && searchQueries && searchQueries.value) {
+          searchQueries.value = "";
+          if (clearSearch) clearSearch.style.display = "none";
+          performSearch("");
+        }
+      });
+    }
+
+    function updateQuickFilters() {
+      quickFilterButtons.forEach(button => {
+        const filter = button.getAttribute("data-filter");
+        button.classList.toggle("active", filter === activeFilter);
+      });
+    }
+
+    function applyFilters() {
+      const searchValue = searchQueries ? searchQueries.value : "";
+      performSearch(searchValue);
+    }
+
+    /**
+     * Initialize code features (line numbers, word wrap)
+     */
+    function initializeCodeFeatures() {
+      // Toggle line numbers
+      document.querySelectorAll(".toggle-line-numbers").forEach(button => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const pre = this.closest(".improved-code-container").querySelector("pre");
+          pre.classList.toggle("line-numbers");
+          Prism.highlightElement(pre.querySelector("code"));
+        });
+      });
+
+      // Toggle word wrap
+      document.querySelectorAll(".toggle-wrap").forEach(button => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const pre = this.closest(".improved-code-container").querySelector("pre");
+          pre.classList.toggle("word-wrap");
+        });
+      });
+
+      // Show analysis on expansion
+      queryCards.forEach(card => {
+        card.addEventListener("transitionend", function () {
+          if (this.classList.contains("expanded")) {
+            const analysisSection = this.querySelector(".query-analysis");
+            if (analysisSection) {
+              setTimeout(() => {
+                analysisSection.style.display = "block";
+              }, 100);
+            }
+          }
         });
       });
     }
 
     /**
-     * Toggle expansion state of a query card
-     * @param {HTMLElement} card - The query card element
-     * @param {HTMLElement} button - The toggle button element
+     * Toggle expansion state of a query card with animation
      */
     function toggleQueryCard(card, button) {
       if (!card || !button) return;
 
-      const isExpanded = card.classList.toggle("expanded");
+      const isExpanding = !card.classList.contains("expanded");
+      card.classList.toggle("expanded");
 
-      // Update button icon
-      button.innerHTML = isExpanded ?
+      // Update button
+      button.innerHTML = isExpanding ?
         '<i class="fas fa-chevron-up"></i>' :
         '<i class="fas fa-chevron-down"></i>';
+      button.setAttribute("title", isExpanding ? "Collapse" : "Expand");
+      button.setAttribute("aria-expanded", isExpanding);
 
-      button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
+      // Hide analysis when collapsing
+      if (!isExpanding) {
+        const analysisSection = card.querySelector(".query-analysis");
+        if (analysisSection) {
+          analysisSection.style.display = "none";
+        }
+      }
+
+      // Highlight code if expanding
+      if (isExpanding) {
+        const codeElement = card.querySelector("code");
+        if (codeElement && !codeElement.classList.contains("highlighted")) {
+          Prism.highlightElement(codeElement);
+          codeElement.classList.add("highlighted");
+        }
+      }
     }
 
     /**
-     * Search queries based on input
+     * Enhanced search functionality
      */
-    function performSearch() {
-      const searchValue = searchQueries.value.toLowerCase();
-
+    function performSearch(searchValue = "") {
+      const normalizedSearch = searchValue.toLowerCase().trim();
       let visibleItems = 0;
 
-      // Remove previous search highlights
+      // Clear previous search highlights
+      clearSearchHighlights();
+
+      queryCards.forEach(card => {
+        const tableName = card.getAttribute("data-table").toLowerCase();
+        const sourceCategory = card.getAttribute("data-source-category");
+        const queryIndex = parseInt(card.getAttribute("data-query-index"));
+        const queryData = mQueriesData[queryIndex];
+        const queryText = queryData ? queryData.m_query.toLowerCase() : "";
+
+        // Apply category filter
+        let categoryMatch = activeFilter === 'all' || sourceCategory === activeFilter;
+
+        // Apply search filter
+        let searchMatch = true;
+        if (normalizedSearch) {
+          searchMatch = tableName.includes(normalizedSearch) || queryText.includes(normalizedSearch);
+
+          // Highlight matches
+          if (searchMatch) {
+            highlightSearchTermInCard(card, searchValue);
+          }
+        }
+
+        const isVisible = categoryMatch && searchMatch;
+        card.style.display = isVisible ? "" : "none";
+
+        if (isVisible) visibleItems++;
+      });
+
+      // Update UI
+      currentVisibleItems = visibleItems;
+      updateResultCount();
+      updateEmptyState();
+
+      // Update search count
+      if (searchCount) {
+        if (normalizedSearch || activeFilter !== 'all') {
+          searchCount.textContent = `${visibleItems} result${visibleItems !== 1 ? 's' : ''}`;
+        } else {
+          searchCount.textContent = "";
+        }
+      }
+    }
+
+    function clearSearchHighlights() {
       document.querySelectorAll(".search-highlight").forEach(el => {
         const text = el.textContent;
         const parent = el.parentNode;
@@ -839,57 +1240,50 @@
         parent.replaceChild(textNode, el);
         parent.normalize();
       });
+    }
 
-      // Filter query cards
-      queryCards.forEach(card => {
-        const tableName = card.getAttribute("data-table");
-        const queryText = card.querySelector("code").textContent.toLowerCase();
+    function highlightSearchTermInCard(card, searchTerm) {
+      // Highlight in table name
+      const nameElement = card.querySelector(".improved-query-name");
+      if (nameElement && nameElement.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+        highlightSearchTerm(nameElement, searchTerm);
+      }
 
-        let matches = true;
-        if (searchValue) {
-          matches = tableName.toLowerCase().includes(searchValue) ||
-            queryText.includes(searchValue);
-
-          // Highlight matches in table name
-          if (tableName.toLowerCase().includes(searchValue)) {
-            highlightSearchTerm(card.querySelector(".improved-query-name"), searchValue);
+      // Highlight in expanded code if visible
+      if (card.classList.contains("expanded")) {
+        const codeElement = card.querySelector("code");
+        if (codeElement) {
+          const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
+          if (originalContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+            highlightCodeSearchTerm(codeElement, searchTerm, originalContent);
           }
         }
-
-        card.style.display = matches ? "" : "none";
-
-        if (matches) visibleItems++;
-      });
-
-      // Update count and empty state
-      currentVisibleItems = visibleItems;
-      updateResultCount();
-      updateEmptyState();
-
-      // Update search count display
-      if (searchCount && searchValue) {
-        searchCount.textContent = `${visibleItems} matches`;
-      } else if (searchCount) {
-        searchCount.textContent = "";
       }
     }
 
-    /**
-     * Highlight search term in an element
-     * @param {HTMLElement} element - Element containing text
-     * @param {string} term - Term to highlight
-     */
     function highlightSearchTerm(element, term) {
-      if (!element) return;
+      if (!element || !term) return;
 
       const text = element.textContent;
-
-      // Create highlighted version
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
       const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
-
-      // Update element content
       element.innerHTML = highlightedText;
+    }
+
+    function highlightCodeSearchTerm(codeElement, term, originalContent) {
+      if (!codeElement || !term) return;
+
+      // Store original content if not already stored
+      if (!codeElement.hasAttribute('data-original-content')) {
+        codeElement.setAttribute('data-original-content', originalContent);
+      }
+
+      const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
+      const highlightedCode = originalContent.replace(regex, '<span class="search-highlight">$1</span>');
+      codeElement.innerHTML = highlightedCode;
+
+      // Re-apply syntax highlighting
+      Prism.highlightElement(codeElement);
     }
 
     /**
@@ -922,121 +1316,325 @@
         card => card.style.display !== "none"
       );
 
-      if (visibleCards.length === 0) return;
+      if (visibleCards.length === 0) {
+        showError("No queries to export");
+        return;
+      }
 
-      const content = visibleCards.map(card => {
+      const exportData = visibleCards.map(card => {
         const tableName = card.getAttribute("data-table");
-        const query = card.querySelector("code").textContent;
-        return `-- Table: ${tableName}\r\n${query}\r\n\r\n`;
-      }).join('');
+        const queryIndex = parseInt(card.getAttribute("data-query-index"));
+        const queryData = mQueriesData[queryIndex];
+        const sourceType = card.querySelector(".source-type-text")?.textContent || "Unknown";
+
+        return {
+          tableName: tableName,
+          sourceType: sourceType,
+          query: queryData ? queryData.m_query : ""
+        };
+      });
+
+      // Generate content
+      const content = exportData.map(item => {
+        return `-- Table: ${item.tableName}
+-- Source Type: ${item.sourceType}
+${item.query}
+
+`;
+      }).join('\r\n');
 
       // Create and download file
       const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", "m_queries.txt");
+      link.setAttribute("download", `power_bi_m_queries_${new Date().toISOString().slice(0, 10)}.txt`);
       link.style.display = "none";
       document.body.appendChild(link);
-
       link.click();
-
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      // Show notification if available
+      // Show notification
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
-          "M queries exported successfully",
+          `Exported ${visibleCards.length} M queries successfully`,
           "success"
         );
       }
     }
 
     /**
-     * Copy text to clipboard with animation
-     * @param {HTMLElement} button - The button that was clicked
-     * @param {string} text - The text to copy
+     * Enhanced copy to clipboard with better feedback
      */
-    function copyToClipboardWithAnimation(button, text) {
+    function copyToClipboardWithAnimation(button, text, itemType = "Content") {
       if (!button) return;
 
-      // Store original button HTML
       const originalHTML = button.innerHTML;
-
-      // Show loading spinner
+      button.disabled = true;
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-      // Try to use Clipboard API
-      if (navigator.clipboard) {
+      // Use modern clipboard API with fallback
+      if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text)
           .then(() => {
             button.innerHTML = '<i class="fas fa-check"></i>';
+            if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+              window.PowerBIExplorer.showNotification(
+                `${itemType} copied to clipboard`,
+                "success"
+              );
+            }
+          })
+          .catch((err) => {
+            console.error("Copy failed:", err);
+            fallbackCopy(text, button, originalHTML, itemType);
+          })
+          .finally(() => {
             setTimeout(() => {
               button.innerHTML = originalHTML;
+              button.disabled = false;
             }, 2000);
-          })
-          .catch(() => {
-            fallbackCopy(text, button, originalHTML);
           });
       } else {
-        fallbackCopy(text, button, originalHTML);
+        fallbackCopy(text, button, originalHTML, itemType);
       }
     }
 
     /**
-     * Fallback copy method for browsers without clipboard API
-     * @param {string} text - Text to copy
-     * @param {HTMLElement} button - Button element
-     * @param {string} originalHTML - Original button HTML
+     * Fallback copy method
      */
-    function fallbackCopy(text, button, originalHTML) {
+    function fallbackCopy(text, button, originalHTML, itemType) {
       try {
         const textArea = document.createElement("textarea");
         textArea.value = text;
         textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
 
-        if (document.execCommand("copy")) {
-          button.innerHTML = '<i class="fas fa-check"></i>';
-        } else {
-          button.innerHTML = '<i class="fas fa-times"></i>';
+        const success = document.execCommand("copy");
+        button.innerHTML = success ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+
+        if (success && window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+          window.PowerBIExplorer.showNotification(
+            `${itemType} copied to clipboard`,
+            "success"
+          );
         }
 
         document.body.removeChild(textArea);
       } catch (err) {
+        console.error("Fallback copy failed:", err);
         button.innerHTML = '<i class="fas fa-times"></i>';
       }
 
       setTimeout(() => {
         button.innerHTML = originalHTML;
+        button.disabled = false;
       }, 2000);
     }
 
     /**
      * Escape special characters in string for regex
-     * @param {string} string - String to escape
-     * @returns {string} Escaped string
      */
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
-
-    /**
-     * Function to copy code to clipboard
-     * @param {HTMLElement} button - The copy button element
-     */
-    window.copyToClipboard = function (button) {
-      const codeElement = button.closest(".improved-code-container").querySelector("code");
-      copyToClipboardWithAnimation(button, codeElement.textContent);
-    };
   });
 </script>
 
 <style>
-  /* Source Info Section Styles */
+  /* Additional styles for improvements */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--glass-border);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  .loading-text {
+    color: white;
+    margin-top: var(--space-lg);
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loading-placeholder {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--space-lg);
+    font-style: italic;
+  }
+
+  /* Quick filters */
+  .quick-filters {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: 500;
+  }
+
+  .filter-chip:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  .filter-chip.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .filter-chip i {
+    font-size: 0.75rem;
+  }
+
+  /* Query analysis section */
+  .query-analysis {
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .analysis-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .analysis-content {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  .analysis-item {
+    display: flex;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+  }
+
+  .analysis-item strong {
+    color: var(--text-secondary);
+    min-width: 120px;
+  }
+
+  .analysis-item span {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Code action buttons */
+  .code-action-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .code-action-btn:hover {
+    background: var(--bg-hover);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  /* Word wrap for code */
+  pre.word-wrap {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Highlight flash animation */
+  @keyframes highlightFlash {
+    0% {
+      background-color: transparent;
+    }
+
+    50% {
+      background-color: rgba(102, 126, 234, 0.2);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .highlight-flash {
+    animation: highlightFlash 2s ease-out;
+  }
+
+  /* Table item hover in details */
+  .table-item {
+    cursor: pointer;
+  }
+
+  .table-item:hover {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .table-item:hover i {
+    color: white;
+  }
+
+  /* Improved accessibility */
+  .source-type-header:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Better source distribution styling */
   .source-info-section {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
@@ -1568,9 +2166,14 @@
     gap: var(--space-xs);
   }
 
-  .copy-button:hover {
+  .copy-button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+  }
+
+  .copy-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 
   .code-wrapper {
