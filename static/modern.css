@@ -1012,13 +1012,6 @@ tbody tr:last-child td {
   background: var(--bg-hover);
 }
 
-.search-count {
-  margin-top: var(--space-xs);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
 /* Select Wrapper */
 .select-wrapper {
   position: relative;

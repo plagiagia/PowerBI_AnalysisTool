@@ -1,37 +1,28 @@
-{% extends "base.html" %}
-{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %}
-
-{% block header_icon %}<i class="fas fa-database"></i>{% endblock %}
-{% block header_title %}Source Explorer{% endblock %}
-{% block header_subtitle %}Examine and analyze the M queries that form your report's data sources{% endblock %}
-
-{% block header_stats %}
+{% extends "base.html" %} {% block title %}Source Explorer - Power BI Analysis
+Tool{% endblock %} {% block header_icon %}<i class="fas fa-database"></i>{%
+endblock %} {% block header_title %}Source Explorer{% endblock %} {% block
+header_subtitle %}Examine and analyze the M queries that form your report's data
+sources{% endblock %} {% block header_stats %}
 <div class="quick-stat">
   <span class="stat-number">{{ m_queries_info|length if m_queries_info else 0 }}</span>
   <span class="stat-label">Data Sources</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if
-    m_queries_info else 0 }}</span>
+  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum /
+    1000)|round|int if m_queries_info else 0 }}</span>
   <span class="stat-label">Total Lines (K)</span>
 </div>
-{% endblock %}
-
-{% block head %}
+{% endblock %} {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
 <!-- Include Prism.js PowerQuery language support -->
 <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/line-numbers/prism-line-numbers.min.css" />
-{% endblock %}
-
-{% block breadcrumbs %}
+{% endblock %} {% block breadcrumbs %}
 <li>
   <a href="/source-explorer"><i class="fas fa-database"></i><span class="breadcrumb-text">Source Explorer</span></a>
 </li>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <!-- Page Header -->
 <div class="page-header">
   <h1 class="page-title"><i class="fas fa-database"></i> Source Explorer</h1>
@@ -41,7 +32,7 @@
 </div>
 
 <!-- Loading Indicator -->
-<div id="loadingIndicator" class="loading-overlay" style="display: none;">
+<div id="loadingIndicator" class="loading-overlay" style="display: none">
   <div class="loading-spinner"></div>
   <div class="loading-text">Analyzing sources...</div>
 </div>
@@ -72,16 +63,6 @@
       </div>
 
       <div class="summary-card">
-        <div class="card-icon file">
-          <i class="fas fa-file-excel"></i>
-        </div>
-        <div class="card-content">
-          <div class="card-number" id="fileCount">0</div>
-          <div class="card-label">File Sources</div>
-        </div>
-      </div>
-
-      <div class="summary-card">
         <div class="card-icon web">
           <i class="fas fa-globe"></i>
         </div>
@@ -92,12 +73,12 @@
       </div>
 
       <div class="summary-card">
-        <div class="card-icon reference">
-          <i class="fas fa-link"></i>
+        <div class="card-icon file">
+          <i class="fas fa-file-excel"></i>
         </div>
         <div class="card-content">
-          <div class="card-number" id="referenceCount">0</div>
-          <div class="card-label">Query References</div>
+          <div class="card-number" id="fileCount">0</div>
+          <div class="card-label">File Sources</div>
         </div>
       </div>
 
@@ -110,10 +91,20 @@
           <div class="card-label">Manual/Other</div>
         </div>
       </div>
+
+      <div class="summary-card">
+        <div class="card-icon reference">
+          <i class="fas fa-link"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="referenceCount">0</div>
+          <div class="card-label">Query References</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="info-details" id="infoDetails" style="display: none;">
+  <div class="info-details" id="infoDetails" style="display: none">
     <div class="details-grid">
       <div class="details-section">
         <h3 class="section-title">
@@ -121,16 +112,6 @@
           Database Sources
         </h3>
         <div class="source-list" id="databaseSources">
-          <div class="loading-placeholder">Loading...</div>
-        </div>
-      </div>
-
-      <div class="details-section">
-        <h3 class="section-title">
-          <i class="fas fa-file-alt"></i>
-          File Sources
-        </h3>
-        <div class="source-list" id="fileSources">
           <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
@@ -147,10 +128,10 @@
 
       <div class="details-section">
         <h3 class="section-title">
-          <i class="fas fa-project-diagram"></i>
-          Query References
+          <i class="fas fa-file-alt"></i>
+          File Sources
         </h3>
-        <div class="source-list" id="referenceSources">
+        <div class="source-list" id="fileSources">
           <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
@@ -161,6 +142,16 @@
           Other Sources
         </h3>
         <div class="source-list" id="otherSources">
+          <div class="loading-placeholder">Loading...</div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-project-diagram"></i>
+          Query References
+        </h3>
+        <div class="source-list" id="referenceSources">
           <div class="loading-placeholder">Loading...</div>
         </div>
       </div>
@@ -179,19 +170,21 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    <div class="search-count" aria-live="polite"></div>
   </div>
 
   <!-- Quick filters -->
   <div class="quick-filters">
     <button class="filter-chip" data-filter="sql">
-      <i class="fas fa-database"></i> SQL Only
+      <i class="fas fa-database"></i> SQL
     </button>
-    <button class="filter-chip" data-filter="file">
-      <i class="fas fa-file"></i> Files Only
+    <button class="filter-chip" data-filter="datrabricks">
+      <i class="fas fa-fire" style="color: #FF3621;"></i> Databricks
     </button>
     <button class="filter-chip" data-filter="web">
-      <i class="fas fa-globe"></i> Web Only
+      <i class="fas fa-globe"></i> Web
+    </button>
+    <button class="filter-chip" data-filter="file">
+      <i class="fas fa-file"></i> Files
     </button>
     <button class="filter-chip active" data-filter="all">
       <i class="fas fa-border-all"></i> All Sources
@@ -235,14 +228,13 @@
           <div class="query-title-content">
             <h3 class="improved-query-name">{{ query.table_name }}</h3>
             <div class="query-meta">
-              <span class="query-type">
-                <i class="fas fa-code"></i>
-                M Query
-              </span>
+
               <span class="query-lines">
                 <i class="fas fa-file-lines"></i>
-                <span class="line-count">{{ query.m_query.count('\n') + 1 }}</span> lines
+                <span class="line-count">{{ query.m_query.count('\n') + 1 }}</span>
+                lines
               </span>
+
               <span class="query-source-type" data-table="{{ query.table_name }}">
                 <i class="fas fa-plug"></i>
                 <span class="source-type-text">Analyzing...</span>
@@ -278,9 +270,6 @@
               <button class="code-action-btn toggle-wrap" title="Toggle word wrap">
                 <i class="fas fa-text-width"></i>
               </button>
-              <button class="copy-button" data-table="{{ query.table_name }}">
-                <i class="fas fa-copy"></i> Copy
-              </button>
             </div>
           </div>
           <div class="code-wrapper">
@@ -290,20 +279,23 @@
         </div>
 
         <!-- Query Analysis Section -->
-        <div class="query-analysis" style="display: none;">
+        <div class="query-analysis" style="display: none">
           <div class="analysis-header">
             <i class="fas fa-microscope"></i>
             <span>Query Analysis</span>
           </div>
           <div class="analysis-content">
             <div class="analysis-item">
-              <strong>Source Type:</strong> <span class="analysis-source-type">-</span>
+              <strong>Source Type:</strong>
+              <span class="analysis-source-type">-</span>
             </div>
             <div class="analysis-item">
-              <strong>Connection:</strong> <span class="analysis-connection">-</span>
+              <strong>Connection:</strong>
+              <span class="analysis-connection">-</span>
             </div>
             <div class="analysis-item">
-              <strong>Dependencies:</strong> <span class="analysis-dependencies">-</span>
+              <strong>Dependencies:</strong>
+              <span class="analysis-dependencies">-</span>
             </div>
           </div>
         </div>
@@ -327,12 +319,10 @@
 
 <!-- Hidden data for JavaScript -->
 <script type="application/json" id="mQueriesData">
-{{ m_queries_info | tojson | safe }}
+  {{ m_queries_info | tojson | safe }}
 </script>
 
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <!-- Include Prism.js for syntax highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-powerquery.min.js"></script>
@@ -352,7 +342,6 @@
     const expandAllBtn = document.getElementById("expandAll");
     const collapseAllBtn = document.getElementById("collapseAll");
     const exportQueriesBtn = document.getElementById("exportQueries");
-    const searchCount = document.querySelector(".search-count");
     const toggleInfoDetails = document.getElementById("toggleInfoDetails");
     const infoDetails = document.getElementById("infoDetails");
     const loadingIndicator = document.getElementById("loadingIndicator");
@@ -360,24 +349,28 @@
 
     // Get M queries data from the template
     const mQueriesDataElement = document.getElementById("mQueriesData");
-    const mQueriesData = mQueriesDataElement ? JSON.parse(mQueriesDataElement.textContent) : [];
+    const mQueriesData = mQueriesDataElement
+      ? JSON.parse(mQueriesDataElement.textContent)
+      : [];
 
     // State variables
     let currentVisibleItems = queryCards.length;
-    let activeFilter = 'all';
+    let activeFilter = "all";
     let sourceAnalysis = {
       sql: 0,
+      databricks: 0,
       file: 0,
       web: 0,
       manual: 0,
       reference: 0,
       details: {
         databases: [],
+        databricks: [],
         files: [],
         web: [],
         other: [],
-        references: []
-      }
+        references: [],
+      },
     };
 
     // Initialize
@@ -440,7 +433,7 @@
               table: tableName,
               type: sourceInfo.type,
               details: sourceInfo.details,
-              connectionKey: sourceInfo.connectionKey || sourceInfo.details
+              connectionKey: sourceInfo.connectionKey || sourceInfo.details,
             });
 
             // Update the query card with source type
@@ -449,7 +442,10 @@
             // Update analysis section
             updateQueryAnalysis(card, sourceInfo);
           } catch (error) {
-            console.error(`Error analyzing source for ${card.getAttribute("data-table")}:`, error);
+            console.error(
+              `Error analyzing source for ${card.getAttribute("data-table")}:`,
+              error
+            );
           }
         });
         resolve();
@@ -475,8 +471,10 @@
     function updateQueryAnalysis(card, sourceInfo) {
       const analysisSection = card.querySelector(".query-analysis");
       if (analysisSection) {
-        analysisSection.querySelector(".analysis-source-type").textContent = sourceInfo.type;
-        analysisSection.querySelector(".analysis-connection").textContent = sourceInfo.details;
+        analysisSection.querySelector(".analysis-source-type").textContent =
+          sourceInfo.type;
+        analysisSection.querySelector(".analysis-connection").textContent =
+          sourceInfo.details;
 
         // Extract dependencies (references to other queries)
         const queryIndex = parseInt(card.getAttribute("data-query-index"));
@@ -494,9 +492,12 @@
       const regex = /(\w+)(?=\s*\[|\s*\{|\s*\()/g;
       const matches = mQuery.match(regex) || [];
 
-      matches.forEach(match => {
+      matches.forEach((match) => {
         // Check if this matches any table name
-        if (mQueriesData.some(q => q.table_name === match) && !dependencies.includes(match)) {
+        if (
+          mQueriesData.some((q) => q.table_name === match) &&
+          !dependencies.includes(match)
+        ) {
           dependencies.push(match);
         }
       });
@@ -511,170 +512,185 @@
       const query = mQuery.toLowerCase();
 
       // SQL Database sources
-      if (query.includes('sql.database(')) {
+      if (query.includes("sql.database(")) {
         const serverMatch = mQuery.match(/Sql\.Database\s*\(\s*"([^"]+)"/i);
         const dbMatch = mQuery.match(/Sql\.Database\s*\([^,]+,\s*"([^"]+)"/i);
-        const server = serverMatch ? serverMatch[1] : 'Unknown Server';
-        const database = dbMatch ? dbMatch[1] : 'Unknown Database';
+        const server = serverMatch ? serverMatch[1] : "Unknown Server";
+        const database = dbMatch ? dbMatch[1] : "Unknown Database";
         const connectionKey = `${server} / ${database}`;
         return {
-          category: 'sql',
-          type: 'SQL Server',
+          category: "sql",
+          type: "SQL Server",
           details: connectionKey,
-          connectionKey: connectionKey
+          connectionKey: connectionKey,
         };
       }
 
-      if (query.includes('oracle.database(')) {
-        const connectionDetail = extractConnectionDetail(mQuery, 'Oracle.Database');
+      if (query.includes("oracle.database(")) {
+        const connectionDetail = extractConnectionDetail(
+          mQuery,
+          "Oracle.Database"
+        );
         return {
-          category: 'sql',
-          type: 'Oracle Database',
+          category: "sql",
+          type: "Oracle Database",
           details: connectionDetail,
-          connectionKey: connectionDetail
+          connectionKey: connectionDetail,
         };
       }
 
-      if (query.includes('mysql.database(')) {
-        const connectionDetail = extractConnectionDetail(mQuery, 'MySQL.Database');
+      if (query.includes("mysql.database(")) {
+        const connectionDetail = extractConnectionDetail(
+          mQuery,
+          "MySQL.Database"
+        );
         return {
-          category: 'sql',
-          type: 'MySQL',
+          category: "sql",
+          type: "MySQL",
           details: connectionDetail,
-          connectionKey: connectionDetail
+          connectionKey: connectionDetail,
         };
       }
 
-      if (query.includes('postgresql.database(')) {
-        const connectionDetail = extractConnectionDetail(mQuery, 'PostgreSQL.Database');
+      if (query.includes("postgresql.database(")) {
+        const connectionDetail = extractConnectionDetail(
+          mQuery,
+          "PostgreSQL.Database"
+        );
         return {
-          category: 'sql',
-          type: 'PostgreSQL',
+          category: "sql",
+          type: "PostgreSQL",
           details: connectionDetail,
-          connectionKey: connectionDetail
+          connectionKey: connectionDetail,
         };
       }
 
       // File sources
-      if (query.includes('excel.workbook(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Excel.Workbook');
+      if (query.includes("excel.workbook(")) {
+        const fileDetail = extractFileDetail(mQuery, "Excel.Workbook");
         return {
-          category: 'file',
-          type: 'Excel',
+          category: "file",
+          type: "Excel",
           details: fileDetail,
-          connectionKey: fileDetail
+          connectionKey: fileDetail,
         };
       }
 
-      if (query.includes('csv.document(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Csv.Document');
+      if (query.includes("csv.document(")) {
+        const fileDetail = extractFileDetail(mQuery, "Csv.Document");
         return {
-          category: 'file',
-          type: 'CSV',
+          category: "file",
+          type: "CSV",
           details: fileDetail,
-          connectionKey: fileDetail
+          connectionKey: fileDetail,
         };
       }
 
-      if (query.includes('folder.contents(') || query.includes('folder.files(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Folder');
+      if (
+        query.includes("folder.contents(") ||
+        query.includes("folder.files(")
+      ) {
+        const fileDetail = extractFileDetail(mQuery, "Folder");
         return {
-          category: 'file',
-          type: 'Folder',
+          category: "file",
+          type: "Folder",
           details: fileDetail,
-          connectionKey: fileDetail
+          connectionKey: fileDetail,
         };
       }
 
-      if (query.includes('json.document(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Json.Document');
+      if (
+        query.includes("json.document(") &&
+        !query.includes("binary.fromtext(")
+      ) {
+        const fileDetail = extractFileDetail(mQuery, "Json.Document");
         return {
-          category: 'file',
-          type: 'JSON',
+          category: "file",
+          type: "JSON",
           details: fileDetail,
-          connectionKey: fileDetail
-        };
-      }
-
-      if (query.includes('xml.document(') || query.includes('xml.tables(')) {
-        const fileDetail = extractFileDetail(mQuery, 'Xml');
-        return {
-          category: 'file',
-          type: 'XML',
-          details: fileDetail,
-          connectionKey: fileDetail
+          connectionKey: fileDetail,
         };
       }
 
       // Web sources
-      if (query.includes('web.contents(') || query.includes('web.page(')) {
-        const webDetail = extractWebDetail(mQuery, 'Web');
+      if (query.includes("web.contents(") || query.includes("web.page(")) {
+        const webDetail = extractWebDetail(mQuery, "Web");
         return {
-          category: 'web',
-          type: 'Web/API',
+          category: "web",
+          type: "Web/API",
           details: webDetail,
-          connectionKey: webDetail
+          connectionKey: webDetail,
         };
       }
 
-      if (query.includes('odata.feed(')) {
-        const webDetail = extractWebDetail(mQuery, 'OData.Feed');
+      if (query.includes("odata.feed(")) {
+        const webDetail = extractWebDetail(mQuery, "OData.Feed");
         return {
-          category: 'web',
-          type: 'OData',
+          category: "web",
+          type: "OData",
           details: webDetail,
-          connectionKey: webDetail
+          connectionKey: webDetail,
         };
       }
 
-      if (query.includes('sharepoint.')) {
+      if (query.includes("sharepoint.")) {
         const sharePointDetail = extractSharePointDetail(mQuery);
         return {
-          category: 'web',
-          type: 'SharePoint',
+          category: "web",
+          type: "SharePoint",
           details: sharePointDetail,
-          connectionKey: sharePointDetail
+          connectionKey: sharePointDetail,
         };
       }
 
-      if (query.includes('azurestorage.') || query.includes('azureblobs.')) {
+      // Databricks sources
+      if (query.includes("databricks.")) {
+        const connectionDetail = extractConnectionDetail(
+          mQuery,
+          "Databricks"
+        );
         return {
-          category: 'web',
-          type: 'Azure Storage',
-          details: 'Azure Storage Account',
-          connectionKey: 'Azure Storage'
+          category: "databricks",
+          type: "Databricks",
+          details: connectionDetail,
+          connectionKey: connectionDetail,
         };
       }
+
 
       // Query references - improved detection
-      const referenceMatch = mQuery.match(/^\s*Source\s*=\s*(\w+)\s*$/im);
+      const referenceMatch = mQuery.match(/^\s*let\s+Source\s*=\s*(\w+)\s*(?:,|\n)/i);
       if (referenceMatch) {
         const referencedQuery = referenceMatch[1];
         return {
-          category: 'reference',
-          type: 'Query Reference',
+          category: "reference",
+          type: "Query Reference",
           details: `→ ${referencedQuery}`,
-          connectionKey: 'Query References'
+          connectionKey: "Query References",
         };
       }
 
       // Manual/Embedded data
-      if (query.includes('table.fromrows(') || query.includes('table.fromrecords(') ||
-        query.includes('table.fromcolumns(') || query.includes('#table(')) {
+      if (
+        query.includes("table.fromrows(") ||
+        query.includes("table.fromrecords(") ||
+        query.includes("table.fromcolumns(") ||
+        query.includes("#table(")
+      ) {
         return {
-          category: 'manual',
-          type: 'Manual Table',
-          details: 'Inline data definition',
-          connectionKey: 'Manual Tables'
+          category: "manual",
+          type: "Manual Table",
+          details: "Inline data definition",
+          connectionKey: "Manual Tables",
         };
       }
 
       // Default fallback
       return {
-        category: 'manual',
-        type: 'Custom/Other',
-        details: 'Custom transformation',
-        connectionKey: 'Other Sources'
+        category: "manual",
+        type: "Custom/Other",
+        details: "Custom transformation",
+        connectionKey: "Other Sources",
       };
     }
 
@@ -682,9 +698,9 @@
      * Extract connection detail from M query
      */
     function extractConnectionDetail(mQuery, functionName) {
-      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
+      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, "i");
       const match = mQuery.match(regex);
-      return match ? match[1] : 'Connection details not found';
+      return match ? match[1] : "Connection details not found";
     }
 
     /**
@@ -693,22 +709,22 @@
     function extractFileDetail(mQuery, functionName) {
       // Multiple patterns to match different file access methods
       const patterns = [
-        new RegExp(`${functionName}[^(]*\\(\\s*"([^"]+)"`, 'i'),
-        new RegExp(`File\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
-        new RegExp(`Folder\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
-        new RegExp(`Folder\\.Files\\s*\\(\\s*"([^"]+)"`, 'i')
+        new RegExp(`${functionName}[^(]*\\(\\s*"([^"]+)"`, "i"),
+        new RegExp(`File\\.Contents\\s*\\(\\s*"([^"]+)"`, "i"),
+        new RegExp(`Folder\\.Contents\\s*\\(\\s*"([^"]+)"`, "i"),
+        new RegExp(`Folder\\.Files\\s*\\(\\s*"([^"]+)"`, "i"),
       ];
 
       for (const pattern of patterns) {
         const match = mQuery.match(pattern);
         if (match) {
           const fullPath = match[1];
-          const fileName = fullPath.split('\\').pop().split('/').pop();
+          const fileName = fullPath.split("\\").pop().split("/").pop();
           return fileName || fullPath;
         }
       }
 
-      return 'File path not found';
+      return "File path not found";
     }
 
     /**
@@ -716,9 +732,12 @@
      */
     function extractWebDetail(mQuery, functionName) {
       const patterns = [
-        new RegExp(`Web\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
-        new RegExp(`Web\\.Page\\s*\\(\\s*Web\\.Contents\\s*\\(\\s*"([^"]+)"`, 'i'),
-        new RegExp(`OData\\.Feed\\s*\\(\\s*"([^"]+)"`, 'i')
+        new RegExp(`Web\\.Contents\\s*\\(\\s*"([^"]+)"`, "i"),
+        new RegExp(
+          `Web\\.Page\\s*\\(\\s*Web\\.Contents\\s*\\(\\s*"([^"]+)"`,
+          "i"
+        ),
+        new RegExp(`OData\\.Feed\\s*\\(\\s*"([^"]+)"`, "i"),
       ];
 
       for (const pattern of patterns) {
@@ -733,7 +752,7 @@
         }
       }
 
-      return 'URL not found';
+      return "URL not found";
     }
 
     /**
@@ -743,7 +762,7 @@
       const patterns = [
         /SharePoint\.[^(]+\s*\(\s*"([^"]+)"/i,
         /SharePoint\.Tables\s*\(\s*"([^"]+)"/i,
-        /SharePoint\.Files\s*\(\s*"([^"]+)"/i
+        /SharePoint\.Files\s*\(\s*"([^"]+)"/i,
       ];
 
       for (const pattern of patterns) {
@@ -758,7 +777,7 @@
         }
       }
 
-      return 'SharePoint site not found';
+      return "SharePoint site not found";
     }
 
     /**
@@ -766,13 +785,13 @@
      */
     function getCategoryDetailsKey(category) {
       const mapping = {
-        'sql': 'databases',
-        'file': 'files',
-        'web': 'web',
-        'manual': 'other',
-        'reference': 'references'
+        sql: "databases",
+        file: "files",
+        web: "web",
+        manual: "other",
+        reference: "references",
       };
-      return mapping[category] || 'other';
+      return mapping[category] || "other";
     }
 
     /**
@@ -783,14 +802,23 @@
       animateCounter(document.getElementById("sqlCount"), sourceAnalysis.sql);
       animateCounter(document.getElementById("fileCount"), sourceAnalysis.file);
       animateCounter(document.getElementById("webCount"), sourceAnalysis.web);
-      animateCounter(document.getElementById("manualCount"), sourceAnalysis.manual);
-      animateCounter(document.getElementById("referenceCount"), sourceAnalysis.reference);
+      animateCounter(
+        document.getElementById("manualCount"),
+        sourceAnalysis.manual
+      );
+      animateCounter(
+        document.getElementById("referenceCount"),
+        sourceAnalysis.reference
+      );
 
       // Update details sections
       updateDetailsSection("databaseSources", sourceAnalysis.details.databases);
       updateDetailsSection("fileSources", sourceAnalysis.details.files);
       updateDetailsSection("webSources", sourceAnalysis.details.web);
-      updateDetailsSection("referenceSources", sourceAnalysis.details.references);
+      updateDetailsSection(
+        "referenceSources",
+        sourceAnalysis.details.references
+      );
       updateDetailsSection("otherSources", sourceAnalysis.details.other);
     }
 
@@ -824,13 +852,14 @@
       if (placeholder) placeholder.remove();
 
       if (sources.length === 0) {
-        element.innerHTML = '<div class="no-sources">No sources of this type found</div>';
+        element.innerHTML =
+          '<div class="no-sources">No sources of this type found</div>';
         return;
       }
 
       // Group by type, then by connection
       const grouped = {};
-      sources.forEach(source => {
+      sources.forEach((source) => {
         if (!grouped[source.type]) {
           grouped[source.type] = {};
         }
@@ -841,8 +870,8 @@
         grouped[source.type][connectionKey].push(source);
       });
 
-      let html = '';
-      Object.keys(grouped).forEach(sourceType => {
+      let html = "";
+      Object.keys(grouped).forEach((sourceType) => {
         const totalTables = Object.values(grouped[sourceType]).flat().length;
         html += `
                 <div class="source-type-group">
@@ -854,19 +883,20 @@
                     <div class="source-type-content" style="display: none;">
             `;
 
-        Object.keys(grouped[sourceType]).forEach(connectionKey => {
+        Object.keys(grouped[sourceType]).forEach((connectionKey) => {
           const tables = grouped[sourceType][connectionKey];
           html += `
                     <div class="connection-group">
                         <div class="connection-header">
                             <i class="fas fa-server"></i>
                             <span class="connection-details">${connectionKey}</span>
-                            <span class="table-count">${tables.length} table${tables.length !== 1 ? 's' : ''}</span>
+                            <span class="table-count">${tables.length} table${tables.length !== 1 ? "s" : ""
+            }</span>
                         </div>
                         <div class="connection-tables">
                 `;
 
-          tables.forEach(table => {
+          tables.forEach((table) => {
             html += `
                         <div class="table-item" data-table="${table.table}">
                             <i class="fas fa-table"></i>
@@ -890,14 +920,14 @@
       element.innerHTML = html;
 
       // Add click handlers for collapsible groups
-      element.querySelectorAll('.source-type-header').forEach(header => {
-        header.addEventListener('click', function () {
+      element.querySelectorAll(".source-type-header").forEach((header) => {
+        header.addEventListener("click", function () {
           toggleCollapsible(this);
         });
 
         // Keyboard support
-        header.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') {
+        header.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             toggleCollapsible(this);
           }
@@ -905,9 +935,9 @@
       });
 
       // Add click handlers for table items
-      element.querySelectorAll('.table-item').forEach(item => {
-        item.addEventListener('click', function () {
-          const tableName = this.getAttribute('data-table');
+      element.querySelectorAll(".table-item").forEach((item) => {
+        item.addEventListener("click", function () {
+          const tableName = this.getAttribute("data-table");
           scrollToQuery(tableName);
         });
       });
@@ -915,22 +945,24 @@
 
     function toggleCollapsible(header) {
       const content = header.nextElementSibling;
-      const icon = header.querySelector('i');
-      const isOpen = content.style.display !== 'none';
+      const icon = header.querySelector("i");
+      const isOpen = content.style.display !== "none";
 
-      content.style.display = isOpen ? 'none' : 'block';
-      icon.classList.toggle('fa-chevron-right', isOpen);
-      icon.classList.toggle('fa-chevron-down', !isOpen);
-      header.setAttribute('aria-expanded', !isOpen);
+      content.style.display = isOpen ? "none" : "block";
+      icon.classList.toggle("fa-chevron-right", isOpen);
+      icon.classList.toggle("fa-chevron-down", !isOpen);
+      header.setAttribute("aria-expanded", !isOpen);
     }
 
     function scrollToQuery(tableName) {
-      const card = document.querySelector(`.improved-query-card[data-table="${tableName}"]`);
+      const card = document.querySelector(
+        `.improved-query-card[data-table="${tableName}"]`
+      );
       if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
         // Flash highlight
-        card.classList.add('highlight-flash');
-        setTimeout(() => card.classList.remove('highlight-flash'), 2000);
+        card.classList.add("highlight-flash");
+        setTimeout(() => card.classList.remove("highlight-flash"), 2000);
       }
     }
 
@@ -947,7 +979,9 @@
           const icon = this.querySelector("i");
           const text = this.querySelector("span");
 
-          icon.className = isVisible ? "fas fa-chevron-down" : "fas fa-chevron-up";
+          icon.className = isVisible
+            ? "fas fa-chevron-down"
+            : "fas fa-chevron-up";
           text.textContent = isVisible ? "Show Details" : "Hide Details";
         });
       }
@@ -986,7 +1020,7 @@
           if (searchQueries) {
             searchQueries.value = "";
             if (clearSearch) clearSearch.style.display = "none";
-            activeFilter = 'all';
+            activeFilter = "all";
             updateQuickFilters();
             performSearch("");
             searchQueries.focus();
@@ -997,8 +1031,10 @@
       // Expand all button
       if (expandAllBtn) {
         expandAllBtn.addEventListener("click", function () {
-          const visibleCards = Array.from(queryCards).filter(card => card.style.display !== "none");
-          visibleCards.forEach(card => {
+          const visibleCards = Array.from(queryCards).filter(
+            (card) => card.style.display !== "none"
+          );
+          visibleCards.forEach((card) => {
             if (!card.classList.contains("expanded")) {
               const button = card.querySelector(".toggle-expand");
               toggleQueryCard(card, button);
@@ -1010,8 +1046,10 @@
       // Collapse all button
       if (collapseAllBtn) {
         collapseAllBtn.addEventListener("click", function () {
-          const visibleCards = Array.from(queryCards).filter(card => card.style.display !== "none");
-          visibleCards.forEach(card => {
+          const visibleCards = Array.from(queryCards).filter(
+            (card) => card.style.display !== "none"
+          );
+          visibleCards.forEach((card) => {
             if (card.classList.contains("expanded")) {
               const button = card.querySelector(".toggle-expand");
               toggleQueryCard(card, button);
@@ -1026,7 +1064,7 @@
       }
 
       // Toggle expand buttons for each query
-      document.querySelectorAll(".toggle-expand").forEach(button => {
+      document.querySelectorAll(".toggle-expand").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
           const card = this.closest(".improved-query-card");
@@ -1035,7 +1073,7 @@
       });
 
       // Copy table name buttons
-      document.querySelectorAll(".copy-name").forEach(button => {
+      document.querySelectorAll(".copy-name").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
           const tableName = this.getAttribute("data-copy");
@@ -1044,34 +1082,38 @@
       });
 
       // Copy query buttons
-      document.querySelectorAll(".copy-query").forEach(button => {
+      document.querySelectorAll(".copy-query").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
           const tableName = this.getAttribute("data-table");
           const card = this.closest(".improved-query-card");
           const codeElement = card.querySelector("code");
           if (codeElement) {
-            const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
+            const originalContent =
+              codeElement.getAttribute("data-original-content") ||
+              codeElement.textContent;
             copyToClipboardWithAnimation(this, originalContent, "Query");
           }
         });
       });
 
       // Copy buttons in code headers
-      document.querySelectorAll(".copy-button").forEach(button => {
+      document.querySelectorAll(".copy-button").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
           const container = this.closest(".improved-code-container");
           const codeElement = container.querySelector("code");
           if (codeElement) {
-            const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
+            const originalContent =
+              codeElement.getAttribute("data-original-content") ||
+              codeElement.textContent;
             copyToClipboardWithAnimation(this, originalContent, "Query");
           }
         });
       });
 
       // Quick filter buttons
-      quickFilterButtons.forEach(button => {
+      quickFilterButtons.forEach((button) => {
         button.addEventListener("click", function () {
           activeFilter = this.getAttribute("data-filter");
           updateQuickFilters();
@@ -1082,13 +1124,13 @@
       // Keyboard shortcuts
       document.addEventListener("keydown", function (e) {
         // Ctrl/Cmd + F for search focus
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        if ((e.ctrlKey || e.metaKey) && e.key === "f") {
           e.preventDefault();
           if (searchQueries) searchQueries.focus();
         }
 
         // Escape to clear search
-        if (e.key === 'Escape' && searchQueries && searchQueries.value) {
+        if (e.key === "Escape" && searchQueries && searchQueries.value) {
           searchQueries.value = "";
           if (clearSearch) clearSearch.style.display = "none";
           performSearch("");
@@ -1097,7 +1139,7 @@
     }
 
     function updateQuickFilters() {
-      quickFilterButtons.forEach(button => {
+      quickFilterButtons.forEach((button) => {
         const filter = button.getAttribute("data-filter");
         button.classList.toggle("active", filter === activeFilter);
       });
@@ -1113,26 +1155,30 @@
      */
     function initializeCodeFeatures() {
       // Toggle line numbers
-      document.querySelectorAll(".toggle-line-numbers").forEach(button => {
+      document.querySelectorAll(".toggle-line-numbers").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
-          const pre = this.closest(".improved-code-container").querySelector("pre");
+          const pre = this.closest(".improved-code-container").querySelector(
+            "pre"
+          );
           pre.classList.toggle("line-numbers");
           Prism.highlightElement(pre.querySelector("code"));
         });
       });
 
       // Toggle word wrap
-      document.querySelectorAll(".toggle-wrap").forEach(button => {
+      document.querySelectorAll(".toggle-wrap").forEach((button) => {
         button.addEventListener("click", function (e) {
           e.stopPropagation();
-          const pre = this.closest(".improved-code-container").querySelector("pre");
+          const pre = this.closest(".improved-code-container").querySelector(
+            "pre"
+          );
           pre.classList.toggle("word-wrap");
         });
       });
 
       // Show analysis on expansion
-      queryCards.forEach(card => {
+      queryCards.forEach((card) => {
         card.addEventListener("transitionend", function () {
           if (this.classList.contains("expanded")) {
             const analysisSection = this.querySelector(".query-analysis");
@@ -1156,9 +1202,9 @@
       card.classList.toggle("expanded");
 
       // Update button
-      button.innerHTML = isExpanding ?
-        '<i class="fas fa-chevron-up"></i>' :
-        '<i class="fas fa-chevron-down"></i>';
+      button.innerHTML = isExpanding
+        ? '<i class="fas fa-chevron-up"></i>'
+        : '<i class="fas fa-chevron-down"></i>';
       button.setAttribute("title", isExpanding ? "Collapse" : "Expand");
       button.setAttribute("aria-expanded", isExpanding);
 
@@ -1190,7 +1236,7 @@
       // Clear previous search highlights
       clearSearchHighlights();
 
-      queryCards.forEach(card => {
+      queryCards.forEach((card) => {
         const tableName = card.getAttribute("data-table").toLowerCase();
         const sourceCategory = card.getAttribute("data-source-category");
         const queryIndex = parseInt(card.getAttribute("data-query-index"));
@@ -1198,12 +1244,15 @@
         const queryText = queryData ? queryData.m_query.toLowerCase() : "";
 
         // Apply category filter
-        let categoryMatch = activeFilter === 'all' || sourceCategory === activeFilter;
+        let categoryMatch =
+          activeFilter === "all" || sourceCategory === activeFilter;
 
         // Apply search filter
         let searchMatch = true;
         if (normalizedSearch) {
-          searchMatch = tableName.includes(normalizedSearch) || queryText.includes(normalizedSearch);
+          searchMatch =
+            tableName.includes(normalizedSearch) ||
+            queryText.includes(normalizedSearch);
 
           // Highlight matches
           if (searchMatch) {
@@ -1224,8 +1273,9 @@
 
       // Update search count
       if (searchCount) {
-        if (normalizedSearch || activeFilter !== 'all') {
-          searchCount.textContent = `${visibleItems} result${visibleItems !== 1 ? 's' : ''}`;
+        if (normalizedSearch || activeFilter !== "all") {
+          searchCount.textContent = `${visibleItems} result${visibleItems !== 1 ? "s" : ""
+            }`;
         } else {
           searchCount.textContent = "";
         }
@@ -1233,7 +1283,7 @@
     }
 
     function clearSearchHighlights() {
-      document.querySelectorAll(".search-highlight").forEach(el => {
+      document.querySelectorAll(".search-highlight").forEach((el) => {
         const text = el.textContent;
         const parent = el.parentNode;
         const textNode = document.createTextNode(text);
@@ -1245,7 +1295,10 @@
     function highlightSearchTermInCard(card, searchTerm) {
       // Highlight in table name
       const nameElement = card.querySelector(".improved-query-name");
-      if (nameElement && nameElement.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (
+        nameElement &&
+        nameElement.textContent.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
         highlightSearchTerm(nameElement, searchTerm);
       }
 
@@ -1253,8 +1306,12 @@
       if (card.classList.contains("expanded")) {
         const codeElement = card.querySelector("code");
         if (codeElement) {
-          const originalContent = codeElement.getAttribute("data-original-content") || codeElement.textContent;
-          if (originalContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+          const originalContent =
+            codeElement.getAttribute("data-original-content") ||
+            codeElement.textContent;
+          if (
+            originalContent.toLowerCase().includes(searchTerm.toLowerCase())
+          ) {
             highlightCodeSearchTerm(codeElement, searchTerm, originalContent);
           }
         }
@@ -1266,7 +1323,10 @@
 
       const text = element.textContent;
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
-      const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
+      const highlightedText = text.replace(
+        regex,
+        '<span class="search-highlight">$1</span>'
+      );
       element.innerHTML = highlightedText;
     }
 
@@ -1274,12 +1334,15 @@
       if (!codeElement || !term) return;
 
       // Store original content if not already stored
-      if (!codeElement.hasAttribute('data-original-content')) {
-        codeElement.setAttribute('data-original-content', originalContent);
+      if (!codeElement.hasAttribute("data-original-content")) {
+        codeElement.setAttribute("data-original-content", originalContent);
       }
 
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
-      const highlightedCode = originalContent.replace(regex, '<span class="search-highlight">$1</span>');
+      const highlightedCode = originalContent.replace(
+        regex,
+        '<span class="search-highlight">$1</span>'
+      );
       codeElement.innerHTML = highlightedCode;
 
       // Re-apply syntax highlighting
@@ -1313,7 +1376,7 @@
      */
     function exportAllQueries() {
       const visibleCards = Array.from(queryCards).filter(
-        card => card.style.display !== "none"
+        (card) => card.style.display !== "none"
       );
 
       if (visibleCards.length === 0) {
@@ -1321,34 +1384,40 @@
         return;
       }
 
-      const exportData = visibleCards.map(card => {
+      const exportData = visibleCards.map((card) => {
         const tableName = card.getAttribute("data-table");
         const queryIndex = parseInt(card.getAttribute("data-query-index"));
         const queryData = mQueriesData[queryIndex];
-        const sourceType = card.querySelector(".source-type-text")?.textContent || "Unknown";
+        const sourceType =
+          card.querySelector(".source-type-text")?.textContent || "Unknown";
 
         return {
           tableName: tableName,
           sourceType: sourceType,
-          query: queryData ? queryData.m_query : ""
+          query: queryData ? queryData.m_query : "",
         };
       });
 
       // Generate content
-      const content = exportData.map(item => {
-        return `-- Table: ${item.tableName}
+      const content = exportData
+        .map((item) => {
+          return `-- Table: ${item.tableName}
 -- Source Type: ${item.sourceType}
 ${item.query}
 
 `;
-      }).join('\r\n');
+        })
+        .join("\r\n");
 
       // Create and download file
       const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `power_bi_m_queries_${new Date().toISOString().slice(0, 10)}.txt`);
+      link.setAttribute(
+        "download",
+        `power_bi_m_queries_${new Date().toISOString().slice(0, 10)}.txt`
+      );
       link.style.display = "none";
       document.body.appendChild(link);
       link.click();
@@ -1376,10 +1445,14 @@ ${item.query}
 
       // Use modern clipboard API with fallback
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text)
+        navigator.clipboard
+          .writeText(text)
           .then(() => {
             button.innerHTML = '<i class="fas fa-check"></i>';
-            if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+            if (
+              window.PowerBIExplorer &&
+              window.PowerBIExplorer.showNotification
+            ) {
               window.PowerBIExplorer.showNotification(
                 `${itemType} copied to clipboard`,
                 "success"
@@ -1415,9 +1488,15 @@ ${item.query}
         textArea.select();
 
         const success = document.execCommand("copy");
-        button.innerHTML = success ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+        button.innerHTML = success
+          ? '<i class="fas fa-check"></i>'
+          : '<i class="fas fa-times"></i>';
 
-        if (success && window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
+        if (
+          success &&
+          window.PowerBIExplorer &&
+          window.PowerBIExplorer.showNotification
+        ) {
           window.PowerBIExplorer.showNotification(
             `${itemType} copied to clipboard`,
             "success"
@@ -1568,7 +1647,7 @@ ${item.query}
 
   .analysis-item span {
     color: var(--text-primary);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
   }
 
   /* Code action buttons */
@@ -1869,7 +1948,7 @@ ${item.query}
   }
 
   .connection-details {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 0.8rem;
     color: var(--text-secondary);
     flex: 1;
@@ -2053,7 +2132,6 @@ ${item.query}
     flex-wrap: wrap;
   }
 
-  .query-type,
   .query-lines,
   .query-source-type {
     display: flex;
@@ -2068,7 +2146,7 @@ ${item.query}
     font-weight: 500;
   }
 
-  .query-type i,
+
   .query-lines i,
   .query-source-type i {
     color: var(--color-primary);
@@ -2151,31 +2229,6 @@ ${item.query}
     gap: var(--space-sm);
   }
 
-  .copy-button {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    padding: var(--space-sm) var(--space-lg);
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-  }
-
-  .copy-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .copy-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
   .code-wrapper {
     position: relative;
   }
@@ -2188,7 +2241,7 @@ ${item.query}
     max-height: 500px;
     /* Increased max height */
     overflow: auto;
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-family: "JetBrains Mono", "Courier New", monospace;
     font-size: 0.9rem;
     /* Slightly larger font */
     line-height: 1.6;
