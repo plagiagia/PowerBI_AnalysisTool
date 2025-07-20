@@ -292,21 +292,24 @@ def create_app(config_object=None) -> Flask:
             m_queries_info=m_queries_info
         )
 
+    
     @app.route('/unused-measures')
     def unused_measures_view() -> str:
         dp = get_data_processor()
         lvp = get_lineage_view_processor()
 
-        # Get used measures
+        # Get used measures from visuals
         used_measures = dp.get_used_measures()
 
-        # Get final measures
-        final_measures = lvp.get_final_measures()
+        # Get comprehensive analysis of all unused measures
+        unused_analysis = lvp.get_comprehensive_unused_measures(used_measures)
 
-        # Calculate unused final measures
-        unused_final_measures = sorted(list(final_measures - used_measures))
-
-        return render_template('unused_measures.html', unused_measures=unused_final_measures)
+        # Pass both the simple list for the template and the analysis for future use
+        return render_template(
+                'unused_measures.html', 
+                unused_measures=unused_analysis['all_unused'],
+                unused_analysis=unused_analysis  # Pass the full analysis for the template
+    )
 
     @app.route('/api/model-json', methods=['GET'])
     def get_model_json():

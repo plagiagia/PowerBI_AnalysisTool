@@ -725,9 +725,120 @@ performance{% endblock %}
     }
 
     /**
-     * Generate rename script
-     */
+ * Enhanced generateRenameScript method that includes cascade information
+ */
     generateRenameScript(measures) {
+      // Get cascade information from the DOM if available
+      const cascadeMeasures = [];
+      const leafMeasures = [];
+
+      measures.forEach(measureName => {
+        const row = document.querySelector(`tr[data-measure="${measureName}"]`);
+        if (row && row.classList.contains('cascade-measure')) {
+          cascadeMeasures.push(measureName);
+        } else {
+          leafMeasures.push(measureName);
+        }
+      });
+
+      const allMeasuresList = measures.map(m => `    "${m}"`).join(',\n');
+      const cascadeInfo = cascadeMeasures.length > 0 ?
+        `// Note: ${cascadeMeasures.length} of these measures will become unused due to cascade effect\n` +
+        `// after their child measures are removed (marked with 'CASCADE' comment below)\n` : '';
+
+      return `// Tabular Editor Script: Break Unused Measures (With Cascade Detection)
+// This script uses smart detection to identify ALL measures safe to remove
+// Including ${leafMeasures.length} leaf measures and ${cascadeMeasures.length} cascade measures
+// Auto-generated on: ${new Date().toLocaleString()}
+// Total measures to process: ${measures.length}
+
+${cascadeInfo}
+var unusedMeasures = new List<string> {
+${allMeasuresList}
+};
+
+// Cascade measures that become unused after removing children:
+var cascadeMeasures = new List<string> {
+${cascadeMeasures.map(m => `    "${m}" // CASCADE: becomes unused after children removed`).join(',\n')}
+};
+
+// Break measures by inserting a dot in the middle
+foreach (var measureName in unusedMeasures)
+{
+    var measure = Model.Tables.SelectMany(t => t.Measures)
+        .FirstOrDefault(m => m.Name == measureName);
+    
+    if (measure != null && !measure.Name.Contains(" ."))
+    {
+        // Store original name and type in description for easy reversal
+        var measureType = cascadeMeasures.Contains(measureName) ? "CASCADE" : "LEAF";
+        if (string.IsNullOrEmpty(measure.Description))
+        {
+            measure.Description = $"ORIGINAL_NAME: {measure.Name} | TYPE: {measureType}";
+        }
+        else
+        {
+            measure.Description = $"{measure.Description} | ORIGINAL_NAME: {measure.Name} | TYPE: {measureType}";
+        }
+        
+        // Find the middle position to insert the dot
+        int midPoint = measure.Name.Length / 2;
+        
+        // If there's a space near the middle, use that position
+        int spaceIndex = measure.Name.IndexOf(' ', Math.Max(0, midPoint - 3));
+        if (spaceIndex > 0 && spaceIndex < midPoint + 3)
+        {
+            // Insert dot after the space
+            measure.Name = measure.Name.Substring(0, spaceIndex + 1) + "." + measure.Name.Substring(spaceIndex + 1);
+        }
+        else
+        {
+            // No convenient space, insert at middle position
+            measure.Name = measure.Name.Substring(0, midPoint) + "." + measure.Name.Substring(midPoint);
+        }
+    }
+}
+
+// Output summary
+Output($"Modified {unusedMeasures.Count} unused measures:");
+Output($"  - {unusedMeasures.Count - cascadeMeasures.Count} leaf measures (immediately unused)");
+Output($"  - {cascadeMeasures.Count} cascade measures (become unused after children removed)");
+Output("");
+Output("NEXT STEPS:");
+Output("1. Deploy these changes to your model");
+Output("2. Check your visuals for error messages");
+Output("3. Measures showing errors are actually being used - restore those");
+Output("4. Measures without errors are truly unused and safe to delete");
+Output("");
+Output("TIP: The CASCADE measures prove our smart detection worked!");
+Output("Without this tool, you'd need multiple cleanup iterations.");
+
+// Uncomment the section below to restore ALL measures to their original names:
+/*
+foreach (var table in Model.Tables)
+{
+    foreach (var measure in table.Measures)
+    {
+        if (measure.Description != null && measure.Description.Contains("ORIGINAL_NAME: "))
+        {
+            // Extract original name
+            var startIndex = measure.Description.IndexOf("ORIGINAL_NAME: ") + "ORIGINAL_NAME: ".Length;
+            var endIndex = measure.Description.IndexOf(" | TYPE:");
+            if (endIndex == -1) endIndex = measure.Description.Length;
+            
+            string originalName = measure.Description.Substring(startIndex, endIndex - startIndex);
+            measure.Name = originalName;
+            
+            // Clean up description
+            var originalDescPattern = @"\| ORIGINAL_NAME: [^|]+ \| TYPE: (CASCADE|LEAF)";
+            measure.Description = System.Text.RegularExpressions.Regex.Replace(measure.Description, originalDescPattern, "").Trim();
+            if (string.IsNullOrEmpty(measure.Description))
+                measure.Description = null;
+        }
+    }
+}
+Output("Restored all measures to original names.");
+*/`;
       const measuresList = measures.map(m => `    "${m}"`).join(',\n');
 
       return `// Tabular Editor Script: Break Unused Measures

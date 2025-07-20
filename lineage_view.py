@@ -243,6 +243,114 @@ class LineageView:
             
         return dependency_data
 
+    def get_comprehensive_unused_measures(self, used_measures_set):
+        """
+        Get ALL measures that would be safe to remove, including measures that
+        would become unused after removing their child measures.
+        
+        This is the improved logic that detects the complete chain of unused measures.
+        
+        Parameters:
+        used_measures_set (set): Set of measures that are used in visuals
+        
+        Returns:
+        dict: Dictionary with comprehensive analysis including:
+            - all_unused: All measures safe to remove
+            - deletion_chain: The order in which measures become unused
+            - impact_analysis: Details about each measure's impact
+        """
+        # Process data first if not already done
+        if not self.measure_data:
+            self.process_lineage_data()
+        
+        all_measures = self.get_all_measures()
+        
+        # Start with measures not used in any visuals
+        unused_measures = all_measures - used_measures_set
+        
+        # Build a reverse dependency map (child -> parents)
+        child_to_parents = {}
+        for measure_name, data in self.measure_data.items():
+            for child in data['child_measures']:
+                if child:
+                    if child not in child_to_parents:
+                        child_to_parents[child] = set()
+                    child_to_parents[child].add(measure_name)
+        
+        # Iteratively find all measures that would become unused
+        deletion_chain = []
+        all_unused = set(unused_measures)
+        measures_to_check = list(unused_measures)
+        
+        while measures_to_check:
+            current_unused = set(measures_to_check)
+            measures_to_check = []
+            
+            for unused_measure in current_unused:
+                # Check all parents of this unused measure
+                if unused_measure in child_to_parents:
+                    for parent in child_to_parents[unused_measure]:
+                        if parent not in all_unused and parent not in used_measures_set:
+                            # Check if ALL children of this parent are unused
+                            parent_data = self.measure_data.get(parent, {})
+                            children = parent_data.get('child_measures', [])
+                            
+                            # Filter out empty strings
+                            children = [c for c in children if c]
+                            
+                            if children and all(child in all_unused for child in children):
+                                # This parent would become unused after removing its children
+                                all_unused.add(parent)
+                                measures_to_check.append(parent)
+            
+            if current_unused:
+                deletion_chain.append(list(current_unused))
+        
+        # Build impact analysis
+        impact_analysis = {}
+        for measure in all_unused:
+            data = self.measure_data.get(measure, {})
+            
+            # Determine why this measure is unused
+            if measure not in used_measures_set:
+                if not data.get('child_measures'):
+                    reason = "Leaf measure not used in any visual"
+                else:
+                    reason = "Not used in visuals and all children are unused"
+            else:
+                reason = "Would become unused after removing child measures"
+            
+            impact_analysis[measure] = {
+                'type': self._get_measure_type(data),
+                'parent_measures': data.get('parent_measures', []),
+                'child_measures': data.get('child_measures', []),
+                'reason': reason,
+                'safe_to_remove': True
+            }
+        
+        return {
+            'all_unused': sorted(list(all_unused)),
+            'deletion_chain': deletion_chain,
+            'impact_analysis': impact_analysis,
+            'total_unused': len(all_unused),
+            'immediate_unused': len(unused_measures),
+            'cascade_unused': len(all_unused) - len(unused_measures)
+        }
+    
+    def _get_measure_type(self, measure_data):
+        """Helper to determine measure type"""
+        has_parents = bool(measure_data.get('parent_measures'))
+        has_children = bool(measure_data.get('child_measures'))
+        
+        if not has_parents and has_children:
+            return "parent"
+        elif has_parents and not has_children:
+            return "final"
+        elif has_parents and has_children:
+            return "intermediate"
+        else:
+            return "isolated"
+
     def analyze_deletion_impact(self, measure_names):
         """
         Analyze what happens if we delete these measures.
