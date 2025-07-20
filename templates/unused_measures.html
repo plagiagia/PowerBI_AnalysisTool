@@ -103,15 +103,7 @@ performance{% endblock %}
     </div>
 
     <div class="table-actions">
-      <div class="sort-controls">
-        <label for="sortSelect" class="sort-label">Sort by:</label>
-        <select id="sortSelect" class="sort-select">
-          <option value="name-asc">Name (A-Z)</option>
-          <option value="name-desc">Name (Z-A)</option>
-          <option value="length-asc">Length (Short first)</option>
-          <option value="length-desc">Length (Long first)</option>
-        </select>
-      </div>
+      <!-- Table actions can be added here if needed -->
     </div>
   </div>
 
@@ -130,16 +122,6 @@ performance{% endblock %}
             <div class="header-content">
               <span>Measure Name</span>
               <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
-            </div>
-          </th>
-          <th scope="col" style="width: 120px;">
-            <div class="header-content">
-              <span>Estimated Impact</span>
-            </div>
-          </th>
-          <th scope="col" style="width: 100px;">
-            <div class="header-content">
-              <span>Actions</span>
             </div>
           </th>
         </tr>
@@ -162,23 +144,6 @@ performance{% endblock %}
               <div class="measure-meta">
                 <span class="measure-length">{{ measure|length }} chars</span>
               </div>
-            </div>
-          </td>
-          <td role="gridcell" data-label="Impact" class="impact-cell">
-            <div class="impact-indicator low">
-              <span class="impact-label">Low</span>
-            </div>
-          </td>
-          <td role="gridcell" data-label="Actions" class="actions-cell">
-            <div class="row-actions">
-              <button class="icon-button copy-measure" title="Copy measure name"
-                aria-label="Copy {{ measure }} to clipboard" data-measure="{{ measure }}">
-                <i class="fas fa-copy"></i>
-              </button>
-              <button class="icon-button info-measure" title="More information"
-                aria-label="Show information about {{ measure }}" data-measure="{{ measure }}">
-                <i class="fas fa-info-circle"></i>
-              </button>
             </div>
           </td>
         </tr>
@@ -348,8 +313,7 @@ performance{% endblock %}
       this.elements = this.initializeElements();
       this.state = {
         selectedMeasures: new Set(),
-        allMeasures: [],
-        sortOrder: 'name-asc'
+        allMeasures: []
       };
 
       this.initialize();
@@ -377,7 +341,7 @@ performance{% endblock %}
         selectedInfo: document.getElementById("selectedInfo"),
 
         // Sort elements
-        sortSelect: document.getElementById("sortSelect"),
+        // Removed sort dropdown
 
         // Export elements
         exportBtn: document.getElementById("exportMeasures"),
@@ -460,8 +424,8 @@ performance{% endblock %}
       this.elements.selectAllBtn?.addEventListener('click', this.selectAllMeasures.bind(this));
       this.elements.unselectAllBtn?.addEventListener('click', this.unselectAllMeasures.bind(this));
 
-      // Sort functionality
-      this.elements.sortSelect?.addEventListener('change', this.handleSort.bind(this));
+      // Table header sorting
+      this.setupTableHeaderSorting();
 
       // Export functionality
       this.elements.exportBtn?.addEventListener('click', this.exportMeasures.bind(this));
@@ -478,9 +442,6 @@ performance{% endblock %}
         measure.checkbox?.addEventListener('change',
           this.handleMeasureSelection.bind(this, measure.name));
       });
-
-      // Copy and info buttons
-      document.addEventListener('click', this.handleButtonClicks.bind(this));
 
       // Help modal
       this.elements.helpButton?.addEventListener('click', this.showHelpModal.bind(this));
@@ -559,13 +520,53 @@ performance{% endblock %}
     }
 
     /**
-     * Handle sorting
+     * Setup table header sorting
      */
-    handleSort() {
-      const sortValue = this.elements.sortSelect?.value || 'name-asc';
-      this.state.sortOrder = sortValue;
+    setupTableHeaderSorting() {
+      const sortableHeaders = this.elements.measuresTable?.querySelectorAll('th.sortable');
 
-      const [field, direction] = sortValue.split('-');
+      sortableHeaders?.forEach(header => {
+        header.addEventListener('click', () => {
+          const sortField = header.getAttribute('data-sort');
+          this.handleTableHeaderSort(sortField, header);
+        });
+      });
+    }
+
+    /**
+     * Handle table header sorting
+     */
+    handleTableHeaderSort(field, headerElement) {
+      // Remove sort classes from all headers
+      const allHeaders = this.elements.measuresTable?.querySelectorAll('th.sortable');
+      allHeaders?.forEach(header => {
+        header.classList.remove('sort-asc', 'sort-desc');
+        const icon = header.querySelector('.sort-icon');
+        if (icon) {
+          icon.className = 'fas fa-sort sort-icon';
+        }
+      });
+
+      // Determine sort direction
+      const currentDirection = headerElement.getAttribute('data-sort-direction') || 'asc';
+      const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+      headerElement.setAttribute('data-sort-direction', newDirection);
+
+      // Add appropriate class to clicked header
+      headerElement.classList.add(`sort-${newDirection}`);
+      const icon = headerElement.querySelector('.sort-icon');
+      if (icon) {
+        icon.className = `fas fa-sort-${newDirection === 'asc' ? 'up' : 'down'} sort-icon`;
+      }
+
+      // Sort the measures
+      this.sortMeasures(field, newDirection);
+    }
+
+    /**
+     * Sort measures by field and direction
+     */
+    sortMeasures(field, direction) {
       const isAscending = direction === 'asc';
 
       this.state.allMeasures.sort((a, b) => {
@@ -594,30 +595,6 @@ performance{% endblock %}
       }
 
       console.log(`Sorted by ${field} (${direction})`);
-    }
-
-    /**
-     * Handle button clicks with event delegation
-     */
-    handleButtonClicks(event) {
-      const button = event.target.closest('button');
-      if (!button) return;
-
-      if (button.classList.contains('copy-measure')) {
-        const measureName = button.getAttribute('data-measure');
-        this.copyToClipboard(measureName, 'Measure name');
-      } else if (button.classList.contains('info-measure')) {
-        const measureName = button.getAttribute('data-measure');
-        this.showMeasureInfo(measureName);
-      }
-    }
-
-    /**
-     * Show measure information
-     */
-    showMeasureInfo(measureName) {
-      const message = `Measure: ${measureName}\nLength: ${measureName.length} characters\nThis measure is not referenced by any visuals in your report.`;
-      this.showNotification(message, 'info');
     }
 
     /**
@@ -934,8 +911,7 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
       const measures = this.state.allMeasures.map(measure => ({
         'Measure Name': measure.name,
         'Selected': this.state.selectedMeasures.has(measure.name) ? 'Yes' : 'No',
-        'Length': measure.length,
-        'Impact': 'Low' // Could be enhanced with actual impact analysis
+        'Length': measure.length
       }));
 
       if (measures.length === 0) {
@@ -1134,6 +1110,21 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
     color: var(--color-primary);
   }
 
+  .sortable.sort-asc .sort-icon,
+  .sortable.sort-desc .sort-icon {
+    opacity: 1;
+    color: var(--color-primary);
+  }
+
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sortable:hover {
+    background: var(--bg-hover);
+  }
+
   /* Enhanced Measure Rows */
   .measure-row {
     transition: var(--transition-fast);
@@ -1220,72 +1211,6 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
     background: var(--glass-bg);
     padding: 0.25rem 0.5rem;
     border-radius: var(--radius-full);
-  }
-
-  /* Impact Indicators */
-  .impact-cell {
-    padding: var(--space-lg);
-  }
-
-  .impact-indicator {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.375rem 0.75rem;
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .impact-indicator.low {
-    background: rgba(67, 233, 123, 0.1);
-    color: #22c55e;
-    border: 1px solid rgba(67, 233, 123, 0.3);
-  }
-
-  .impact-indicator.medium {
-    background: rgba(251, 191, 36, 0.1);
-    color: #f59e0b;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
-
-  .impact-indicator.high {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-
-  /* Actions Cell */
-  .actions-cell {
-    padding: var(--space-lg);
-  }
-
-  .row-actions {
-    display: flex;
-    gap: var(--space-xs);
-  }
-
-  .icon-button {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: var(--glass-bg);
-    color: var(--text-secondary);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-  }
-
-  .icon-button:hover {
-    background: var(--bg-hover);
-    color: var(--color-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
   }
 
   /* Enhanced Script Section */
@@ -1603,29 +1528,6 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
     margin-bottom: var(--space-xs);
   }
 
-  /* Sort Controls */
-  .sort-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  .sort-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  .sort-select {
-    background: var(--bg-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-xs) var(--space-sm);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    cursor: pointer;
-  }
-
   /* Enhanced Selection Info */
   .selection-info {
     padding: var(--space-sm) var(--space-md);
@@ -1669,18 +1571,9 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
     .export-actions {
       flex-direction: column;
     }
-
-    .sort-controls {
-      flex-direction: column;
-      align-items: flex-start;
-    }
   }
 
   @media (max-width: 480px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-
     .modal {
       padding: var(--space-md);
     }
@@ -1707,24 +1600,6 @@ Output("Moved " + movedCount + " measures to folder: " + folderName);`;
   .measure-row:focus-within {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
-  }
-
-  /* High Contrast Support */
-  @media (prefers-contrast: high) {
-    .impact-indicator.low {
-      background: #22c55e;
-      color: white;
-    }
-
-    .impact-indicator.medium {
-      background: #f59e0b;
-      color: white;
-    }
-
-    .impact-indicator.high {
-      background: #ef4444;
-      color: white;
-    }
   }
 
   /* Reduced Motion Support */
