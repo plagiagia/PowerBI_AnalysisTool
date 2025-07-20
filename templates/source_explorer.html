@@ -1,5 +1,5 @@
-{% extends "base.html" %} 
-{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Source Explorer - Power BI Analysis Tool{% endblock %}
 
 {% block header_icon %}<i class="fas fa-database"></i>{% endblock %}
 {% block header_title %}Source Explorer{% endblock %}
@@ -11,7 +11,8 @@
   <span class="stat-label">Data Sources</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if m_queries_info else 0 }}</span>
+  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum / 1000)|round|int if
+    m_queries_info else 0 }}</span>
   <span class="stat-label">Total Lines (K)</span>
 </div>
 {% endblock %}
@@ -19,13 +20,13 @@
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
-{% endblock %} 
+{% endblock %}
 
 {% block breadcrumbs %}
 <li>
   <a href="/source-explorer"><i class="fas fa-database"></i><span class="breadcrumb-text">Source Explorer</span></a>
 </li>
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -36,18 +37,135 @@
   </p>
 </div>
 
+<!-- Source Distribution Info Table -->
+<div class="source-info-section">
+  <div class="info-header">
+    <h2 class="info-title">
+      <i class="fas fa-chart-pie"></i>
+      Source Distribution
+    </h2>
+    <button id="toggleInfoDetails" class="toggle-details-btn">
+      <i class="fas fa-chevron-down"></i>
+      <span>Show Details</span>
+    </button>
+  </div>
+
+  <div class="info-summary">
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="card-icon sql">
+          <i class="fas fa-database"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="sqlCount">0</div>
+          <div class="card-label">SQL Sources</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="card-icon file">
+          <i class="fas fa-file-excel"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="fileCount">0</div>
+          <div class="card-label">File Sources</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="card-icon web">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="webCount">0</div>
+          <div class="card-label">Web Sources</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="card-icon reference">
+          <i class="fas fa-link"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="referenceCount">0</div>
+          <div class="card-label">Query References</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="card-icon manual">
+          <i class="fas fa-edit"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-number" id="manualCount">0</div>
+          <div class="card-label">Manual/Other</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-details" id="infoDetails" style="display: none;">
+    <div class="details-grid">
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-server"></i>
+          Database Sources
+        </h3>
+        <div class="source-list" id="databaseSources">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-file-alt"></i>
+          File Sources
+        </h3>
+        <div class="source-list" id="fileSources">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-cloud"></i>
+          Web & API Sources
+        </h3>
+        <div class="source-list" id="webSources">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-project-diagram"></i>
+          Query References
+        </h3>
+        <div class="source-list" id="referenceSources">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h3 class="section-title">
+          <i class="fas fa-tools"></i>
+          Other Sources
+        </h3>
+        <div class="source-list" id="otherSources">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Control Panel -->
 <div class="control-panel">
   <!-- Search Bar -->
   <div class="search-container">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
-      <input
-        type="text"
-        id="searchQueries"
-        placeholder="Search in queries..."
-        aria-label="Search in M queries"
-      />
+      <input type="text" id="searchQueries" placeholder="Search in queries..." aria-label="Search in M queries" />
       <button id="clearSearch" class="clear-search" style="display: none" aria-label="Clear search">
         <i class="fas fa-times"></i>
       </button>
@@ -99,6 +217,10 @@
               <span class="query-lines">
                 <i class="fas fa-file-lines"></i>
                 {{ query.m_query.count('\n') + 1 }} lines
+              </span>
+              <span class="query-source-type" data-table="{{ query.table_name }}">
+                <i class="fas fa-plug"></i>
+                <span class="source-type-text">Unknown</span>
               </span>
             </div>
           </div>
@@ -157,7 +279,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-powerquery.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // DOM Elements
     const searchQueries = document.getElementById("searchQueries");
     const clearSearch = document.getElementById("clearSearch");
@@ -170,30 +292,452 @@
     const collapseAllBtn = document.getElementById("collapseAll");
     const exportQueriesBtn = document.getElementById("exportQueries");
     const searchCount = document.querySelector(".search-count");
-    
+    const toggleInfoDetails = document.getElementById("toggleInfoDetails");
+    const infoDetails = document.getElementById("infoDetails");
+
     // Variables for state
     let currentVisibleItems = queryCards.length;
-    
-    // Set up event listeners
+    let sourceAnalysis = {
+      sql: 0,
+      file: 0,
+      web: 0,
+      manual: 0,
+      reference: 0,
+      details: {
+        databases: [],
+        files: [],
+        web: [],
+        other: [],
+        references: []
+      }
+    };
+
+    // Initialize
+    analyzeSourceTypes();
+    updateInfoTable();
     setupEventListeners();
-    
+
+    /**
+     * Analyze source types from M queries
+     */
+    function analyzeSourceTypes() {
+      queryCards.forEach(card => {
+        const tableName = card.getAttribute("data-table");
+        const codeElement = card.querySelector("code");
+        const mQuery = codeElement ? codeElement.textContent : "";
+
+        const sourceInfo = identifySourceType(mQuery, tableName);
+
+        // Update counters
+        sourceAnalysis[sourceInfo.category]++;
+
+        // Add to details with enhanced structure
+        const categoryKey = getCategoryDetailsKey(sourceInfo.category);
+        sourceAnalysis.details[categoryKey].push({
+          table: tableName,
+          type: sourceInfo.type,
+          details: sourceInfo.details,
+          connectionKey: sourceInfo.connectionKey || sourceInfo.details
+        });
+
+        // Update the query card with source type
+        const sourceTypeElement = card.querySelector(".source-type-text");
+        if (sourceTypeElement) {
+          sourceTypeElement.textContent = sourceInfo.type;
+        }
+
+        // Add source type class to query type span
+        const querySourceSpan = card.querySelector(".query-source-type");
+        if (querySourceSpan) {
+          querySourceSpan.classList.add(`source-${sourceInfo.category}`);
+        }
+      });
+    }
+
+    /**
+     * Identify source type from M query
+     */
+    function identifySourceType(mQuery, tableName) {
+      const query = mQuery.toLowerCase();
+
+      // SQL Database sources
+      if (query.includes('sql.database(')) {
+        const serverMatch = mQuery.match(/Sql\.Database\s*\(\s*"([^"]+)"/i);
+        const dbMatch = mQuery.match(/Sql\.Database\s*\([^,]+,\s*"([^"]+)"/i);
+        const server = serverMatch ? serverMatch[1] : 'Unknown Server';
+        const database = dbMatch ? dbMatch[1] : 'Unknown Database';
+        const connectionKey = `${server} / ${database}`;
+        return {
+          category: 'sql',
+          type: 'SQL Database',
+          details: connectionKey,
+          connectionKey: connectionKey
+        };
+      }
+
+      if (query.includes('oracle.database(')) {
+        const connectionDetail = extractConnectionDetail(mQuery, 'Oracle.Database');
+        return {
+          category: 'sql',
+          type: 'Oracle Database',
+          details: connectionDetail,
+          connectionKey: connectionDetail
+        };
+      }
+
+      if (query.includes('mysql.database(')) {
+        const connectionDetail = extractConnectionDetail(mQuery, 'MySQL.Database');
+        return {
+          category: 'sql',
+          type: 'MySQL Database',
+          details: connectionDetail,
+          connectionKey: connectionDetail
+        };
+      }
+
+      if (query.includes('postgresql.database(')) {
+        const connectionDetail = extractConnectionDetail(mQuery, 'PostgreSQL.Database');
+        return {
+          category: 'sql',
+          type: 'PostgreSQL Database',
+          details: connectionDetail,
+          connectionKey: connectionDetail
+        };
+      }
+
+      // File sources
+      if (query.includes('excel.workbook(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Excel.Workbook');
+        return {
+          category: 'file',
+          type: 'Excel File',
+          details: fileDetail,
+          connectionKey: fileDetail
+        };
+      }
+
+      if (query.includes('csv.document(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Csv.Document');
+        return {
+          category: 'file',
+          type: 'CSV File',
+          details: fileDetail,
+          connectionKey: fileDetail
+        };
+      }
+
+      if (query.includes('folder.contents(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Folder.Contents');
+        return {
+          category: 'file',
+          type: 'Folder',
+          details: fileDetail,
+          connectionKey: fileDetail
+        };
+      }
+
+      if (query.includes('json.document(')) {
+        const fileDetail = extractFileDetail(mQuery, 'Json.Document');
+        return {
+          category: 'file',
+          type: 'JSON File',
+          details: fileDetail,
+          connectionKey: fileDetail
+        };
+      }
+
+      // Web sources
+      if (query.includes('web.contents(')) {
+        const webDetail = extractWebDetail(mQuery, 'Web.Contents');
+        return {
+          category: 'web',
+          type: 'Web API/URL',
+          details: webDetail,
+          connectionKey: webDetail
+        };
+      }
+
+      if (query.includes('odata.feed(')) {
+        const webDetail = extractWebDetail(mQuery, 'OData.Feed');
+        return {
+          category: 'web',
+          type: 'OData Service',
+          details: webDetail,
+          connectionKey: webDetail
+        };
+      }
+
+      if (query.includes('sharepoint.')) {
+        const sharePointDetail = extractSharePointDetail(mQuery);
+        return {
+          category: 'web',
+          type: 'SharePoint',
+          details: sharePointDetail,
+          connectionKey: sharePointDetail
+        };
+      }
+
+      if (query.includes('azurestorage.')) {
+        return {
+          category: 'web',
+          type: 'Azure Storage',
+          details: 'Azure Storage Account',
+          connectionKey: 'Azure Storage Account'
+        };
+      }
+
+      // Query references
+      if (query.match(/source\s*=\s*[a-z_][a-z0-9_]*$/im)) {
+        const referenceMatch = mQuery.match(/Source\s*=\s*([A-Z_][A-Z0-9_]*)/i);
+        const referencedQuery = referenceMatch ? referenceMatch[1] : 'Unknown Reference';
+        return {
+          category: 'reference',
+          type: 'Query Reference',
+          details: `References: ${referencedQuery}`,
+          connectionKey: 'Query References'
+        };
+      }
+
+      // Manual/Embedded data
+      if (query.includes('table.fromrows(') && query.includes('json.document(binary.decompress(')) {
+        return {
+          category: 'manual',
+          type: 'Embedded Data',
+          details: 'Manually entered data',
+          connectionKey: 'Embedded Data'
+        };
+      }
+
+      if (query.includes('table.fromrows(')) {
+        return {
+          category: 'manual',
+          type: 'Manual Table',
+          details: 'Manually defined table',
+          connectionKey: 'Manual Tables'
+        };
+      }
+
+      // Default fallback
+      return {
+        category: 'manual',
+        type: 'Other/Unknown',
+        details: 'Unable to determine source type',
+        connectionKey: 'Unknown Sources'
+      };
+    }
+
+    /**
+     * Extract connection detail from M query
+     */
+    function extractConnectionDetail(mQuery, functionName) {
+      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
+      const match = mQuery.match(regex);
+      return match ? match[1] : 'Connection details not found';
+    }
+
+    /**
+     * Extract file detail from M query
+     */
+    function extractFileDetail(mQuery, functionName) {
+      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
+      const match = mQuery.match(regex);
+      if (match) {
+        const fullPath = match[1];
+        const fileName = fullPath.split('\\').pop().split('/').pop();
+        return fileName || fullPath;
+      }
+      return 'File path not found';
+    }
+
+    /**
+     * Extract web detail from M query
+     */
+    function extractWebDetail(mQuery, functionName) {
+      const regex = new RegExp(`${functionName}\\s*\\(\\s*"([^"]+)"`, 'i');
+      const match = mQuery.match(regex);
+      if (match) {
+        try {
+          const url = new URL(match[1]);
+          return url.hostname;
+        } catch {
+          return match[1];
+        }
+      }
+      return 'URL not found';
+    }
+
+    /**
+     * Extract SharePoint detail from M query
+     */
+    function extractSharePointDetail(mQuery) {
+      const siteMatch = mQuery.match(/SharePoint\.[^(]+\s*\(\s*"([^"]+)"/i);
+      if (siteMatch) {
+        try {
+          const url = new URL(siteMatch[1]);
+          return url.hostname;
+        } catch {
+          return siteMatch[1];
+        }
+      }
+      return 'SharePoint site not found';
+    }
+
+    /**
+     * Get category details key
+     */
+    function getCategoryDetailsKey(category) {
+      const mapping = {
+        'sql': 'databases',
+        'file': 'files',
+        'web': 'web',
+        'manual': 'other',
+        'reference': 'references'
+      };
+      return mapping[category] || 'other';
+    }
+
+    /**
+     * Update info table with analysis results
+     */
+    function updateInfoTable() {
+      // Update summary cards
+      document.getElementById("sqlCount").textContent = sourceAnalysis.sql;
+      document.getElementById("fileCount").textContent = sourceAnalysis.file;
+      document.getElementById("webCount").textContent = sourceAnalysis.web;
+      document.getElementById("manualCount").textContent = sourceAnalysis.manual;
+      document.getElementById("referenceCount").textContent = sourceAnalysis.reference;
+
+      // Update details sections
+      updateDetailsSection("databaseSources", sourceAnalysis.details.databases);
+      updateDetailsSection("fileSources", sourceAnalysis.details.files);
+      updateDetailsSection("webSources", sourceAnalysis.details.web);
+      updateDetailsSection("referenceSources", sourceAnalysis.details.references);
+      updateDetailsSection("otherSources", sourceAnalysis.details.other);
+    }
+
+    /**
+     * Update a details section with hierarchical grouping
+     */
+    function updateDetailsSection(elementId, sources) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+
+      if (sources.length === 0) {
+        element.innerHTML = '<div class="no-sources">No sources of this type found</div>';
+        return;
+      }
+
+      // Group by type, then by connection
+      const grouped = {};
+      sources.forEach(source => {
+        if (!grouped[source.type]) {
+          grouped[source.type] = {};
+        }
+        const connectionKey = source.connectionKey || source.details;
+        if (!grouped[source.type][connectionKey]) {
+          grouped[source.type][connectionKey] = [];
+        }
+        grouped[source.type][connectionKey].push(source);
+      });
+
+      let html = '';
+      Object.keys(grouped).forEach(sourceType => {
+        const totalTables = Object.values(grouped[sourceType]).flat().length;
+        html += `
+          <div class="source-type-group">
+            <div class="source-type-header">
+              <i class="fas fa-chevron-down"></i>
+              <span class="source-type-title">${sourceType}</span>
+              <span class="source-type-count">${totalTables}</span>
+            </div>
+            <div class="source-type-content">
+        `;
+
+        Object.keys(grouped[sourceType]).forEach(connectionKey => {
+          const tables = grouped[sourceType][connectionKey];
+          html += `
+            <div class="connection-group">
+              <div class="connection-header">
+                <i class="fas fa-server"></i>
+                <span class="connection-details">${connectionKey}</span>
+                <span class="table-count">${tables.length} table${tables.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div class="connection-tables">
+          `;
+
+          tables.forEach(table => {
+            html += `
+              <div class="table-item">
+                <i class="fas fa-table"></i>
+                <span class="table-name">${table.table}</span>
+              </div>
+            `;
+          });
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      element.innerHTML = html;
+
+      // Add click handlers for collapsible groups
+      element.querySelectorAll('.source-type-header').forEach(header => {
+        header.addEventListener('click', function () {
+          const content = this.nextElementSibling;
+          const icon = this.querySelector('i');
+          const isOpen = content.style.display !== 'none';
+
+          content.style.display = isOpen ? 'none' : 'block';
+          icon.classList.toggle('fa-chevron-down', !isOpen);
+          icon.classList.toggle('fa-chevron-right', isOpen);
+        });
+      });
+    }
+
     /**
      * Set up event listeners for interactive elements
      */
     function setupEventListeners() {
+      // Toggle info details
+      if (toggleInfoDetails) {
+        toggleInfoDetails.addEventListener("click", function () {
+          const isVisible = infoDetails.style.display !== "none";
+          infoDetails.style.display = isVisible ? "none" : "block";
+
+          const icon = this.querySelector("i");
+          const text = this.querySelector("span");
+
+          if (isVisible) {
+            icon.className = "fas fa-chevron-down";
+            text.textContent = "Show Details";
+          } else {
+            icon.className = "fas fa-chevron-up";
+            text.textContent = "Hide Details";
+          }
+        });
+      }
+
       // Search box
       if (searchQueries) {
-        searchQueries.addEventListener("input", function() {
+        searchQueries.addEventListener("input", function () {
           if (clearSearch) {
             clearSearch.style.display = this.value ? "block" : "none";
           }
           performSearch();
         });
       }
-      
+
       // Clear search button
       if (clearSearch) {
-        clearSearch.addEventListener("click", function() {
+        clearSearch.addEventListener("click", function () {
           if (searchQueries) {
             searchQueries.value = "";
             clearSearch.style.display = "none";
@@ -202,10 +746,10 @@
           }
         });
       }
-      
+
       // Clear empty state button
       if (clearEmptyStateBtn) {
-        clearEmptyStateBtn.addEventListener("click", function() {
+        clearEmptyStateBtn.addEventListener("click", function () {
           if (searchQueries) {
             searchQueries.value = "";
             if (clearSearch) clearSearch.style.display = "none";
@@ -214,10 +758,10 @@
           }
         });
       }
-      
+
       // Expand all button
       if (expandAllBtn) {
-        expandAllBtn.addEventListener("click", function() {
+        expandAllBtn.addEventListener("click", function () {
           queryCards.forEach(card => {
             const button = card.querySelector(".toggle-expand");
             if (!card.classList.contains("expanded")) {
@@ -226,10 +770,10 @@
           });
         });
       }
-      
+
       // Collapse all button
       if (collapseAllBtn) {
-        collapseAllBtn.addEventListener("click", function() {
+        collapseAllBtn.addEventListener("click", function () {
           queryCards.forEach(card => {
             const button = card.querySelector(".toggle-expand");
             if (card.classList.contains("expanded")) {
@@ -238,29 +782,29 @@
           });
         });
       }
-      
+
       // Export queries button
       if (exportQueriesBtn) {
         exportQueriesBtn.addEventListener("click", exportAllQueries);
       }
-      
+
       // Toggle expand buttons for each query
       document.querySelectorAll(".toggle-expand").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
           const card = this.closest(".improved-query-card");
           toggleQueryCard(card, this);
         });
       });
-      
+
       // Copy table name buttons
       document.querySelectorAll(".copy-name").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
           const tableName = this.getAttribute("data-copy");
           copyToClipboardWithAnimation(this, tableName);
         });
       });
     }
-    
+
     /**
      * Toggle expansion state of a query card
      * @param {HTMLElement} card - The query card element
@@ -268,25 +812,25 @@
      */
     function toggleQueryCard(card, button) {
       if (!card || !button) return;
-      
+
       const isExpanded = card.classList.toggle("expanded");
-      
+
       // Update button icon
-      button.innerHTML = isExpanded ? 
-        '<i class="fas fa-chevron-up"></i>' : 
+      button.innerHTML = isExpanded ?
+        '<i class="fas fa-chevron-up"></i>' :
         '<i class="fas fa-chevron-down"></i>';
-      
+
       button.setAttribute("title", isExpanded ? "Collapse" : "Expand");
     }
-    
+
     /**
      * Search queries based on input
      */
     function performSearch() {
       const searchValue = searchQueries.value.toLowerCase();
-      
+
       let visibleItems = 0;
-      
+
       // Remove previous search highlights
       document.querySelectorAll(".search-highlight").forEach(el => {
         const text = el.textContent;
@@ -295,33 +839,33 @@
         parent.replaceChild(textNode, el);
         parent.normalize();
       });
-      
+
       // Filter query cards
       queryCards.forEach(card => {
         const tableName = card.getAttribute("data-table");
         const queryText = card.querySelector("code").textContent.toLowerCase();
-        
+
         let matches = true;
         if (searchValue) {
-          matches = tableName.toLowerCase().includes(searchValue) || 
-                   queryText.includes(searchValue);
-          
+          matches = tableName.toLowerCase().includes(searchValue) ||
+            queryText.includes(searchValue);
+
           // Highlight matches in table name
           if (tableName.toLowerCase().includes(searchValue)) {
             highlightSearchTerm(card.querySelector(".improved-query-name"), searchValue);
           }
         }
-        
+
         card.style.display = matches ? "" : "none";
-        
+
         if (matches) visibleItems++;
       });
-      
+
       // Update count and empty state
       currentVisibleItems = visibleItems;
       updateResultCount();
       updateEmptyState();
-      
+
       // Update search count display
       if (searchCount && searchValue) {
         searchCount.textContent = `${visibleItems} matches`;
@@ -329,7 +873,7 @@
         searchCount.textContent = "";
       }
     }
-    
+
     /**
      * Highlight search term in an element
      * @param {HTMLElement} element - Element containing text
@@ -337,17 +881,17 @@
      */
     function highlightSearchTerm(element, term) {
       if (!element) return;
-      
+
       const text = element.textContent;
-      
+
       // Create highlighted version
       const regex = new RegExp(`(${escapeRegExp(term)})`, "gi");
       const highlightedText = text.replace(regex, '<span class="search-highlight">$1</span>');
-      
+
       // Update element content
       element.innerHTML = highlightedText;
     }
-    
+
     /**
      * Update the result count display
      */
@@ -356,7 +900,7 @@
         resultCount.textContent = currentVisibleItems;
       }
     }
-    
+
     /**
      * Update empty state visibility
      */
@@ -364,12 +908,12 @@
       if (emptyState) {
         emptyState.style.display = currentVisibleItems === 0 ? "flex" : "none";
       }
-      
+
       if (queriesList) {
         queriesList.style.display = currentVisibleItems === 0 ? "none" : "";
       }
     }
-    
+
     /**
      * Export all visible queries to a file
      */
@@ -377,15 +921,15 @@
       const visibleCards = Array.from(queryCards).filter(
         card => card.style.display !== "none"
       );
-      
+
       if (visibleCards.length === 0) return;
-      
+
       const content = visibleCards.map(card => {
         const tableName = card.getAttribute("data-table");
         const query = card.querySelector("code").textContent;
         return `-- Table: ${tableName}\r\n${query}\r\n\r\n`;
       }).join('');
-      
+
       // Create and download file
       const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -394,21 +938,21 @@
       link.setAttribute("download", "m_queries.txt");
       link.style.display = "none";
       document.body.appendChild(link);
-      
+
       link.click();
-      
+
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       // Show notification if available
       if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
         window.PowerBIExplorer.showNotification(
-          "M queries exported successfully", 
+          "M queries exported successfully",
           "success"
         );
       }
     }
-    
+
     /**
      * Copy text to clipboard with animation
      * @param {HTMLElement} button - The button that was clicked
@@ -416,13 +960,13 @@
      */
     function copyToClipboardWithAnimation(button, text) {
       if (!button) return;
-      
+
       // Store original button HTML
       const originalHTML = button.innerHTML;
-      
+
       // Show loading spinner
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      
+
       // Try to use Clipboard API
       if (navigator.clipboard) {
         navigator.clipboard.writeText(text)
@@ -439,7 +983,7 @@
         fallbackCopy(text, button, originalHTML);
       }
     }
-    
+
     /**
      * Fallback copy method for browsers without clipboard API
      * @param {string} text - Text to copy
@@ -454,23 +998,23 @@
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         if (document.execCommand("copy")) {
           button.innerHTML = '<i class="fas fa-check"></i>';
         } else {
           button.innerHTML = '<i class="fas fa-times"></i>';
         }
-        
+
         document.body.removeChild(textArea);
       } catch (err) {
         button.innerHTML = '<i class="fas fa-times"></i>';
       }
-      
+
       setTimeout(() => {
         button.innerHTML = originalHTML;
       }, 2000);
     }
-    
+
     /**
      * Escape special characters in string for regex
      * @param {string} string - String to escape
@@ -479,12 +1023,12 @@
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
-    
+
     /**
      * Function to copy code to clipboard
      * @param {HTMLElement} button - The copy button element
      */
-    window.copyToClipboard = function(button) {
+    window.copyToClipboard = function (button) {
       const codeElement = button.closest(".improved-code-container").querySelector("code");
       copyToClipboardWithAnimation(button, codeElement.textContent);
     };
@@ -492,331 +1036,699 @@
 </script>
 
 <style>
-/* Improved Source Explorer Styles */
-.queries-section.improved {
-  margin-bottom: var(--space-3xl);
-}
+  /* Source Info Section Styles */
+  .source-info-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-lg);
+  }
 
-/* Improved Queries List with Better Spacing */
-.improved-queries-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xl); /* Increased gap between items */
-  margin-bottom: var(--space-6);
-}
+  .info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--glass-border);
+  }
 
-/* Improved Query Card */
-.improved-query-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  transition: var(--transition-smooth);
-  position: relative;
-}
+  .info-title {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: 0;
+  }
 
-.improved-query-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  border-color: var(--color-primary);
-}
+  .info-title i {
+    color: var(--color-primary);
+  }
 
-/* Improved Query Header */
-.improved-query-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-xl);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--glass-border);
-  min-height: 100px; /* Ensure adequate height */
-}
+  .toggle-details-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: 500;
+  }
 
-.query-title-section {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-  flex: 1;
-  min-width: 0;
-}
+  .toggle-details-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
 
-.table-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  background: var(--gradient-primary);
-  color: white;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  box-shadow: var(--shadow-glow);
-  flex-shrink: 0;
-}
-
-.query-title-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.improved-query-name {
-  font-family: var(--font-primary);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--space-sm) 0;
-  word-break: break-word;
-}
-
-.query-meta {
-  display: flex;
-  gap: var(--space-lg);
-  flex-wrap: wrap;
-}
-
-.query-type,
-.query-lines {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-full);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.query-type i,
-.query-lines i {
-  color: var(--color-primary);
-}
-
-.improved-query-actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
-.improved-query-actions .icon-button {
-  width: 44px;
-  height: 44px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-}
-
-.improved-query-actions .icon-button:hover {
-  background: var(--bg-hover);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Improved Query Content */
-.improved-query-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-out, padding 0.4s ease-out;
-}
-
-.improved-query-card.expanded .improved-query-content {
-  max-height: 2500px; /* Increased max height */
-  padding: var(--space-xl);
-}
-
-/* Improved Code Container */
-.improved-code-container {
-  background: var(--bg-primary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  overflow: hidden;
-  position: relative;
-}
-
-.code-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.code-label {
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 0.95rem;
-}
-
-.code-label i {
-  color: var(--color-primary);
-}
-
-.code-actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
-.copy-button {
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.copy-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.code-wrapper {
-  position: relative;
-}
-
-.code-wrapper pre {
-  margin: 0;
-  padding: var(--space-xl); /* Increased padding for better readability */
-  background: var(--bg-primary);
-  max-height: 500px; /* Increased max height */
-  overflow: auto;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.9rem; /* Slightly larger font */
-  line-height: 1.6; /* Better line spacing */
-}
-
-.code-wrapper code {
-  color: var(--text-primary);
-}
-
-/* Search highlight improvements */
-.search-highlight {
-  background: var(--gradient-warning);
-  color: var(--text-primary);
-  padding: 0.125rem 0.25rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
-}
-
-/* Empty state improvements */
-.empty-state {
-  padding: var(--space-3xl);
-  text-align: center;
-  background: var(--glass-bg);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--glass-border);
-  margin-top: var(--space-xl);
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-  .improved-query-header {
-    flex-direction: column;
-    align-items: flex-start;
+  /* Summary Cards */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: var(--space-lg);
-    min-height: auto;
+  }
+
+  .summary-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    transition: var(--transition-fast);
   }
-  
-  .query-title-section {
-    width: 100%;
-    gap: var(--space-md);
+
+  .summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
   }
-  
-  .table-icon-wrapper {
+
+  .card-icon {
     width: 48px;
     height: 48px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 20px;
+    color: white;
+    flex-shrink: 0;
   }
-  
-  .improved-query-name {
-    font-size: 1.25rem;
+
+  .card-icon.sql {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
-  
-  .query-meta {
-    gap: var(--space-sm);
+
+  .card-icon.file {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
   }
-  
-  .improved-query-actions {
-    align-self: flex-end;
+
+  .card-icon.web {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   }
-  
-  .improved-queries-list {
+
+  .card-icon.reference {
+    background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+  }
+
+  .card-icon.manual {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+
+  .card-content {
+    flex: 1;
+  }
+
+  .card-number {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+  }
+
+  .card-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Details Grid */
+  .info-details {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--glass-border);
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--space-xl);
   }
-  
-  .code-wrapper pre {
+
+  .details-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     padding: var(--space-lg);
-    font-size: 0.8rem;
   }
-  
-  .code-header {
-    flex-direction: column;
-    align-items: flex-start;
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
     gap: var(--space-sm);
   }
-  
+
+  .section-title i {
+    color: var(--color-primary);
+  }
+
+  .source-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* Hierarchical Structure Styles */
+  .source-type-group {
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .source-type-header {
+    background: var(--bg-primary);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .source-type-header:hover {
+    background: var(--bg-hover);
+  }
+
+  .source-type-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .source-type-count {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .source-type-content {
+    padding: var(--space-md);
+  }
+
+  .connection-group {
+    margin-bottom: var(--space-md);
+    background: var(--glass-bg);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .connection-header {
+    background: var(--bg-secondary);
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .connection-details {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex: 1;
+    word-break: break-all;
+  }
+
+  .table-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--glass-bg);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .connection-tables {
+    padding: var(--space-sm);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-xs);
+  }
+
+  .table-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+  }
+
+  .table-item:hover {
+    background: var(--bg-hover);
+    transform: translateX(2px);
+  }
+
+  .table-item i {
+    color: var(--color-primary);
+    font-size: 0.75rem;
+  }
+
+  .table-name {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .no-sources {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--space-lg);
+  }
+
+  /* Source type indicators in query cards */
+  .query-source-type {
+    border: 1px solid var(--glass-border);
+  }
+
+  .query-source-type.source-sql {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+  }
+
+  .query-source-type.source-file {
+    border-color: #43e97b;
+    background: rgba(67, 233, 123, 0.1);
+  }
+
+  .query-source-type.source-web {
+    border-color: #4facfe;
+    background: rgba(79, 172, 254, 0.1);
+  }
+
+  .query-source-type.source-reference {
+    border-color: #9c27b0;
+    background: rgba(156, 39, 176, 0.1);
+  }
+
+  .query-source-type.source-manual {
+    border-color: #fa709a;
+    background: rgba(250, 112, 154, 0.1);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Improved Source Explorer Styles */
+  .queries-section.improved {
+    margin-bottom: var(--space-3xl);
+  }
+
+  /* Improved Queries List with Better Spacing */
+  .improved-queries-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    /* Increased gap between items */
+    margin-bottom: var(--space-6);
+  }
+
+  /* Improved Query Card */
+  .improved-query-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+    position: relative;
+  }
+
+  .improved-query-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: var(--color-primary);
+  }
+
+  /* Improved Query Header */
+  .improved-query-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xl);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
+    min-height: 100px;
+    /* Ensure adequate height */
+  }
+
+  .query-title-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .table-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+  }
+
+  .query-title-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .improved-query-name {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-sm) 0;
+    word-break: break-word;
+  }
+
+  .query-meta {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .query-type,
+  .query-lines,
+  .query-source-type {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .query-type i,
+  .query-lines i,
+  .query-source-type i {
+    color: var(--color-primary);
+  }
+
+  .improved-query-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .improved-query-actions .icon-button {
+    width: 44px;
+    height: 44px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .improved-query-actions .icon-button:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Improved Query Content */
+  .improved-query-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+  }
+
+  .improved-query-card.expanded .improved-query-content {
+    max-height: 2500px;
+    /* Increased max height */
+    padding: var(--space-xl);
+  }
+
+  /* Improved Code Container */
+  .improved-code-container {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .code-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.95rem;
+  }
+
+  .code-label i {
+    color: var(--color-primary);
+  }
+
   .code-actions {
-    align-self: flex-end;
+    display: flex;
+    gap: var(--space-sm);
   }
-}
 
-/* Animation for card expansion */
-@keyframes cardExpand {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+  .copy-button {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .copy-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
-}
 
-.improved-query-card.expanded .improved-query-content {
-  animation: cardExpand 0.3s ease-out;
-}
+  .code-wrapper {
+    position: relative;
+  }
 
-/* Better scrollbar for code blocks */
-.code-wrapper pre::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+  .code-wrapper pre {
+    margin: 0;
+    padding: var(--space-xl);
+    /* Increased padding for better readability */
+    background: var(--bg-primary);
+    max-height: 500px;
+    /* Increased max height */
+    overflow: auto;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.9rem;
+    /* Slightly larger font */
+    line-height: 1.6;
+    /* Better line spacing */
+  }
 
-.code-wrapper pre::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-}
+  .code-wrapper code {
+    color: var(--text-primary);
+  }
 
-.code-wrapper pre::-webkit-scrollbar-thumb {
-  background: var(--gradient-primary);
-  border-radius: var(--radius-sm);
-}
+  /* Search highlight improvements */
+  .search-highlight {
+    background: var(--gradient-warning);
+    color: var(--text-primary);
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
+  }
 
-.code-wrapper pre::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
-}
+  /* Empty state improvements */
+  .empty-state {
+    padding: var(--space-3xl);
+    text-align: center;
+    background: var(--glass-bg);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    margin-top: var(--space-xl);
+  }
+
+  /* Responsive improvements */
+  @media (max-width: 768px) {
+    .summary-cards {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .details-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+
+    .info-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .toggle-details-btn {
+      align-self: flex-end;
+    }
+
+    .connection-tables {
+      grid-template-columns: 1fr;
+    }
+
+    .improved-query-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-lg);
+      min-height: auto;
+      padding: var(--space-lg);
+    }
+
+    .query-title-section {
+      width: 100%;
+      gap: var(--space-md);
+    }
+
+    .table-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+    }
+
+    .improved-query-name {
+      font-size: 1.25rem;
+    }
+
+    .query-meta {
+      gap: var(--space-sm);
+    }
+
+    .improved-query-actions {
+      align-self: flex-end;
+    }
+
+    .improved-queries-list {
+      gap: var(--space-xl);
+    }
+
+    .code-wrapper pre {
+      padding: var(--space-lg);
+      font-size: 0.8rem;
+    }
+
+    .code-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    .code-actions {
+      align-self: flex-end;
+    }
+  }
+
+  /* Animation for card expansion */
+  @keyframes cardExpand {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .improved-query-card.expanded .improved-query-content {
+    animation: cardExpand 0.3s ease-out;
+  }
+
+  /* Better scrollbar for code blocks */
+  .code-wrapper pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .code-wrapper pre::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+  }
+
+  .code-wrapper pre::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: var(--radius-sm);
+  }
+
+  .code-wrapper pre::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
 </style>
+
 {% endblock %}
