@@ -8,15 +8,17 @@ data lineage{% endblock %}
 
 {% block header_stats %}
 <div class="quick-stat">
-  <span class="stat-number" id="header-parent-measures">0</span>
+  <span class="stat-number" id="header-parent-measures">{{ lineage_metrics.parent_measures_count if lineage_metrics else
+    0 }}</span>
   <span class="stat-label">Parent Measures</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number" id="header-final-measures">0</span>
+  <span class="stat-number" id="header-final-measures">{{ lineage_metrics.final_measures_count if lineage_metrics else 0
+    }}</span>
   <span class="stat-label">Final Measures</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number" id="header-columns">0</span>
+  <span class="stat-number" id="header-columns">{{ lineage_metrics.columns_count if lineage_metrics else 0 }}</span>
   <span class="stat-label">Columns</span>
 </div>
 {% endblock %}
@@ -29,8 +31,10 @@ data lineage{% endblock %}
 <style>
   /* Ensure network diagram container takes available space */
   .network-container {
-    height: 70vh; /* Default height */
-    background-color: var(--bg-primary); /* Adapts with theme */
+    height: 70vh;
+    /* Default height */
+    background-color: var(--bg-primary);
+    /* Adapts with theme */
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
   }
@@ -107,66 +111,6 @@ data lineage{% endblock %}
               <span class="checkbox-icon column-icon"></span>
               Columns
             </label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Layout Panel -->
-    <div class="control-panel">
-      <div class="panel-header">
-        <h2 class="panel-title"><i class="fas fa-sitemap"></i> Layout</h2>
-        <button class="panel-toggle" aria-label="Toggle layout panel">
-          <i class="fas fa-chevron-up"></i>
-        </button>
-      </div>
-      <div class="panel-content">
-        <div class="radio-group">
-          <input type="radio" id="hierarchical" name="layout" class="custom-radio" checked />
-          <label for="hierarchical" class="radio-label">Hierarchical</label>
-        </div>
-
-        <div class="radio-group">
-          <input type="radio" id="forceDirected" name="layout" class="custom-radio" />
-          <label for="forceDirected" class="radio-label">Force Directed</label>
-        </div>
-
-        <div class="layout-actions">
-          <button id="fitView" class="action-button secondary">
-            <i class="fas fa-expand"></i> Fit View
-          </button>
-          <button id="resetView" class="action-button secondary">
-            <i class="fas fa-undo"></i> Reset
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats Panel -->
-    <div class="control-panel">
-      <div class="panel-header">
-        <h2 class="panel-title"><i class="fas fa-chart-pie"></i> Statistics</h2>
-        <button class="panel-toggle" aria-label="Toggle stats panel">
-          <i class="fas fa-chevron-up"></i>
-        </button>
-      </div>
-      <div class="panel-content">
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-value" id="parentMeasureCount">0</div>
-            <div class="stat-label">Parent Measures</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="finalMeasureCount">0</div>
-            <div class="stat-label">Final Measures</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="columnCount">0</div>
-            <div class="stat-label">Columns</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="relationshipCount">0</div>
-            <div class="stat-label">Relationships</div>
           </div>
         </div>
       </div>
@@ -795,23 +739,7 @@ data lineage{% endblock %}
       });
     }
 
-    /**
-     * Apply force-directed layout
-     */
-    function applyForceDirectedLayout() {
-      if (!network) return;
-      network.setOptions({
-        layout: { hierarchical: { enabled: false } },
-        physics: {
-          enabled: true,
-          stabilization: { enabled: true, iterations: 1000 } // Re-enable stabilization
-        }
-      });
-      // Turn off physics after stabilization
-      network.once("stabilizationIterationsDone", function () {
-        network.setOptions({ physics: { enabled: false } });
-      });
-    }
+
 
     /**
      * Reset the view to show all nodes and edges
@@ -902,14 +830,26 @@ data lineage{% endblock %}
         else if (node.nodeType === "final") finalCount++;
         else if (node.nodeType === "intermediate") intermediateCount++; // Count intermediate
       });
+
       // Parents in stats might include intermediate ones for simplicity or show them separately
-      if (parentMeasureCount) parentMeasureCount.textContent = parentCount + intermediateCount; // Or just parentCount
+      const totalParentMeasures = parentCount + intermediateCount;
+
+      if (parentMeasureCount) parentMeasureCount.textContent = totalParentMeasures;
       if (finalMeasureCount) finalMeasureCount.textContent = finalCount;
       if (columnCount) columnCount.textContent = colCount;
       if (relationshipCount) relationshipCount.textContent = edgesArray.length;
+
+      // Update header stats as well
+      const headerParentMeasures = document.getElementById("header-parent-measures");
+      const headerFinalMeasures = document.getElementById("header-final-measures");
+      const headerColumns = document.getElementById("header-columns");
+
+      if (headerParentMeasures) headerParentMeasures.textContent = totalParentMeasures;
+      if (headerFinalMeasures) headerFinalMeasures.textContent = finalCount;
+      if (headerColumns) headerColumns.textContent = colCount;
+
       animateCounters();
     }
-
     /**
      * Animate the statistics counters
      */
@@ -1127,11 +1067,11 @@ data lineage{% endblock %}
       // Remove active class from all tabs
       const tabs = document.querySelectorAll(".measure-tab");
       tabs.forEach(tab => tab.classList.remove("active"));
-      
+
       // Remove active class from all tab contents
       const contents = document.querySelectorAll(".tab-content");
       contents.forEach(content => content.classList.remove("active"));
-      
+
       // Add active class to selected tab and content
       if (tabName === "original") {
         if (originalTab) originalTab.classList.add("active");

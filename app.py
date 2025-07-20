@@ -152,6 +152,31 @@ def create_app(config_object=None) -> Flask:
             "most_common_visual": most_common_visual
         }
 
+    def calculate_lineage_metrics(lineage_view_processor: LineageView) -> Dict[str, int]:
+        """
+        Calculate metrics for the lineage view page.
+        
+        Returns:
+            Dict with parent_measures_count, final_measures_count, and columns_count
+        """
+        # Use existing methods to get measures
+        all_measures = lineage_view_processor.get_all_measures()
+        final_measures = lineage_view_processor.get_final_measures()
+        
+        # Count columns from nodes
+        columns_count = sum(1 for node in lineage_view_processor.nodes if node.get('type') == 'column')
+        
+        # Parent measures are those that have children (total - final)
+        parent_measures_count = len(all_measures) - len(final_measures)
+        
+        return {
+            'parent_measures_count': parent_measures_count,
+            'final_measures_count': len(final_measures),
+            'columns_count': columns_count,
+            'total_measures': len(all_measures),
+            'total_relationships': len(lineage_view_processor.edges)
+        }
+
     @app.context_processor
     def inject_common_data():
         """Inject common data into templates."""
@@ -213,10 +238,15 @@ def create_app(config_object=None) -> Flask:
             abort(404, description="This feature is currently disabled.")
 
         lvp = get_lineage_view_processor()
+        
+        # Calculate metrics for the lineage view
+        lineage_metrics = calculate_lineage_metrics(lvp)
+        
         return render_template(
             'lineage_view.html',
             nodes=lvp.nodes,
-            edges=lvp.edges
+            edges=lvp.edges,
+            lineage_metrics=lineage_metrics
         )
 
     @app.route('/dax-expressions')
@@ -277,8 +307,6 @@ def create_app(config_object=None) -> Flask:
         unused_final_measures = sorted(list(final_measures - used_measures))
 
         return render_template('unused_measures.html', unused_measures=unused_final_measures)
-
-
 
     @app.route('/api/model-json', methods=['GET'])
     def get_model_json():
