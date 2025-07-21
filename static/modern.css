@@ -585,17 +585,7 @@ main {
   transition: var(--transition-bounce);
 }
 
-.tool-badge {
-  background: var(--gradient-accent);
-  color: white;
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  box-shadow: var(--shadow-md);
-}
+
 
 .tool-content {
   padding: var(--space-xl);
@@ -711,23 +701,6 @@ main {
   box-shadow: var(--shadow-md);
 }
 
-.modern-button.accent {
-  background: var(--gradient-accent);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.modern-button.info {
-  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.modern-button.warning {
-  background: var(--gradient-warning);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
 
 /* Theme Toggle Button */
 .theme-toggle {
