@@ -39,51 +39,6 @@
   </p>
 </div>
 
-<!-- DAX Statistics Overview -->
-<div class="dax-stats-overview">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-calculator"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value" id="totalMeasures">{{ dax_expressions|length }}</div>
-        <div class="stat-label">Total Measures</div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-code-branch"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value" id="complexMeasures">0</div>
-        <div class="stat-label">Complex Measures</div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-clone"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value" id="similarPairs">0</div>
-        <div class="stat-label">Similar Pairs</div>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-align-left"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value" id="avgLength">0</div>
-        <div class="stat-label">Avg. Length</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Enhanced Search and Filter Bar -->
 <div class="search-filter-container">
   <div class="search-section">
@@ -108,15 +63,7 @@
   </div>
 
   <div class="filter-section">
-    <div class="filter-group">
-      <label class="filter-label">Complexity</label>
-      <select id="complexityFilter" class="filter-select">
-        <option value="all">All Complexity</option>
-        <option value="simple">Simple (< 100 chars)</option>
-        <option value="moderate">Moderate (100-500 chars)</option>
-        <option value="complex">Complex (> 500 chars)</option>
-      </select>
-    </div>
+
 
     <div class="filter-group">
       <label class="filter-label">Functions</label>
@@ -144,14 +91,7 @@
   </div>
 
   <div class="table-actions">
-    <div class="view-options">
-      <button id="compactView" class="view-button active" title="Compact view">
-        <i class="fas fa-th-list"></i>
-      </button>
-      <button id="expandedView" class="view-button" title="Expanded view">
-        <i class="fas fa-th-large"></i>
-      </button>
-    </div>
+
 
     <button id="analyzeSimilarity" class="action-button secondary">
       <i class="fas fa-fingerprint"></i> Analyze Similarity
@@ -185,14 +125,7 @@
           <div class="measure-details">
             <h3 class="measure-name">{{ label }}</h3>
             <div class="measure-metadata">
-              <span class="metadata-item">
-                <i class="fas fa-text-width"></i>
-                {{ expression|length }} characters
-              </span>
-              <span class="metadata-item complexity-badge" data-complexity="">
-                <i class="fas fa-tachometer-alt"></i>
-                <span class="complexity-text">Analyzing...</span>
-              </span>
+
             </div>
           </div>
         </div>
@@ -337,15 +270,13 @@
       this.daxExpressions = this.collectDAXExpressions();
       this.filteredExpressions = [...this.daxExpressions];
       this.similarityResults = [];
-      this.viewMode = 'compact';
+
 
       this.init();
     }
 
     init() {
       this.setupEventListeners();
-      this.analyzeComplexity();
-      this.updateStats();
       this.applyInitialHighlighting();
     }
 
@@ -388,12 +319,7 @@
       caseSensitive?.addEventListener('change', () => this.performSearch());
 
       // Filters
-      document.getElementById('complexityFilter')?.addEventListener('change', () => this.applyFilters());
       document.getElementById('functionFilter')?.addEventListener('change', () => this.applyFilters());
-
-      // View options
-      document.getElementById('compactView')?.addEventListener('click', () => this.setViewMode('compact'));
-      document.getElementById('expandedView')?.addEventListener('click', () => this.setViewMode('expanded'));
 
       // Bulk actions
       document.getElementById('expandAll')?.addEventListener('click', () => this.toggleAllCards(true));
@@ -448,79 +374,10 @@
       });
     }
 
-    analyzeComplexity() {
-      let complexCount = 0;
 
-      this.daxExpressions.forEach(expr => {
-        const complexity = this.calculateComplexity(expr.code);
-        const card = expr.element;
-        const badge = card.querySelector('.complexity-badge');
-        const text = badge?.querySelector('.complexity-text');
 
-        if (badge && text) {
-          badge.setAttribute('data-complexity', complexity);
-          text.textContent = complexity.charAt(0).toUpperCase() + complexity.slice(1);
 
-          // Add appropriate class
-          badge.classList.remove('simple', 'moderate', 'complex');
-          badge.classList.add(complexity);
 
-          if (complexity === 'complex') complexCount++;
-        }
-
-        // Analyze functions used
-        const functions = this.extractFunctions(expr.code);
-        const functionTags = card.querySelector('.function-tags');
-        if (functionTags) {
-          functionTags.innerHTML = functions.map(fn =>
-            `<span class="function-tag">${fn}</span>`
-          ).join('');
-        }
-
-        // Find referenced measures
-        const references = this.findReferencedMeasures(expr.code);
-        const referenceList = card.querySelector('.reference-list');
-        if (referenceList) {
-          if (references.length > 0) {
-            referenceList.innerHTML = references.map(ref =>
-              `<span class="reference-item">[${ref}]</span>`
-            ).join('');
-          } else {
-            referenceList.innerHTML = '<span class="no-references">No measure references found</span>';
-          }
-        }
-      });
-
-      // Update complex measures count
-      document.getElementById('complexMeasures').textContent = complexCount;
-    }
-
-    calculateComplexity(code) {
-      const length = code.length;
-      const functionCount = (code.match(/\b(CALCULATE|SUMX|AVERAGEX|FILTER|IF|SWITCH|VAR|RETURN)\b/gi) || []).length;
-      const nestedParens = this.countNestedParentheses(code);
-
-      // Simple heuristic for complexity
-      if (length < 100 && functionCount <= 1 && nestedParens <= 2) return 'simple';
-      if (length > 500 || functionCount > 5 || nestedParens > 4) return 'complex';
-      return 'moderate';
-    }
-
-    countNestedParentheses(code) {
-      let maxDepth = 0;
-      let currentDepth = 0;
-
-      for (let char of code) {
-        if (char === '(') {
-          currentDepth++;
-          maxDepth = Math.max(maxDepth, currentDepth);
-        } else if (char === ')') {
-          currentDepth = Math.max(0, currentDepth - 1);
-        }
-      }
-
-      return maxDepth;
-    }
 
     extractFunctions(code) {
       const functionPattern = /\b([A-Z][A-Z0-9]*(?:\.[A-Z][A-Z0-9]*)?)\s*\(/g;
@@ -550,18 +407,6 @@
       }
 
       return Array.from(references);
-    }
-
-    updateStats() {
-      const totalMeasures = this.daxExpressions.length;
-      const totalChars = this.daxExpressions.reduce((sum, expr) => sum + expr.length, 0);
-      const avgLength = totalMeasures > 0 ? Math.round(totalChars / totalMeasures) : 0;
-
-      document.getElementById('totalMeasures').textContent = totalMeasures;
-      document.getElementById('avgLength').textContent = avgLength;
-
-      // These will be updated after similarity analysis
-      document.getElementById('similarPairs').textContent = '0';
     }
 
     performSearch() {
@@ -649,11 +494,7 @@
             (searchInCode && expr.code.toLowerCase().includes(searchTerm));
         }
 
-        // Complexity filter
-        if (complexity !== 'all' && matches) {
-          const exprComplexity = expr.element.querySelector('.complexity-badge').getAttribute('data-complexity');
-          matches = exprComplexity === complexity;
-        }
+
 
         // Function filter
         if (functionFilter !== 'all' && matches) {
@@ -697,24 +538,6 @@
       } else {
         emptyState.style.display = 'none';
         daxList.style.display = '';
-      }
-    }
-
-    setViewMode(mode) {
-      this.viewMode = mode;
-
-      // Update button states
-      document.getElementById('compactView').classList.toggle('active', mode === 'compact');
-      document.getElementById('expandedView').classList.toggle('active', mode === 'expanded');
-
-      // Update card display
-      const daxList = document.getElementById('daxList');
-      daxList.classList.toggle('expanded-view', mode === 'expanded');
-
-      if (mode === 'expanded') {
-        this.toggleAllCards(true);
-      } else {
-        this.toggleAllCards(false);
       }
     }
 
@@ -893,10 +716,6 @@
       // Update stats
       const totalPairs = (this.daxExpressions.length * (this.daxExpressions.length - 1)) / 2;
       document.getElementById('totalPairs').textContent = totalPairs;
-
-      // Update similar pairs count in main stats
-      const similarPairs = this.similarityResults.filter(r => r.similarity >= 0.7).length;
-      document.getElementById('similarPairs').textContent = similarPairs;
 
       // Update similarity threshold
       this.updateSimilarityDisplay(threshold);
@@ -1103,9 +922,7 @@
     exportDAX() {
       const data = this.filteredExpressions.map(expr => ({
         'Measure Name': expr.name,
-        'DAX Expression': expr.code,
-        'Length': expr.length,
-        'Complexity': expr.element.querySelector('.complexity-badge').getAttribute('data-complexity')
+        'DAX Expression': expr.code
       }));
 
       const csv = this.arrayToCSV(data);
@@ -1117,7 +934,6 @@
     clearAllFilters() {
       document.getElementById('searchDax').value = '';
       document.getElementById('clearSearch').style.display = 'none';
-      document.getElementById('complexityFilter').value = 'all';
       document.getElementById('functionFilter').value = 'all';
 
       this.clearHighlights();
@@ -1209,64 +1025,6 @@
 
 <style>
   /* Enhanced DAX Explorer Styles */
-
-  /* Statistics Overview */
-  .dax-stats-overview {
-    margin-bottom: var(--space-2xl);
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-lg);
-  }
-
-  .stat-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    transition: var(--transition-smooth);
-  }
-
-  .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--color-primary);
-  }
-
-  .stat-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--gradient-primary);
-    color: white;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .stat-content {
-    flex: 1;
-  }
-
-  .stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-top: 0.25rem;
-  }
 
   /* Search and Filter Container */
   .search-filter-container {
@@ -1364,32 +1122,7 @@
     color: var(--text-primary);
   }
 
-  .view-options {
-    display: flex;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
 
-  .view-button {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: var(--space-sm) var(--space-md);
-    cursor: pointer;
-    transition: var(--transition-fast);
-  }
-
-  .view-button:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-  }
-
-  .view-button.active {
-    background: var(--gradient-primary);
-    color: white;
-  }
 
   /* DAX Cards */
   .dax-container {
@@ -1402,14 +1135,6 @@
     gap: var(--space-lg);
   }
 
-  .dax-list.expanded-view .dax-card {
-    margin-bottom: var(--space-xl);
-  }
-
-  .dax-list.expanded-view .dax-card-content {
-    max-height: none !important;
-    padding: var(--space-xl) !important;
-  }
 
   .dax-card {
     background: var(--glass-bg);
@@ -1504,27 +1229,11 @@
     opacity: 0.7;
   }
 
-  .complexity-badge {
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
 
-  .complexity-badge.simple {
-    background: rgba(67, 233, 123, 0.2);
-    color: #43e97b;
-  }
 
-  .complexity-badge.moderate {
-    background: rgba(79, 172, 254, 0.2);
-    color: #4facfe;
-  }
 
-  .complexity-badge.complex {
-    background: rgba(250, 112, 154, 0.2);
-    color: #fa709a;
-  }
+
+
 
   .measure-actions {
     display: flex;
@@ -1794,6 +1503,26 @@
     gap: var(--space-xl);
   }
 
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+  }
+
   /* Similarity Results */
   .results-header {
     display: flex;
@@ -2000,10 +1729,6 @@
   }
 
   @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     .measure-analysis {
       grid-template-columns: 1fr;
     }
