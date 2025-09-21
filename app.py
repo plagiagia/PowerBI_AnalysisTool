@@ -132,40 +132,112 @@ def create_app(config_object=None) -> Flask:
         """
         dp = get_data_processor()
         lvp = get_lineage_view_processor()
+        mp = get_model_processor()
 
-        # Filter visuals that have fields and are not filter visuals
         excluded_types = {"Page Level Filters", "Global Level Filters"}
         valid_visuals = [
-            row for row in dp.visuals_data 
+            row for row in dp.visuals_data
             if len(row) > 3 and row[3] and row[1] and row[1] not in excluded_types
         ]
 
-        # Extract visual types and count
         visual_types = [row[1] for row in valid_visuals]
         visual_count = len(visual_types)
+        counter = collections.Counter(visual_types)
+        most_common_visual = counter.most_common(1)[0][0] if counter else "None"
+        visual_distribution = counter.most_common(5)
 
-        # Find most common visual type
-        most_common_visual = "None"
-        if visual_types:
-            counter = collections.Counter(visual_types)
-            most_common_visual = counter.most_common(1)[0][0]
-
-        # Extract unique pages
         unique_pages = {row[0] for row in dp.visuals_data if row and row[0]}
 
-        # Get measures
         all_measures = lvp.get_all_measures()
         used_measures = dp.get_used_measures(all_measures)
         used_measures = lvp.expand_used_measures(used_measures)
         final_measures = lvp.get_final_measures()
+        unused_analysis = lvp.get_comprehensive_unused_measures(used_measures)
         unused_final_measures = final_measures - used_measures
 
+        tables = mp.get_tables()
+        relationships = mp.get_relationships()
+        roles = mp.get_roles()
+        annotations = mp.get_annotations()
+        measures_detail = mp.get_measures() or []
+
+        column_count = sum(len(table.get('columns', [])) for table in tables)
+        hidden_measure_count = sum(1 for measure in measures_detail if measure.get('isHidden'))
+        hidden_table_count = sum(1 for table in tables if table.get('isHidden'))
+        hidden_column_count = sum(
+            1
+            for table in tables
+            for column in table.get('columns', [])
+            if column.get('isHidden')
+        )
+
+        model_summary = {
+            'table_count': len(tables),
+            'column_count': column_count,
+            'measure_count': len(measures_detail) if measures_detail else len(all_measures),
+            'relationship_count': len(relationships),
+            'role_count': len(roles),
+            'hidden_table_count': hidden_table_count,
+            'hidden_column_count': hidden_column_count,
+            'hidden_measure_count': hidden_measure_count,
+            'annotation_count': len(annotations),
+        }
+
+        theme_info = dp.get_theme_info() or {}
+        bookmarks = dp.get_bookmarks()
+        navigation_items = dp.get_navigation_items()
+        formatting_details = dp.get_visual_formatting()
+
+        bookmark_filters = sum(bookmark.get('filter_count', 0) for bookmark in bookmarks)
+        bookmark_targets = sum(len(bookmark.get('target_visuals', [])) for bookmark in bookmarks)
+
+        custom_tooltips = sum(1 for entry in formatting_details if entry.get('has_custom_tooltip'))
+        custom_titles = sum(1 for entry in formatting_details if entry.get('has_custom_title'))
+        custom_backgrounds = sum(1 for entry in formatting_details if entry.get('has_background'))
+        custom_borders = sum(1 for entry in formatting_details if entry.get('has_border'))
+        drop_shadows = sum(1 for entry in formatting_details if entry.get('has_drop_shadow'))
+        formatting_highlights = sum(
+            1
+            for entry in formatting_details
+            if entry.get('has_custom_tooltip')
+            or entry.get('has_custom_title')
+            or entry.get('has_background')
+            or entry.get('has_border')
+            or entry.get('has_drop_shadow')
+        )
+
+        navigation_counts = collections.Counter((item.get('visual_type') or 'Other') for item in navigation_items)
+
+        report_summary = {
+            'theme_name': theme_info.get('customTheme', {}).get('name')
+            or theme_info.get('baseTheme', {}).get('name')
+            or 'Power BI Default',
+            'bookmark_count': len(bookmarks),
+            'bookmark_filters': bookmark_filters,
+            'bookmark_targets': bookmark_targets,
+            'navigation_count': len(navigation_items),
+            'formatting_highlights': formatting_highlights,
+            'navigation_types': navigation_counts.most_common(3),
+            'custom_tooltips': custom_tooltips,
+            'custom_titles': custom_titles,
+            'custom_backgrounds': custom_backgrounds,
+            'custom_borders': custom_borders,
+            'drop_shadows': drop_shadows,
+        }
+
         return {
-            "visual_count": visual_count,
-            "page_count": len(unique_pages),
-            "measure_count": len(all_measures),
-            "unused_count": len(unused_final_measures),
-            "most_common_visual": most_common_visual
+            'visual_count': visual_count,
+            'page_count': len(unique_pages),
+            'measure_count': len(all_measures),
+            'unused_count': unused_analysis.get('total_unused', len(unused_final_measures)),
+            'unused_breakdown': {
+                'immediate': unused_analysis.get('immediate_unused', len(unused_final_measures)),
+                'cascade': unused_analysis.get('cascade_unused', 0)
+            },
+            'most_common_visual': most_common_visual,
+            'visual_distribution': visual_distribution,
+            'model_summary': model_summary,
+            'report_summary': report_summary
         }
 
     def calculate_lineage_metrics(lineage_view_processor: LineageView) -> Dict[str, int]:

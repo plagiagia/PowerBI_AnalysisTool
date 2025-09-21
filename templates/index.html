@@ -50,6 +50,122 @@
   </div>
 </section>
 
+<!-- Report Snapshot Section -->
+<section class="snapshot-section">
+  <div class="snapshot-grid">
+    <div class="insight-card primary">
+      <div class="insight-header">
+        <span class="insight-icon"><i class="fas fa-info-circle"></i></span>
+        <h3>Report Snapshot</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          <span class="insight-label">Report:</span>
+          <span class="insight-value">{{ report_name }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Last Loaded:</span>
+          <span class="insight-value">{{ time_loaded }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Theme:</span>
+          <span class="insight-value">{{ metrics.report_summary.theme_name }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Top Visual:</span>
+          <span class="insight-value">{{ metrics.most_common_visual }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <div class="insight-header">
+        <span class="insight-icon"><i class="fas fa-layer-group"></i></span>
+        <h3>Model Health</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          <span class="insight-label">Tables:</span>
+          <span class="insight-value">{{ metrics.model_summary.table_count }}</span>
+          <span class="insight-hint">/ {{ metrics.model_summary.column_count }} columns</span>
+        </li>
+        <li>
+          <span class="insight-label">Relationships:</span>
+          <span class="insight-value">{{ metrics.model_summary.relationship_count }}</span>
+          <span class="insight-hint">Roles {{ metrics.model_summary.role_count }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Hidden Objects:</span>
+          <span class="insight-value">{{ metrics.model_summary.hidden_table_count }} tables</span>
+          <span class="insight-hint">{{ metrics.model_summary.hidden_column_count }} columns / {{ metrics.model_summary.hidden_measure_count }} measures</span>
+        </li>
+        <li>
+          <span class="insight-label">Annotations:</span>
+          <span class="insight-value">{{ metrics.model_summary.annotation_count }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <div class="insight-header">
+        <span class="insight-icon"><i class="fas fa-book-open"></i></span>
+        <h3>Experience & Navigation</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          <span class="insight-label">Bookmarks:</span>
+          <span class="insight-value">{{ metrics.report_summary.bookmark_count }}</span>
+          <span class="insight-hint">{{ metrics.report_summary.bookmark_filters }} filters / {{ metrics.report_summary.bookmark_targets }} targets</span>
+        </li>
+        <li>
+          <span class="insight-label">Navigation Visuals:</span>
+          <span class="insight-value">{{ metrics.report_summary.navigation_count }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Navigation Types:</span>
+          <span class="insight-value">
+            {% if metrics.report_summary.navigation_types %}
+              {% for nav in metrics.report_summary.navigation_types %}
+                {{ nav[0] }} ({{ nav[1] }}){% if not loop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              None
+            {% endif %}
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <div class="insight-header">
+        <span class="insight-icon"><i class="fas fa-chart-pie"></i></span>
+        <h3>Visual Mix & Styling</h3>
+      </div>
+      <ul class="insight-list">
+        <li>
+          <span class="insight-label">Top Visuals:</span>
+          <span class="insight-extras">
+            {% if metrics.visual_distribution %}
+              {% for visual in metrics.visual_distribution %}
+                <span class="insight-pill"><strong>{{ visual[0] }}</strong>{{ visual[1] }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="insight-value">No visuals</span>
+            {% endif %}
+          </span>
+        </li>
+        <li>
+          <span class="insight-label">Custom Formatting:</span>
+          <span class="insight-value">{{ metrics.report_summary.formatting_highlights }}</span>
+          <span class="insight-hint">Tooltips {{ metrics.report_summary.custom_tooltips }}, Titles {{ metrics.report_summary.custom_titles }}, Backgrounds {{ metrics.report_summary.custom_backgrounds }}</span>
+        </li>
+        <li>
+          <span class="insight-label">Borders & Shadows:</span>
+          <span class="insight-value">{{ metrics.report_summary.custom_borders }}</span>
+          <span class="insight-hint">Drop shadows {{ metrics.report_summary.drop_shadows }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 <!-- Modern Analysis Tools Section -->
 <section class="modern-tools-section">
   <div class="section-header">
@@ -218,6 +334,66 @@
       </div>
       <div class="card-highlight"></div>
     </div>
+
+    <!-- Model Insights -->
+    <div class="modern-tool-card" data-category="model">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-layer-group"></i>
+        </div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Model Insights</h3>
+        <p class="tool-description">Review table coverage, relationships, and row-level security in one place.</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-diagram-project"></i>
+            Relationships
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-user-shield"></i>
+            RLS Overview
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/model-insights" class="modern-button primary">
+          <span>Open Model Insights</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
+
+    <!-- Report Insights -->
+    <div class="modern-tool-card" data-category="report">
+      <div class="tool-card-header">
+        <div class="tool-icon">
+          <i class="fas fa-object-group"></i>
+        </div>
+      </div>
+      <div class="tool-content">
+        <h3 class="tool-title">Report Insights</h3>
+        <p class="tool-description">Analyze bookmarks, layouts, and formatting patterns across the report.</p>
+        <div class="tool-features">
+          <span class="feature-tag">
+            <i class="fas fa-bookmark"></i>
+            Bookmarks
+          </span>
+          <span class="feature-tag">
+            <i class="fas fa-paint-brush"></i>
+            Styling Audit
+          </span>
+        </div>
+      </div>
+      <div class="tool-footer">
+        <a href="/report-insights" class="modern-button primary">
+          <span>Open Report Insights</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="card-highlight"></div>
+    </div>
   </div>
 </section>
 {% endblock %}
@@ -337,6 +513,114 @@
 </script>
 
 <style>
+  .snapshot-section {
+    margin: 2rem 0 3rem;
+  }
+
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .insight-card {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(31, 35, 53, 0.08);
+    color: #1f2333;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 18px 34px -24px rgba(31, 35, 53, 0.35);
+  }
+
+  .insight-card.primary {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(231, 238, 255, 0.92));
+    border-color: rgba(123, 127, 255, 0.35);
+  }
+
+  .insight-header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+
+  .insight-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .insight-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: rgba(123, 127, 255, 0.12);
+    color: #5e64ff;
+  }
+
+  .insight-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    row-gap: 0.6rem;
+  }
+
+  .insight-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .insight-label {
+    font-weight: 600;
+    color: #424b66;
+  }
+
+  .insight-value {
+    color: #1f2333;
+    font-weight: 500;
+  }
+
+  .insight-hint {
+    color: #66708e;
+    font-size: 0.85rem;
+  }
+
+  .insight-extras {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .insight-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(123, 127, 255, 0.12);
+    font-size: 0.85rem;
+    color: #2d3363;
+  }
+
+  .insight-pill strong {
+    margin-right: 0.35rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .snapshot-section {
+      margin: 1.5rem 0 2rem;
+    }
+  }
+
   /* Ripple Effect */
   .ripple {
     position: absolute;
