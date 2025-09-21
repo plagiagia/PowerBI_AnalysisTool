@@ -156,6 +156,7 @@ def create_app(config_object=None) -> Flask:
         # Get measures
         all_measures = lvp.get_all_measures()
         used_measures = dp.get_used_measures(all_measures)
+        used_measures = lvp.expand_used_measures(used_measures)
         final_measures = lvp.get_final_measures()
         unused_final_measures = final_measures - used_measures
 
@@ -492,6 +493,7 @@ def create_app(config_object=None) -> Flask:
         # Get used measures from visuals
         known_measures = set(lvp.measure_data) or lvp.get_all_measures()
         used_measures = dp.get_used_measures(known_measures)
+        used_measures = lvp.expand_used_measures(used_measures)
 
         # Get comprehensive analysis of all unused measures
         unused_analysis = lvp.get_comprehensive_unused_measures(used_measures)

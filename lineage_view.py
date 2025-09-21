@@ -109,6 +109,33 @@ class LineageView:
         
         return all_measures
 
+    def expand_used_measures(self, used_measures):
+        """
+        Expand a set of measures used in visuals to include all upstream dependencies.
+        """
+        if not self.measure_data:
+            self.process_lineage_data()
+
+        expanded = set()
+        stack = list(used_measures or [])
+
+        while stack:
+            measure = stack.pop()
+            if not measure or measure in expanded:
+                continue
+
+            expanded.add(measure)
+            data = self.measure_data.get(measure)
+            if not data:
+                continue
+
+            for parent in data.get('parent_measures', []):
+                parent = (parent or '').strip()
+                if parent and parent not in expanded:
+                    stack.append(parent)
+
+        return expanded
+
     def get_final_measures(self):
         """
         Get only final measures (measures with no children).
@@ -264,12 +291,13 @@ class LineageView:
         # Process data first if not already done
         if not self.measure_data:
             self.process_lineage_data()
-        
+
+        used_measures_set = self.expand_used_measures(used_measures_set)
         all_measures = self.get_all_measures()
-        
+
         # Start with measures not used in any visuals
         unused_measures = all_measures - used_measures_set
-        
+
         # Build a reverse dependency map (child -> parents)
         child_to_parents = {}
         for measure_name, data in self.measure_data.items():
