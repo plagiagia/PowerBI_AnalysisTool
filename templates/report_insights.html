@@ -1,0 +1,342 @@
+﻿{% extends "base.html" %}
+{% block title %}Report Insights - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-object-group"></i>{% endblock %}
+{% block header_title %}Report Insights{% endblock %}
+{% block header_subtitle %}Analyze themes, bookmarks, layouts, and visual configuration extracted from the Power BI report definition.{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ report_summary.bookmark_count }}</span>
+  <span class="stat-label">Bookmarks</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ report_summary.navigation_count }}</span>
+  <span class="stat-label">Navigation Visuals</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ report_summary.layout_count }}</span>
+  <span class="stat-label">Layout Entries</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="enhanced-metrics-section">
+  <div class="metrics-container">
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-fill-drip"></i></div>
+      <div class="metric-value">{{ report_summary.theme_name }}</div>
+      <div class="metric-label">Active Theme</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-sort-amount-down-alt"></i></div>
+      <div class="metric-value">{{ report_summary.query_with_order }}</div>
+      <div class="metric-label">Visuals with Sort</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-filter"></i></div>
+      <div class="metric-value">{{ report_summary.query_with_filters }}</div>
+      <div class="metric-label">Visual Filters Applied</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-paint-brush"></i></div>
+      <div class="metric-value">{{ report_summary.formatting_custom_count }}</div>
+      <div class="metric-label">Custom Styling</div>
+    </div>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-fill"></i> Theme Details</h2>
+    <p class="section-description">Base and custom theme metadata embedded in the report configuration.</p>
+  </div>
+  <div class="theme-grid">
+    <div class="theme-card">
+      <h3>Custom Theme</h3>
+      {% if theme_info.customTheme %}
+      <ul>
+        <li><strong>Name:</strong> {{ theme_info.customTheme.name }}</li>
+        <li><strong>Version:</strong> {{ theme_info.customTheme.version or '-' }}</li>
+        <li><strong>Type:</strong> {{ theme_info.customTheme.type or '-' }}</li>
+      </ul>
+      {% else %}
+      <p class="empty-state">No custom theme applied.</p>
+      {% endif %}
+    </div>
+    <div class="theme-card">
+      <h3>Base Theme</h3>
+      {% if theme_info.baseTheme %}
+      <ul>
+        <li><strong>Name:</strong> {{ theme_info.baseTheme.name }}</li>
+        <li><strong>Version:</strong> {{ theme_info.baseTheme.version or '-' }}</li>
+        <li><strong>Type:</strong> {{ theme_info.baseTheme.type or '-' }}</li>
+      </ul>
+      {% else %}
+      <p class="empty-state">Theme inherits Power BI default styling.</p>
+      {% endif %}
+    </div>
+    <div class="theme-card">
+      <h3>Navigation</h3>
+      <ul>
+        <li><strong>Active Section Index:</strong> {{ theme_info.activeSectionIndex if theme_info.activeSectionIndex is not none else '-' }}</li>
+        <li><strong>Bookmarks:</strong> {{ bookmark_metrics.count }}</li>
+        <li><strong>Targeted Visuals:</strong> {{ bookmark_metrics.targets }}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-bookmark"></i> Bookmarks</h2>
+    <p class="section-description">Bookmark definitions with target sections, visuals, and captured filters.</p>
+  </div>
+  {% if bookmarks %}
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Target Section</th>
+          <th>Filter Fields</th>
+          <th>Target Visuals</th>
+          <th>Visual Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bookmark in bookmarks %}
+        <tr>
+          <td>{{ bookmark.display_name }}</td>
+          <td>{{ bookmark.target_section or '-' }}</td>
+          <td>{{ bookmark.filter_fields | join(', ') if bookmark.filter_fields else '-' }}</td>
+          <td>{{ bookmark.target_visuals | join(', ') if bookmark.target_visuals else '-' }}</td>
+          <td>{{ bookmark.visual_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No bookmarks are defined in this report.</p>
+  {% endif %}
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-th-large"></i> Layout Summary</h2>
+    <p class="section-description">Average visual sizes and layering depth calculated per page.</p>
+  </div>
+  {% if layout_summary %}
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Visuals</th>
+          <th>Avg Width</th>
+          <th>Avg Height</th>
+          <th>Max Layer Depth</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for summary in layout_summary %}
+        <tr>
+          <td>{{ summary.page }}</td>
+          <td>{{ summary.visual_count }}</td>
+          <td>{{ summary.avg_width }}</td>
+          <td>{{ summary.avg_height }}</td>
+          <td>{{ summary.max_z }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <details class="model-details">
+    <summary><strong>View detailed layout grid</strong></summary>
+    <div class="details-body">
+      <table class="modern-table compact-table">
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>Visual</th>
+            <th>Type</th>
+            <th>X</th>
+            <th>Y</th>
+            <th>Width</th>
+            <th>Height</th>
+            <th>Z</th>
+            <th>Tab Order</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in layout_records %}
+          <tr>
+            <td>{{ record.page }}</td>
+            <td>{{ record.visual_name or '-' }}</td>
+            <td>{{ record.visual_type }}</td>
+            <td>{{ record.x if record.x is not none else '-' }}</td>
+            <td>{{ record.y if record.y is not none else '-' }}</td>
+            <td>{{ record.width if record.width is not none else '-' }}</td>
+            <td>{{ record.height if record.height is not none else '-' }}</td>
+            <td>{{ record.z if record.z is not none else '-' }}</td>
+            <td>{{ record.tabOrder if record.tabOrder is not none else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+  {% else %}
+  <p class="empty-state">No layout information available.</p>
+  {% endif %}
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-sort"></i> Query Details</h2>
+    <p class="section-description">Visuals with explicit ordering, grouping, or additional row-level filters.</p>
+  </div>
+  {% if query_details %}
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Visual</th>
+          <th>Type</th>
+          <th>Order By</th>
+          <th>Group By</th>
+          <th>Filters</th>
+          <th>Top</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for query in query_details %}
+        <tr>
+          <td>{{ query.page }}</td>
+          <td>{{ query.visual_name }}</td>
+          <td>{{ query.visual_type }}</td>
+          <td>{{ query.order_by | join(', ') if query.order_by else '-' }}</td>
+          <td>{{ query.group_by | join(', ') if query.group_by else '-' }}</td>
+          <td>{{ query.where | join(', ') if query.where else '-' }}</td>
+          <td>{{ query.top or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No visuals apply additional ordering or filters beyond their main query.</p>
+  {% endif %}
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-palette"></i> Formatting Highlights</h2>
+    <p class="section-description">Visuals with advanced formatting features such as custom tooltips, titles, borders, or backgrounds.</p>
+  </div>
+  <div class="formatting-stats">
+    <ul>
+      <li><strong>Custom Tooltips:</strong> {{ formatting_stats.custom_tooltip }}</li>
+      <li><strong>Custom Titles:</strong> {{ formatting_stats.custom_title }}</li>
+      <li><strong>Custom Backgrounds:</strong> {{ formatting_stats.custom_background }}</li>
+      <li><strong>Custom Borders:</strong> {{ formatting_stats.custom_border }}</li>
+      <li><strong>Drop Shadows:</strong> {{ formatting_stats.drop_shadow }}</li>
+    </ul>
+  </div>
+  {% if formatting_highlights %}
+  <div class="table-wrapper">
+    <table class="modern-table compact-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Visual</th>
+          <th>Type</th>
+          <th>Custom Tooltip</th>
+          <th>Title</th>
+          <th>Background</th>
+          <th>Border</th>
+          <th>Drop Shadow</th>
+          <th>Objects</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in formatting_highlights %}
+        <tr>
+          <td>{{ item.page }}</td>
+          <td>{{ item.visual_name }}</td>
+          <td>{{ item.visual_type }}</td>
+          <td>{{ 'Yes' if item.has_custom_tooltip else 'No' }}</td>
+          <td>{{ 'Yes' if item.has_custom_title else 'No' }}</td>
+          <td>{{ 'Yes' if item.has_background else 'No' }}</td>
+          <td>{{ 'Yes' if item.has_border else 'No' }}</td>
+          <td>{{ 'Yes' if item.has_drop_shadow else 'No' }}</td>
+          <td>
+            {% set features = (item.object_features + item.vc_object_features)|unique %}
+            {{ features | join(', ') if features else '-' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No visuals use custom formatting features.</p>
+  {% endif %}
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-route"></i> Navigation Elements</h2>
+    <p class="section-description">Visuals that serve navigation or interaction roles rather than presenting data.</p>
+  </div>
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Visual Type</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for nav in navigation_summary %}
+        <tr>
+          <td>{{ nav.visual_type }}</td>
+          <td>{{ nav.count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if navigation_items %}
+  <details class="model-details">
+    <summary><strong>View navigation items by page</strong></summary>
+    <div class="details-body">
+      <table class="modern-table compact-table">
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>Visual</th>
+            <th>Type</th>
+            <th>Reasons</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in navigation_items %}
+          <tr>
+            <td>{{ item.page }}</td>
+            <td>{{ item.visual_name or '-' }}</td>
+            <td>{{ item.visual_type }}</td>
+            <td>{{ item.reasons | join(', ') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+  {% else %}
+  <p class="empty-state">No navigation-specific visuals detected.</p>
+  {% endif %}
+</section>
+{% endblock %}

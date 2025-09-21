@@ -1,0 +1,295 @@
+﻿{% extends "base.html" %}
+{% block title %}Model Insights - Power BI Explorer{% endblock %}
+
+{% block header_icon %}<i class="fas fa-layer-group"></i>{% endblock %}
+{% block header_title %}Model Insights{% endblock %}
+{% block header_subtitle %}Inspect tables, relationships, security roles, and metadata health from the semantic model.{% endblock %}
+
+{% block header_stats %}
+<div class="quick-stat">
+  <span class="stat-number">{{ model_summary.table_count }}</span>
+  <span class="stat-label">Tables</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ model_summary.relationship_count }}</span>
+  <span class="stat-label">Relationships</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ model_summary.role_count }}</span>
+  <span class="stat-label">Security Roles</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="enhanced-metrics-section">
+  <div class="metrics-container">
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-database"></i></div>
+      <div class="metric-value">{{ model_summary.column_count }}</div>
+      <div class="metric-label">Columns</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-calculator"></i></div>
+      <div class="metric-value">{{ model_summary.measure_count }}</div>
+      <div class="metric-label">Measures</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-eye-slash"></i></div>
+      <div class="metric-value">{{ model_summary.hidden_table_count }} / {{ model_summary.hidden_column_count }}</div>
+      <div class="metric-label">Hidden Tables / Columns</div>
+    </div>
+    <div class="metric-card-enhanced">
+      <div class="card-icon"><i class="fas fa-tags"></i></div>
+      <div class="metric-value">{{ model_summary.annotations_count }}</div>
+      <div class="metric-label">Model Annotations</div>
+    </div>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-layer-group"></i> Table Overview</h2>
+    <p class="section-description">Summary of every table with column and measure coverage.</p>
+  </div>
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Table</th>
+          <th>Columns</th>
+          <th>Measures</th>
+          <th>Hidden</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for table in tables %}
+        <tr>
+          <td>{{ table.name }}</td>
+          <td>{{ table.columns|length }}</td>
+          <td>{{ table.measures|length }}</td>
+          <td>{{ 'Yes' if table.isHidden else 'No' }}</td>
+          <td>{{ table.description or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-info-circle"></i> Data Quality Gaps</h2>
+    <p class="section-description">Measures lacking documentation or formatting and columns without data categories.</p>
+  </div>
+  <div class="gap-grid">
+    <div class="gap-card">
+      <h3><i class="fas fa-exclamation-triangle"></i> Measures Missing Metadata ({{ measure_gaps|length }})</h3>
+      {% if measure_gaps %}
+      <table class="modern-table compact-table">
+        <thead>
+          <tr>
+            <th>Table</th>
+            <th>Measure</th>
+            <th>Hidden</th>
+            <th>Missing Format</th>
+            <th>Missing Description</th>
+            <th>Display Folder</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for gap in measure_gaps %}
+          <tr>
+            <td>{{ gap.table or '-' }}</td>
+            <td>{{ gap.name }}</td>
+            <td>{{ 'Yes' if gap.is_hidden else 'No' }}</td>
+            <td>{{ 'Yes' if gap.missing_format else 'No' }}</td>
+            <td>{{ 'Yes' if gap.missing_description else 'No' }}</td>
+            <td>{{ gap.display_folder or '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty-state">All measures include documentation and formatting.</p>
+      {% endif %}
+    </div>
+    <div class="gap-card">
+      <h3><i class="fas fa-tag"></i> Columns Without Data Category ({{ column_gaps|length }})</h3>
+      {% if column_gaps %}
+      <table class="modern-table compact-table">
+        <thead>
+          <tr>
+            <th>Table</th>
+            <th>Column</th>
+            <th>Data Type</th>
+            <th>Hidden</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for gap in column_gaps %}
+          <tr>
+            <td>{{ gap.table or '-' }}</td>
+            <td>{{ gap.name }}</td>
+            <td>{{ gap.data_type or '-' }}</td>
+            <td>{{ 'Yes' if gap.is_hidden else 'No' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty-state">All columns are tagged with a data category.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-project-diagram"></i> Relationships</h2>
+    <p class="section-description">Active and inactive relationships across the model.</p>
+  </div>
+  <div class="table-wrapper">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>From Table</th>
+          <th>From Column</th>
+          <th>To Table</th>
+          <th>To Column</th>
+          <th>Active</th>
+          <th>Cross Filter</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rel in relationships %}
+        <tr>
+          <td>{{ rel.fromTable }}</td>
+          <td>{{ rel.fromColumn }}</td>
+          <td>{{ rel.toTable }}</td>
+          <td>{{ rel.toColumn }}</td>
+          <td>{{ 'Yes' if rel.isActive else 'No' }}</td>
+          <td>{{ rel.crossFilteringBehavior or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-user-shield"></i> Security Roles</h2>
+    <p class="section-description">Row-level security definitions and table filters.</p>
+  </div>
+  <div class="roles-grid">
+    {% for role in roles %}
+    <div class="role-card">
+      <h3>{{ role.name }}</h3>
+      <p class="role-permission">Model Permission: {{ role.modelPermission or 'read' }}</p>
+      {% if role.tablePermissions %}
+      <ul class="role-table-list">
+        {% for perm in role.tablePermissions %}
+        <li><strong>{{ perm.table }}</strong>: {{ perm.filterExpression or 'No filter' }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty-state">No table level restrictions.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% if not roles %}
+    <p class="empty-state">No roles defined in this model.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-file-alt"></i> Model Annotations</h2>
+    <p class="section-description">Key-value annotations stored in the model metadata.</p>
+  </div>
+  {% if annotation_items %}
+  <dl class="annotation-list">
+    {% for item in annotation_items %}
+    <dt>{{ item.name }}</dt>
+    <dd>{{ item.value }}</dd>
+    {% endfor %}
+  </dl>
+  {% else %}
+  <p class="empty-state">No annotations found.</p>
+  {% endif %}
+</section>
+
+<section class="model-section">
+  <div class="section-header">
+    <h2 class="section-title"><i class="fas fa-table"></i> Detailed Table Metadata</h2>
+    <p class="section-description">Expand each table to review column configuration and measure documentation.</p>
+  </div>
+  <div class="details-accordion">
+    {% for table in tables %}
+    <details class="model-details">
+      <summary>
+        <strong>{{ table.name }}</strong>
+        <span class="summary-meta">Columns: {{ table.columns|length }} · Measures: {{ table.measures|length }}</span>
+        {% if table.isHidden %}<span class="summary-tag">Hidden</span>{% endif %}
+      </summary>
+      <div class="details-body">
+        <h4>Columns</h4>
+        <table class="modern-table compact-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Data Type</th>
+              <th>Data Category</th>
+              <th>Summarize By</th>
+              <th>Hidden</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for column in table.columns %}
+            <tr>
+              <td>{{ column.name }}</td>
+              <td>{{ column.dataType or '-' }}</td>
+              <td>{{ column.dataCategory or '-' }}</td>
+              <td>{{ column.summarizeBy or '-' }}</td>
+              <td>{{ 'Yes' if column.isHidden else 'No' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <h4>Measures</h4>
+        {% if table.measures %}
+        <table class="modern-table compact-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Format</th>
+              <th>Description</th>
+              <th>Display Folder</th>
+              <th>Hidden</th>
+              <th>Expression (Preview)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for measure in table.measures %}
+            <tr>
+              <td>{{ measure.name }}</td>
+              <td>{{ measure.formatString or '-' }}</td>
+              <td>{{ measure.description or '-' }}</td>
+              <td>{{ measure.displayFolder or '-' }}</td>
+              <td>{{ 'Yes' if measure.isHidden else 'No' }}</td>
+              <td><pre class="code-preview">{{ measure.expression | truncate(200, True, '…') }}</pre></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="empty-state">No measures defined for this table.</p>
+        {% endif %}
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
