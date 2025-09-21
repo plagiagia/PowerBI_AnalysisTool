@@ -6,35 +6,35 @@
    
 :root {
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --gradient-primary: linear-gradient(135deg, #7b91ff 0%, #a890ff 100%);
+  --gradient-secondary: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  --gradient-accent: linear-gradient(135deg, #7dd3fc 0%, #60a5fa 100%);
+  --gradient-success: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+  --gradient-warning: linear-gradient(135deg, #fde68a 0%, #fca5a5 100%);
   
   /* Colors */
-  --color-primary: #667eea;
-  --color-secondary: #f093fb;
-  --color-accent: #4facfe;
-  --color-success: #43e97b;
-  --color-warning: #fa709a;
-  --color-danger: #f5576c;
+  --color-primary: #4f67ff;
+  --color-secondary: #f472b6;
+  --color-accent: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #f43f5e;
   
   /* Base Theme (Light) */
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card: #ffffff;
   --bg-hover: rgba(102, 126, 234, 0.05);
   
   /* Glass Effect */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(203, 213, 225, 0.8);
+  --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
   
   /* Text */
   --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --text-muted: #718096;
+  --text-secondary: #3b4254;
+  --text-muted: #6b7280;
   
   /* Typography */
   --font-primary: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -57,11 +57,16 @@
   --radius-full: 9999px;
   
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.25);
-  --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 14px 24px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.16);
+  --shadow-glow: 0 0 40px rgba(79, 101, 255, 0.18);
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.12);
+  --shadow-hover: 0 18px 40px rgba(15, 23, 42, 0.14);
+
+  /* Borders */
+  --border-subtle: #e2e8f0;
   
   /* Transitions */
   --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -107,10 +112,10 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
+  background:
+    radial-gradient(circle at 20% 80%, rgba(123, 145, 255, 0.18) 0%, transparent 55%),
+    radial-gradient(circle at 80% 20%, rgba(251, 194, 235, 0.2) 0%, transparent 55%),
+    radial-gradient(circle at 45% 35%, rgba(96, 165, 250, 0.18) 0%, transparent 60%);
   z-index: -1;
   animation: backgroundShift 20s ease-in-out infinite;
 }
@@ -142,9 +147,9 @@ main {
 .sidebar {
   width: 280px;
   height: 100vh;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border-right: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.95);
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -265,10 +270,14 @@ main {
 }
 
 .nav-item.active .nav-link {
-  color: var(--text-primary);
+  color: #ffffff;
   background: var(--gradient-primary);
   font-weight: 600;
   box-shadow: var(--shadow-glow);
+}
+.nav-item.active .nav-icon,
+.nav-item.active .nav-text {
+  color: #ffffff;
 }
 
 .nav-icon {
@@ -309,12 +318,12 @@ main {
    ================================= */
    
 .modern-dashboard-header {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, rgba(123, 145, 255, 0.16), rgba(166, 193, 238, 0.12));
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   padding: var(--space-2xl) var(--space-xl);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .header-content {
@@ -341,8 +350,8 @@ main {
 
 .sidebar-toggle {
   display: none;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   padding: var(--space-sm);
   border-radius: var(--radius-md);
@@ -352,8 +361,8 @@ main {
 }
 
 .header-datetime {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-full);
@@ -445,21 +454,21 @@ main {
 }
 
 .metric-card-enhanced {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   position: relative;
   overflow: hidden;
   transition: var(--transition-smooth);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
 
 .metric-card-enhanced:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--shadow-xl), var(--shadow-glow);
-  border-color: var(--color-primary);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(79, 103, 255, 0.35);
 }
 
 .card-icon {
@@ -529,27 +538,27 @@ main {
 }
 
 .modern-tool-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   overflow: hidden;
   transition: var(--transition-smooth);
   position: relative;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .modern-tool-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl), var(--shadow-glow);
-  border-color: var(--color-primary);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(79, 103, 255, 0.35);
 }
 
 .tool-card-header {
   padding: var(--space-xl);
-  background: var(--glass-bg);
-  border-bottom: 1px solid var(--glass-border);
+  background: rgba(248, 250, 252, 0.85);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -600,8 +609,8 @@ main {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
@@ -612,7 +621,7 @@ main {
 
 .tool-footer {
   padding: var(--space-xl);
-  background: var(--glass-bg);
+  background: #ffffff;
   border-top: 1px solid var(--glass-border);
 }
 
@@ -631,7 +640,7 @@ main {
   font-weight: 600;
   font-size: 0.875rem;
   border-radius: var(--radius-full);
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: var(--transition-smooth);
   text-decoration: none;
@@ -647,42 +656,43 @@ main {
 .modern-button.primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 12px 24px rgba(79, 103, 255, 0.24);
 }
 
 .action-button.primary:hover,
 .modern-button.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(79, 103, 255, 0.25);
 }
 
 .action-button.secondary,
 .modern-button.secondary {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
-  backdrop-filter: blur(10px);
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
 .action-button.secondary:hover,
 .modern-button.secondary:hover {
-  background: var(--bg-hover);
-  border-color: var(--color-primary);
+  background: #ffffff;
+  border-color: rgba(79, 103, 255, 0.4);
+  box-shadow: var(--shadow-soft);
   transform: translateY(-2px);
 }
 
 .action-button.outline {
   background: transparent;
-  border: 2px solid var(--glass-border);
+  border: 2px solid var(--border-subtle);
   color: var(--text-primary);
 }
 
 .action-button.outline:hover {
-  background: var(--glass-bg);
-  border-color: var(--color-primary);
+  background: #ffffff;
+  border-color: rgba(79, 103, 255, 0.4);
   color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-soft);
 }
 
 
@@ -692,9 +702,8 @@ main {
    ================================= */
    
 .table-container {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   margin-bottom: var(--space-xl);
@@ -841,7 +850,7 @@ tbody tr:last-child td {
 
 .field-item:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 12px 24px rgba(79, 103, 255, 0.24);
 }
 
 .field-item.filter-field {
@@ -862,8 +871,8 @@ tbody tr:last-child td {
   align-items: center;
   gap: var(--space-xs);
   padding: 0.375rem 0.875rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   border-radius: var(--radius-full);
   font-size: 0.8rem;
@@ -873,7 +882,7 @@ tbody tr:last-child td {
 
 .visual-type-badge:hover {
   background: var(--bg-hover);
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   transform: translateY(-1px);
 }
 
@@ -922,7 +931,7 @@ tbody tr:last-child td {
 
 .search-input-wrapper input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
 }
 
@@ -932,7 +941,7 @@ tbody tr:last-child td {
   top: 50%;
   transform: translateY(-50%);
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
   padding: var(--space-xs);
@@ -978,7 +987,7 @@ tbody tr:last-child td {
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
 }
 
@@ -987,9 +996,8 @@ tbody tr:last-child td {
    ================================= */
 
 .modern-filter-section {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   margin-bottom: var(--space-xl);
@@ -1022,7 +1030,7 @@ tbody tr:last-child td {
 
 .reset-button {
   background: transparent;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
@@ -1037,7 +1045,7 @@ tbody tr:last-child td {
 
 .reset-button:hover {
   background: var(--bg-hover);
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   color: var(--color-primary);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
@@ -1092,12 +1100,12 @@ tbody tr:last-child td {
 }
 
 .dropdown-trigger:hover {
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   background: var(--bg-hover);
 }
 
 .dropdown-trigger.active {
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
 }
 
@@ -1128,7 +1136,7 @@ tbody tr:last-child td {
   left: 0;
   right: 0;
   background: var(--bg-secondary);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
   z-index: 100;
@@ -1136,7 +1144,6 @@ tbody tr:last-child td {
   overflow-y: auto;
   display: none;
   margin-top: 4px;
-  backdrop-filter: blur(10px);
 }
 
 .dropdown-content.show {
@@ -1189,7 +1196,7 @@ tbody tr:last-child td {
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
   background: var(--gradient-primary);
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
 }
 
@@ -1234,7 +1241,7 @@ tbody tr:last-child td {
 
 .field-search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
   background: var(--bg-hover);
 }
@@ -1249,7 +1256,7 @@ tbody tr:last-child td {
   top: 50%;
   transform: translateY(-50%);
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
   padding: var(--space-xs);
@@ -1309,7 +1316,7 @@ tbody tr:last-child td {
 
 .filter-tag-remove {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: white;
   cursor: pointer;
   padding: 2px;
@@ -1339,9 +1346,8 @@ tbody tr:last-child td {
   align-items: center;
   margin-top: var(--space-xl);
   padding: var(--space-lg);
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   flex-wrap: wrap;
   gap: var(--space-lg);
@@ -1359,8 +1365,8 @@ tbody tr:last-child td {
 }
 
 .pagination-button {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-md);
@@ -1375,7 +1381,7 @@ tbody tr:last-child td {
 
 .pagination-button:hover:not(:disabled) {
   background: var(--bg-hover);
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   transform: translateY(-1px);
 }
 
@@ -1391,8 +1397,8 @@ tbody tr:last-child td {
 }
 
 .pagination-page {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   width: 36px;
   height: 36px;
@@ -1408,7 +1414,7 @@ tbody tr:last-child td {
 
 .pagination-page:hover {
   background: var(--bg-hover);
-  border-color: var(--color-primary);
+  border-color: rgba(79, 103, 255, 0.35);
   transform: translateY(-1px);
 }
 
@@ -1528,8 +1534,7 @@ tbody tr:last-child td {
    ================================= */
    
 .app-footer {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-top: 1px solid var(--glass-border);
   padding: var(--space-xl);
   text-align: center;
@@ -1556,9 +1561,8 @@ tbody tr:last-child td {
 }
 
 .notification {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   display: flex;
@@ -1603,7 +1607,7 @@ tbody tr:last-child td {
 
 .notification-close {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
   padding: var(--space-xs);
@@ -1697,7 +1701,7 @@ tbody tr:last-child td {
 @keyframes dropdownFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -1932,7 +1936,7 @@ tbody tr:last-child td {
   
   .modern-dashboard-header {
     background: none;
-    border: none;
+    border: 1px solid transparent;
     padding: 1rem 0;
   }
   
@@ -1970,3 +1974,4 @@ tbody tr:last-child td {
   visibility: visible !important;
   opacity: 1 !important;
 }
+
