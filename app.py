@@ -140,7 +140,7 @@ def create_app(config_object=None) -> Flask:
 
         # Get measures
         all_measures = lvp.get_all_measures()
-        used_measures = dp.get_used_measures()
+        used_measures = dp.get_used_measures(all_measures)
         final_measures = lvp.get_final_measures()
         unused_final_measures = final_measures - used_measures
 
@@ -299,17 +299,20 @@ def create_app(config_object=None) -> Flask:
         lvp = get_lineage_view_processor()
 
         # Get used measures from visuals
-        used_measures = dp.get_used_measures()
+        known_measures = set(lvp.measure_data) or lvp.get_all_measures()
+        used_measures = dp.get_used_measures(known_measures)
 
         # Get comprehensive analysis of all unused measures
         unused_analysis = lvp.get_comprehensive_unused_measures(used_measures)
+        metrics = get_report_metrics()
 
         # Pass both the simple list for the template and the analysis for future use
         return render_template(
-                'unused_measures.html', 
-                unused_measures=unused_analysis['all_unused'],
-                unused_analysis=unused_analysis  # Pass the full analysis for the template
-    )
+            'unused_measures.html',
+            unused_measures=unused_analysis['all_unused'],
+            unused_analysis=unused_analysis,  # Pass the full analysis for the template
+            metrics=metrics
+        )
 
     @app.route('/api/model-json', methods=['GET'])
     def get_model_json():

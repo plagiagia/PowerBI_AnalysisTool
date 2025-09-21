@@ -9,27 +9,12 @@
   // DOM Elements
   const body = document.body;
   const sidebar = document.querySelector(".sidebar");
-  const themeToggle = document.querySelector(".theme-toggle");
   const helpButton = document.querySelector(".help-button");
-
-  // State
-  let darkMode = true; // Default to dark mode for modern vibes
-  
-  // Check for saved theme preference or default to dark mode
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "light") {
-    darkMode = false;
-  }
 
   /**
    * Initialize the application
    */
   function init() {
-    // Set initial theme
-    if (!darkMode) {
-      body.classList.add("light-mode");
-    }
-
     // Set up event listeners
     setupEventListeners();
 
@@ -52,11 +37,6 @@
    * Set up event listeners for interactive elements
    */
   function setupEventListeners() {
-    // Theme toggle
-    if (themeToggle) {
-      themeToggle.addEventListener("click", toggleTheme);
-    }
-
     // Help button
     if (helpButton) {
       helpButton.addEventListener("click", showHelp);
@@ -122,35 +102,6 @@
       };
       datetimeElement.textContent = now.toLocaleDateString("en-US", options);
     }
-  }
-
-  /**
-   * Toggle theme between dark and light mode
-   */
-  function toggleTheme() {
-    darkMode = !darkMode;
-    
-    if (darkMode) {
-      body.classList.remove("light-mode");
-      localStorage.setItem("theme", "dark");
-    } else {
-      body.classList.add("light-mode");
-      localStorage.setItem("theme", "light");
-    }
-
-    // Update theme toggle icon
-    if (themeToggle) {
-      const icon = themeToggle.querySelector("i");
-      if (icon) {
-        icon.className = darkMode ? "fas fa-sun" : "fas fa-moon";
-      }
-      themeToggle.setAttribute("aria-label", darkMode ? "Switch to light mode" : "Switch to dark mode");
-    }
-
-    // Trigger theme change event
-    document.dispatchEvent(new CustomEvent("themeChanged", { 
-      detail: { theme: darkMode ? "dark" : "light" } 
-    }));
   }
 
   /**
@@ -463,8 +414,7 @@
   window.PowerBIExplorer = {
     showNotification,
     debounce,
-    formatNumber,
-    toggleTheme
+    formatNumber
   };
 
   // Initialize when DOM is ready

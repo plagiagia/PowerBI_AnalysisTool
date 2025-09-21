@@ -31,9 +31,6 @@
 
   <!-- Main CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}" id="prismLightTheme" />
-  <!-- Prism.js Tomorrow Night theme (Dark) - Initially disabled -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
-    id="prismDarkTheme" disabled />
 
   <title>{% block title %}Power BI Explorer{% endblock %}</title>
 
@@ -152,13 +149,6 @@
 
     <div class="sidebar-footer">
 
-      <div class="footer-actions">
-        <button id="themeSwitcher" class="action-button theme-toggle" aria-label="Toggle dark mode"
-          title="Toggle theme">
-          <i class="fas fa-moon"></i>
-        </button>
-
-      </div>
       <div class="app-version">v{{ app_version }}</div>
     </div>
   </aside>

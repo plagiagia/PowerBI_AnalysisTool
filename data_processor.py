@@ -1,4 +1,5 @@
 import json
+from typing import Optional, Set
 
 class DataProcessor:
     def __init__(self, json_file_path):
@@ -172,16 +173,39 @@ class DataProcessor:
 
         return "; ".join(extracted_fields)
 
-    def get_used_measures(self):
-        used_measures = set()
+    def get_used_measures(self, known_measures: Optional[Set[str]] = None) -> Set[str]:
+        used_measures: Set[str] = set()
+        lookup = None
+
+        if known_measures:
+            lookup = {name.lower(): name for name in known_measures}
+
         for visual_data in self.visuals_data:
             # Extract fields from select, filters, and vc objects
             # Indices for select fields, filter fields, and vc object fields
             for index in [3, 4, 5, 6]:
-                if index < len(visual_data):
-                    fields = visual_data[index].split('; ')
-                    for field in fields:
-                        measure = field.split('[')[-1].replace(']', '').strip()
-                        if measure:
-                            used_measures.add(measure)
+                if index >= len(visual_data):
+                    continue
+
+                field_block = visual_data[index]
+                if not field_block:
+                    continue
+
+                for field in field_block.split('; '):
+                    field = field.strip()
+                    if not field or '[' not in field or not field.endswith(']'):
+                        continue
+
+                    candidate = field[field.rfind('[') + 1:-1].strip()
+                    if not candidate:
+                        continue
+
+                    if lookup is not None:
+                        match = lookup.get(candidate.lower())
+                        if match:
+                            used_measures.add(match)
+                    else:
+                        used_measures.add(candidate)
+
         return used_measures
+

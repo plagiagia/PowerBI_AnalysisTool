@@ -57,16 +57,18 @@ class LineageView:
             measure_columns = measure[self.COLUMN_INDEX].split(
                 '; ') if measure[self.COLUMN_INDEX] else []
             for column in measure_columns:
-                if column and not has_parent:  # Only add column edges for root measures
-                    if column not in self.unique_columns:
-                        self.nodes.append(
-                            {'id': column, 'label': column, 'type': 'column'})
-                        self.unique_columns.add(column)
+                if not column:
+                    continue
 
-                    edge = (column, measure_name)
-                    if edge not in self.unique_edges:
-                        self.unique_edges.add(edge)
-                        self.edges.append({'from': column, 'to': measure_name})
+                if column not in self.unique_columns:
+                    self.nodes.append(
+                        {'id': column, 'label': column, 'type': 'column'})
+                    self.unique_columns.add(column)
+
+                edge = (column, measure_name)
+                if edge not in self.unique_edges:
+                    self.unique_edges.add(edge)
+                    self.edges.append({'from': column, 'to': measure_name})
 
             # Processing for parent-child relationships (existing logic)
             for parent in parent_measures:
