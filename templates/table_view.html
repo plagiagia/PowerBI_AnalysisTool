@@ -1,4 +1,4 @@
-{% extends "base.html" %} 
+﻿{% extends "base.html" %} 
 {% block title %}Visual Fields - Power BI Explorer{% endblock %} 
 
 {% block header_icon %}<i class="fas fa-table"></i>{% endblock %}
@@ -7,8 +7,12 @@
 
 {% block header_stats %}
 <div class="quick-stat">
-  <span class="stat-number">{{ table_data|length if table_data else 0 }}</span>
+  <span class="stat-number">{{ field_overview.total_visuals }}</span>
   <span class="stat-label">Total Visuals</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ field_overview.unique_fields }}</span>
+  <span class="stat-label">Unique Fields</span>
 </div>
 <div class="quick-stat">
   <span class="stat-number">{{ unique_pages|length if unique_pages else 0 }}</span>
@@ -17,8 +21,313 @@
 {% endblock %}
 
 {% block head %}
-<!-- Add any page-specific head content here -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+  .field-overview-section {
+    margin: 2rem 0 2.5rem;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .summary-card {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 18px;
+    background: rgba(250, 252, 255, 0.9);
+    border: 1px solid rgba(31, 35, 53, 0.08);
+    box-shadow: 0 18px 32px -26px rgba(31, 35, 53, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    color: #1f2333;
+  }
+
+  .summary-card.primary {
+    background: linear-gradient(135deg, rgba(103, 108, 255, 0.22), rgba(36, 208, 255, 0.15));
+    border-color: rgba(123, 127, 255, 0.45);
+  }
+
+  .summary-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .summary-card-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .summary-card-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(66, 75, 102, 0.85);
+  }
+
+  .summary-card.primary .summary-card-header p {
+    color: rgba(31, 35, 53, 0.75);
+  }
+
+  .summary-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(94, 100, 255, 0.15);
+    color: #5e64ff;
+  }
+
+  .summary-card.primary .summary-icon {
+    background: rgba(255, 255, 255, 0.3);
+    color: #3c41ff;
+  }
+
+  .summary-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    row-gap: 0.55rem;
+  }
+
+  .summary-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  .summary-label {
+    font-weight: 600;
+    color: #424b66;
+  }
+
+  .summary-value {
+    font-weight: 600;
+    color: #1f2333;
+  }
+
+  .summary-hint {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #66708e;
+  }
+
+  .page-breakdown-section {
+    margin: 1rem 0 2.5rem;
+  }
+
+  .page-breakdown-section .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .page-breakdown-section .section-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .page-breakdown-section .section-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(66, 75, 102, 0.85);
+  }
+
+  .page-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .page-card {
+    background: rgba(250, 252, 255, 0.88);
+    border-radius: 18px;
+    border: 1px solid rgba(31, 35, 53, 0.08);
+    box-shadow: 0 18px 32px -24px rgba(31, 35, 53, 0.45);
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .page-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .page-card-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2333;
+  }
+
+  .page-card-count {
+    font-size: 0.85rem;
+    color: #66708e;
+  }
+
+  .page-card-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .page-card-metrics div {
+    background: rgba(94, 100, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.7rem 0.3rem;
+  }
+
+  .page-card-metrics strong {
+    display: block;
+    font-size: 1rem;
+    color: #1f2333;
+  }
+
+  .page-card-metrics span {
+    font-size: 0.75rem;
+    color: #66708e;
+  }
+
+  .page-card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(31, 35, 53, 0.55);
+  }
+
+  .visual-type-list,
+  .field-chip-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .visual-type-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(94, 100, 255, 0.12);
+    color: #3f46aa;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .field-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .field-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(94, 100, 255, 0.25);
+    background: rgba(94, 100, 255, 0.12);
+    color: #1f2333;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .field-chip:hover,
+  .field-chip:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px -16px rgba(31, 35, 53, 0.6);
+    outline: none;
+  }
+
+  .field-chip.field-measure {
+    background: rgba(94, 100, 255, 0.18);
+    border-color: rgba(94, 100, 255, 0.4);
+  }
+
+  .field-chip.field-column {
+    background: rgba(76, 201, 240, 0.18);
+    border-color: rgba(76, 201, 240, 0.38);
+    color: #103b47;
+  }
+
+  .field-chip.field-unknown {
+    background: rgba(255, 191, 107, 0.2);
+    border-color: rgba(255, 191, 107, 0.38);
+    color: #5c3800;
+  }
+
+  .field-chip.filter-chip {
+    border-style: dashed;
+  }
+
+  .field-chip.vc-chip {
+    background: rgba(142, 148, 255, 0.2);
+    border-color: rgba(142, 148, 255, 0.35);
+  }
+
+  .field-chip.object-chip {
+    background: rgba(255, 214, 165, 0.2);
+    border-color: rgba(255, 214, 165, 0.4);
+  }
+
+  .field-chip-table {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(31, 35, 53, 0.7);
+  }
+
+  .field-chip-name {
+    font-weight: 600;
+  }
+
+  .field-chip-count {
+    background: rgba(31, 35, 53, 0.12);
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(31, 35, 53, 0.75);
+  }
+
+  .empty-value {
+    color: rgba(31, 35, 53, 0.4);
+  }
+
+  @media (max-width: 900px) {
+    .summary-grid,
+    .page-breakdown-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-card-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+  }
+</style>
 {% endblock %} 
 
 {% block breadcrumbs %}
@@ -125,6 +434,147 @@
   </div>
 </div>
 
+<!-- Field Overview Section -->
+<section class="field-overview-section">
+  <div class="summary-grid">
+    <div class="summary-card primary">
+      <div class="summary-card-header">
+        <span class="summary-icon"><i class="fas fa-layer-group"></i></span>
+        <div>
+          <h3>Field Coverage</h3>
+          <p>Snapshot of how data fields drive this report.</p>
+        </div>
+      </div>
+      <ul class="summary-list">
+        <li>
+          <span class="summary-label">Unique fields</span>
+          <span class="summary-value">{{ field_overview.unique_fields }}</span>
+        </li>
+        <li>
+          <span class="summary-label">Columns</span>
+          <span class="summary-value">{{ field_overview.unique_columns }}</span>
+        </li>
+        <li>
+          <span class="summary-label">Measures</span>
+          <span class="summary-value">{{ field_overview.unique_measures }}</span>
+        </li>
+        <li>
+          <span class="summary-label">Avg fields / visual</span>
+          <span class="summary-value">{{ field_overview.avg_fields_per_visual }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-header">
+        <span class="summary-icon"><i class="fas fa-exchange-alt"></i></span>
+        <div>
+          <h3>Visual Interactions</h3>
+          <p>How visuals rely on filters and customization.</p>
+        </div>
+      </div>
+      <ul class="summary-list">
+        <li>
+          <span class="summary-label">Visuals with filters</span>
+          <span class="summary-value">{{ field_overview.visuals_with_filters }}</span>
+          <span class="summary-hint">{{ field_overview.filter_ratio }}%</span>
+        </li>
+        <li>
+          <span class="summary-label">Visuals using VC objects</span>
+          <span class="summary-value">{{ field_overview.visuals_with_vc }}</span>
+        </li>
+        <li>
+          <span class="summary-label">Visuals using visual objects</span>
+          <span class="summary-value">{{ field_overview.visuals_with_objects }}</span>
+        </li>
+      </ul>
+    </div>
+    {% if field_usage_summary %}
+    <div class="summary-card">
+      <div class="summary-card-header">
+        <span class="summary-icon"><i class="fas fa-star"></i></span>
+        <div>
+          <h3>Top Fields</h3>
+          <p>Most referenced fields across visuals.</p>
+        </div>
+      </div>
+      <div class="field-chip-cloud">
+        {% for field in field_usage_summary[:8] %}
+        <button type="button" class="field-chip field-{{ field.kind|default('unknown') }}" data-field="{{ field.field }}" title="{{ field.tooltip }}">
+          {% if field.table %}
+          <span class="field-chip-table">{{ field.table }}</span>
+          {% endif %}
+          <span class="field-chip-name">{{ field.name }}</span>
+          <span class="field-chip-count">{{ field.total }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Page Breakdown Section -->
+<section class="page-breakdown-section">
+  <div class="section-header">
+    <h3><i class="fas fa-file-alt"></i> Page Breakdown</h3>
+    <p>Understand how each page combines visuals, fields, and filters.</p>
+  </div>
+  <div class="page-breakdown-grid">
+    {% for page in page_summaries %}
+    <div class="page-card">
+      <div class="page-card-header">
+        <h4>{{ page.page }}</h4>
+        <span class="page-card-count">{{ page.visual_count }} visuals</span>
+      </div>
+      <div class="page-card-metrics">
+        <div>
+          <strong>{{ page.field_count }}</strong>
+          <span>fields</span>
+        </div>
+        <div>
+          <strong>{{ page.measure_count }}</strong>
+          <span>measures</span>
+        </div>
+        <div>
+          <strong>{{ page.column_count }}</strong>
+          <span>columns</span>
+        </div>
+        <div>
+          <strong>{{ page.filter_visuals }}</strong>
+          <span>visuals with filters</span>
+        </div>
+      </div>
+      {% if page.visual_types %}
+      <div class="page-card-section">
+        <span class="section-label">Top visual types</span>
+        <div class="visual-type-list">
+          {% for visual_type in page.visual_types[:4] %}
+          <span class="visual-type-pill">{{ visual_type.type }} {{ visual_type.count }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if page.top_fields %}
+      <div class="page-card-section">
+        <span class="section-label">Frequent fields</span>
+        <div class="field-chip-cloud">
+          {% for field in page.top_fields %}
+          {% set usage = field_usage_lookup.get(field.field, {}) %}
+          <button type="button" class="field-chip field-{{ field.kind|default('unknown') }}" data-field="{{ field.field }}" title="{{ usage.tooltip or '' }}">
+            {% if field.table %}
+            <span class="field-chip-table">{{ field.table }}</span>
+            {% endif %}
+            <span class="field-chip-name">{{ field.name }}</span>
+            <span class="field-chip-count">{{ field.frequency }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
 <!-- Table Section -->
 <div class="table-section">
   <div class="table-toolbar">
@@ -161,76 +611,115 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in table_data %} 
-        {% if row[3] %}
-        <tr>
-          <td data-label="Page">{{ row[0] }}</td>
+        {% for visual in visual_rows %}
+        <tr data-page="{{ visual.page }}" data-visual-type="{{ visual.visual_type|lower|replace(' ', '-') }}">
+          <td data-label="Page">{{ visual.page }}</td>
           <td data-label="Visual Type" class="visual-type">
             <span
               class="visual-type-badge"
-              data-type="{{ row[1]|lower|replace(' ', '-') }}"
+              data-type="{{ visual.visual_type|lower|replace(' ', '-') }}"
             >
-              {% if row[1]|lower == 'table' %}
+              {% set vtype = visual.visual_type|lower %}
+              {% if vtype == 'table' %}
               <i class="fas fa-table"></i>
-              {% elif row[1]|lower == 'column chart' or row[1]|lower == 'bar chart' %}
+              {% elif vtype in ['column chart', 'bar chart', 'clustered column chart'] %}
               <i class="fas fa-chart-bar"></i>
-              {% elif row[1]|lower == 'line chart' %}
+              {% elif vtype in ['line chart', 'area chart'] %}
               <i class="fas fa-chart-line"></i>
-              {% elif row[1]|lower == 'pie chart' %}
+              {% elif vtype == 'pie chart' %}
               <i class="fas fa-chart-pie"></i>
-              {% elif row[1]|lower == 'card' %}
+              {% elif vtype == 'card' %}
               <i class="fas fa-square"></i>
-              {% elif row[1]|lower == 'slicer' %}
+              {% elif vtype == 'slicer' %}
               <i class="fas fa-filter"></i>
               {% else %}
               <i class="fas fa-chart-area"></i>
-              {% endif %} 
-              {{ row[1] }}
+              {% endif %}
+              {{ visual.visual_type }}
             </span>
           </td>
-          <td data-label="Visual Name" class="visual-name">{{ row[2] }}</td>
+          <td data-label="Visual Name" class="visual-name">{{ visual.visual_name }}</td>
           <td data-label="Fields Used">
             <div class="field-list">
-              {% for field in row[3].split('; ') %}
-              <span class="field-item">{{ field }}</span>
-              {% endfor %}
+              {% if visual.fields %}
+                {% for field in visual.fields %}
+                  {% set usage = field_usage_lookup.get(field.full, {}) %}
+                  <button type="button" class="field-chip field-{{ field.kind|default('unknown') }}" data-field="{{ field.full }}" title="{{ usage.tooltip or '' }}">
+                    {% if field.table %}
+                    <span class="field-chip-table">{{ field.table }}</span>
+                    {% endif %}
+                    <span class="field-chip-name">{{ field.name }}</span>
+                    {% if usage.total %}
+                    <span class="field-chip-count">{{ usage.total }}</span>
+                    {% endif %}
+                  </button>
+                {% endfor %}
+              {% else %}
+                <span class="empty-value">--</span>
+              {% endif %}
             </div>
           </td>
           <td data-label="Filter Fields">
             <div class="field-list">
-              {% if row[4] %} 
-              {% for field in row[4].split('; ') %}
-              <span class="field-item filter-field">{{ field }}</span>
-              {% endfor %} 
+              {% if visual.filter_fields %}
+                {% for field in visual.filter_fields %}
+                  {% set usage = field_usage_lookup.get(field.full, {}) %}
+                  <button type="button" class="field-chip field-{{ field.kind|default('unknown') }} filter-chip" data-field="{{ field.full }}" title="{{ usage.tooltip or '' }}">
+                    {% if field.table %}
+                    <span class="field-chip-table">{{ field.table }}</span>
+                    {% endif %}
+                    <span class="field-chip-name">{{ field.name }}</span>
+                    {% if usage.total %}
+                    <span class="field-chip-count">{{ usage.total }}</span>
+                    {% endif %}
+                  </button>
+                {% endfor %}
               {% else %}
-              <span class="empty-value">—</span>
+                <span class="empty-value">--</span>
               {% endif %}
             </div>
           </td>
           <td data-label="VC Objects">
             <div class="field-list">
-              {% if row[5] %} 
-              {% for field in row[5].split('; ') %}
-              <span class="field-item vc-object">{{ field }}</span>
-              {% endfor %} 
+              {% if visual.vc_fields %}
+                {% for field in visual.vc_fields %}
+                  {% set usage = field_usage_lookup.get(field.full, {}) %}
+                  <button type="button" class="field-chip field-{{ field.kind|default('unknown') }} vc-chip" data-field="{{ field.full }}" title="{{ usage.tooltip or '' }}">
+                    {% if field.table %}
+                    <span class="field-chip-table">{{ field.table }}</span>
+                    {% endif %}
+                    <span class="field-chip-name">{{ field.name }}</span>
+                    {% if usage.total %}
+                    <span class="field-chip-count">{{ usage.total }}</span>
+                    {% endif %}
+                  </button>
+                {% endfor %}
               {% else %}
-              <span class="empty-value">—</span>
+                <span class="empty-value">--</span>
               {% endif %}
             </div>
           </td>
           <td data-label="Visual Objects">
             <div class="field-list">
-              {% if row[6] %} 
-              {% for field in row[6].split('; ') %}
-              <span class="field-item visual-object">{{ field }}</span>
-              {% endfor %} 
+              {% if visual.object_fields %}
+                {% for field in visual.object_fields %}
+                  {% set usage = field_usage_lookup.get(field.full, {}) %}
+                  <button type="button" class="field-chip field-{{ field.kind|default('unknown') }} object-chip" data-field="{{ field.full }}" title="{{ usage.tooltip or '' }}">
+                    {% if field.table %}
+                    <span class="field-chip-table">{{ field.table }}</span>
+                    {% endif %}
+                    <span class="field-chip-name">{{ field.name }}</span>
+                    {% if usage.total %}
+                    <span class="field-chip-count">{{ usage.total }}</span>
+                    {% endif %}
+                  </button>
+                {% endfor %}
               {% else %}
-              <span class="empty-value">—</span>
+                <span class="empty-value">--</span>
               {% endif %}
             </div>
           </td>
         </tr>
-        {% endif %} 
         {% endfor %}
       </tbody>
     </table>
@@ -293,6 +782,11 @@
     const clearEmptyState = document.getElementById("clearEmptyState");
     const resultCount = document.getElementById("resultCount");
     const exportCSV = document.getElementById("exportCSV");
+    const globalSearchInput = document.getElementById("globalSearchInput");
+    const clearGlobalSearch = document.getElementById("clearGlobalSearch");
+    const resetAllFilters = document.getElementById("resetAllFilters");
+    const activeFilters = document.getElementById("activeFilters");
+    const activeFiltersList = document.getElementById("activeFiltersList");
 
     // Pagination elements
     const pagination = document.getElementById("pagination");
@@ -344,12 +838,10 @@
     function initializeModernFilters() {
       const pageDropdown = document.getElementById('pageFilterDropdown');
       const visualTypeDropdown = document.getElementById('visualTypeFilterDropdown');
-      const globalSearchInput = document.getElementById('globalSearchInput');
-      const clearGlobalSearch = document.getElementById('clearGlobalSearch');
-      const resetAllFilters = document.getElementById('resetAllFilters');
-      const activeFilters = document.getElementById('activeFilters');
-      const activeFiltersList = document.getElementById('activeFiltersList');
 
+      if (!pageDropdown || !visualTypeDropdown || !globalSearchInput || !clearGlobalSearch || !resetAllFilters || !activeFilters || !activeFiltersList) {
+        return;
+      }
       // Initialize dropdowns
       initializeDropdown(pageDropdown, 'pageOptions', 'selectAllPages');
       initializeDropdown(visualTypeDropdown, 'visualTypeOptions', 'selectAllVisualTypes');
@@ -602,6 +1094,29 @@
       });
     }
 
+
+    function initializeFieldChips() {
+      const chips = document.querySelectorAll('.field-chip');
+      if (!chips.length || !globalSearchInput) {
+        return;
+      }
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const value = chip.getAttribute('data-field') || chip.textContent.trim();
+          globalSearchInput.value = value;
+
+          if (clearGlobalSearch) {
+            clearGlobalSearch.style.display = value ? 'block' : 'none';
+          }
+
+          applyFiltersAndSearch();
+
+          chip.classList.add('active-chip');
+          setTimeout(() => chip.classList.remove('active-chip'), 500);
+        });
+      });
+    }
     /**
      * Search function - searches all content including nested elements
      */
@@ -982,3 +1497,5 @@
   });
 </script>
 {% endblock %}
+
+

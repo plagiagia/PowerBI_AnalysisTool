@@ -19,6 +19,8 @@ The **Power BI Analytics Hub** is a web-based tool that analyzes exported Power 
 - **💻 DAX Code Analyzer** - Browse DAX expressions with syntax highlighting and similarity analysis
 - **🗃️ Source Query Explorer** - Examine M queries from data sources with code highlighting
 - **⚡ Performance Optimizer** - Identify unused measures to optimize report performance
+- **🏗️ Model Insights** - Comprehensive model analysis including tables, relationships, roles, RLS, and data quality
+- **📑 Report Insights** - Report-level analysis covering themes, bookmarks, layouts, and formatting patterns
 
 ### 🎨 **Modern User Experience**
 
@@ -91,7 +93,9 @@ To use this tool, you need to extract the following files from your Power BI env
 
 Your analytics command center featuring:
 - **Report Metrics** - Total visuals, measures, pages, and unused measures
-- **Visual Statistics** - Most common visual types and distribution
+- **Model Health** - Tables, columns, relationships, roles, and hidden objects overview
+- **Experience & Navigation** - Bookmarks, navigation visuals, and filtering insights
+- **Visual Mix & Styling** - Visual type distribution and custom formatting analysis
 - **Quick Navigation** - Direct access to all analysis tools
 
 ### 🔍 Visual Fields Explorer (`/table-view`)
@@ -130,9 +134,33 @@ M query analysis:
 
 Identify optimization opportunities:
 - **Unused Measure Detection** - Find measures not referenced in any visuals
+- **Cascade Detection** - Identifies measures that become unused after removing their dependencies
+- **Comprehensive Analysis** - Multi-level impact analysis with deletion chains
 - **Cleanup Recommendations** - Suggestions for performance improvement
 - **Tabular Editor Scripts** - Generate scripts to help with cleanup
 - **Impact Analysis** - Understand what would be affected by removing measures
+
+### 🏗️ Model Insights (`/model-insights`)
+
+Deep dive into your data model:
+- **Table Overview** - Complete inventory of tables with column counts and hidden status
+- **Relationship Analysis** - View all relationships with cardinality and filtering behavior
+- **Row-Level Security** - Analyze RLS roles and table permissions
+- **Data Quality Gaps** - Identify measures without descriptions or format strings
+- **Column Analysis** - Find columns missing data categories
+- **Hidden Objects** - Track hidden tables, columns, and measures
+- **Annotations** - Review model-level annotations and metadata
+
+### 📑 Report Insights (`/report-insights`)
+
+Analyze report-level design and interactivity:
+- **Theme Analysis** - Review active theme and color scheme
+- **Bookmark Explorer** - Examine bookmarks with filters and target visuals
+- **Layout Analysis** - Visual positioning, sizing, and z-order by page
+- **Query Patterns** - Review OrderBy, GroupBy, and Where clauses in visual queries
+- **Formatting Audit** - Identify custom tooltips, titles, backgrounds, borders, and shadows
+- **Navigation Tracking** - Catalog buttons, page navigators, and interactive elements
+- **Top Limits** - Discover visuals using Top N filtering
 
 ## 🔧 Configuration
 
@@ -155,6 +183,8 @@ FLASK_ENV=development
 ENABLE_SOURCE_EXPLORER=true
 ENABLE_DAX_EXPLORER=true
 ENABLE_LINEAGE_VIEW=true
+ENABLE_MODEL_INSIGHTS=true
+ENABLE_REPORT_INSIGHTS=true
 ```
 
 ## 📁 Project Structure
@@ -165,6 +195,7 @@ PowerBI_AnalysisTool/
 ├── ⚙️ config.py                  # Configuration settings
 ├── 📊 data_processor.py          # Report data processing logic
 ├── 🔗 lineage_view.py            # Measure dependency analysis
+├── 🏗️ model_processor.py         # Model metadata processing
 ├── 📁 static/                    # Frontend assets
 │   ├── 🎨 modern.css             # UI styling
 │   └── ⚡ modern.js              # Interactive features
@@ -175,7 +206,10 @@ PowerBI_AnalysisTool/
 │   ├── 🔗 lineage_view.html      # Data lineage diagram
 │   ├── 💻 dax_expressions.html   # DAX analyzer
 │   ├── 🗃️ source_explorer.html   # M query explorer
-│   └── ⚡ unused_measures.html   # Performance optimizer
+│   ├── ⚡ unused_measures.html   # Performance optimizer
+│   ├── 🏗️ model_insights.html    # Model insights page
+│   ├── 📑 report_insights.html   # Report insights page
+│   └── ❌ error.html              # Error handling page
 ├── 📁 data/                      # Data files directory (user-provided)
 ├── 📋 requirements.txt           # Python dependencies
 ├── 📜 LICENSE                    # License information
