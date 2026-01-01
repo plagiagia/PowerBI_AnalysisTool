@@ -1,682 +1,348 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Power BI Explorer{% endblock %}
+{% block title %}Dashboard - Power BI Analysis Tool{% endblock %}
 
-{% block breadcrumbs %}
-<li>
-  <a href="/"><i class="fas fa-home"></i><span class="breadcrumb-text">Dashboard</span></a>
-</li>
-{% endblock %}
+{% block header_subtitle %}Report analysis and metrics overview{% endblock %}
 
 {% block content %}
-
-<!-- Enhanced Metrics Section -->
+<!-- Key Metrics -->
 <section class="enhanced-metrics-section">
   <div class="metrics-container">
-    <!-- Visual Analytics Card -->
     <div class="metric-card-enhanced">
-      <div class="card-icon">
-        <i class="fas fa-chart-bar"></i>
-      </div>
-      <div class="metric-value" data-value="{{ metrics.visual_count if metrics is defined else 121 }}">0</div>
-      <div class="metric-label">Total Visuals</div>
+      <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+      <div class="metric-value">{{ metrics.visual_count }}</div>
+      <div class="metric-label">Visuals</div>
     </div>
-
-    <!-- Measures Card -->
     <div class="metric-card-enhanced">
-      <div class="card-icon">
-        <i class="fas fa-calculator"></i>
-      </div>
-      <div class="metric-value" data-value="{{ metrics.measure_count if metrics is defined else 258 }}">0</div>
-      <div class="metric-label">DAX Measures</div>
+      <div class="card-icon"><i class="fas fa-calculator"></i></div>
+      <div class="metric-value">{{ metrics.measure_count }}</div>
+      <div class="metric-label">Measures</div>
     </div>
-
-    <!-- Pages Card -->
     <div class="metric-card-enhanced">
-      <div class="card-icon">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <div class="metric-value" data-value="{{ metrics.page_count if metrics is defined else 18 }}">0</div>
-      <div class="metric-label">Report Pages</div>
+      <div class="card-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="metric-value">{{ metrics.page_count }}</div>
+      <div class="metric-label">Pages</div>
     </div>
-
-    <!-- Performance Card -->
     <div class="metric-card-enhanced">
-      <div class="card-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="metric-value" data-value="{{ metrics.unused_count if metrics is defined else 4 }}">0</div>
-      <div class="metric-label">Unused Measures</div>
+      <div class="card-icon"><i class="fas fa-exclamation-circle"></i></div>
+      <div class="metric-value">{{ metrics.unused_count }}</div>
+      <div class="metric-label">Unused</div>
     </div>
   </div>
 </section>
 
-<!-- Report Snapshot Section -->
-<section class="snapshot-section">
-  <div class="snapshot-grid">
-    <div class="insight-card primary">
-      <div class="insight-header">
-        <span class="insight-icon"><i class="fas fa-info-circle"></i></span>
-        <h3>Report Snapshot</h3>
+<!-- Summary Cards -->
+<section class="summary-section">
+  <div class="summary-grid">
+    <!-- Report Info -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <i class="fas fa-info-circle"></i>
+        <h3>Report Info</h3>
       </div>
-      <ul class="insight-list">
-        <li>
-          <span class="insight-label">Report:</span>
-          <span class="insight-value">{{ report_name }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Last Loaded:</span>
-          <span class="insight-value">{{ time_loaded }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Theme:</span>
-          <span class="insight-value">{{ metrics.report_summary.theme_name }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Top Visual:</span>
-          <span class="insight-value">{{ metrics.most_common_visual }}</span>
-        </li>
-      </ul>
+      <div class="summary-content">
+        <div class="summary-row">
+          <span class="summary-label">Name</span>
+          <span class="summary-value">{{ report_name }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Theme</span>
+          <span class="summary-value">{{ metrics.report_summary.theme_name }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Most Used Visual</span>
+          <span class="summary-value">{{ metrics.most_common_visual }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Loaded</span>
+          <span class="summary-value muted">{{ time_loaded }}</span>
+        </div>
+      </div>
     </div>
-    <div class="insight-card">
-      <div class="insight-header">
-        <span class="insight-icon"><i class="fas fa-layer-group"></i></span>
-        <h3>Model Health</h3>
+
+    <!-- Model Summary -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <i class="fas fa-database"></i>
+        <h3>Model Summary</h3>
       </div>
-      <ul class="insight-list">
-        <li>
-          <span class="insight-label">Tables:</span>
-          <span class="insight-value">{{ metrics.model_summary.table_count }}</span>
-          <span class="insight-hint">/ {{ metrics.model_summary.column_count }} columns</span>
-        </li>
-        <li>
-          <span class="insight-label">Relationships:</span>
-          <span class="insight-value">{{ metrics.model_summary.relationship_count }}</span>
-          <span class="insight-hint">Roles {{ metrics.model_summary.role_count }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Hidden Objects:</span>
-          <span class="insight-value">{{ metrics.model_summary.hidden_table_count }} tables</span>
-          <span class="insight-hint">{{ metrics.model_summary.hidden_column_count }} columns / {{ metrics.model_summary.hidden_measure_count }} measures</span>
-        </li>
-        <li>
-          <span class="insight-label">Annotations:</span>
-          <span class="insight-value">{{ metrics.model_summary.annotation_count }}</span>
-        </li>
-      </ul>
+      <div class="summary-content">
+        <div class="summary-row">
+          <span class="summary-label">Tables</span>
+          <span class="summary-value">{{ metrics.model_summary.table_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Columns</span>
+          <span class="summary-value">{{ metrics.model_summary.column_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Relationships</span>
+          <span class="summary-value">{{ metrics.model_summary.relationship_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Roles (RLS)</span>
+          <span class="summary-value">{{ metrics.model_summary.role_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Hidden Objects</span>
+          <span class="summary-value muted">{{ metrics.model_summary.hidden_table_count }} tables, {{ metrics.model_summary.hidden_column_count }} cols, {{ metrics.model_summary.hidden_measure_count }} measures</span>
+        </div>
+      </div>
     </div>
-    <div class="insight-card">
-      <div class="insight-header">
-        <span class="insight-icon"><i class="fas fa-book-open"></i></span>
-        <h3>Experience & Navigation</h3>
+
+    <!-- Report Features -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <i class="fas fa-sliders-h"></i>
+        <h3>Report Features</h3>
       </div>
-      <ul class="insight-list">
-        <li>
-          <span class="insight-label">Bookmarks:</span>
-          <span class="insight-value">{{ metrics.report_summary.bookmark_count }}</span>
-          <span class="insight-hint">{{ metrics.report_summary.bookmark_filters }} filters / {{ metrics.report_summary.bookmark_targets }} targets</span>
-        </li>
-        <li>
-          <span class="insight-label">Navigation Visuals:</span>
-          <span class="insight-value">{{ metrics.report_summary.navigation_count }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Navigation Types:</span>
-          <span class="insight-value">
-            {% if metrics.report_summary.navigation_types %}
-              {% for nav in metrics.report_summary.navigation_types %}
-                {{ nav[0] }} ({{ nav[1] }}){% if not loop.last %}, {% endif %}
-              {% endfor %}
-            {% else %}
-              None
-            {% endif %}
-          </span>
-        </li>
-      </ul>
+      <div class="summary-content">
+        <div class="summary-row">
+          <span class="summary-label">Bookmarks</span>
+          <span class="summary-value">{{ metrics.report_summary.bookmark_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Navigation Elements</span>
+          <span class="summary-value">{{ metrics.report_summary.navigation_count }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Custom Formatting</span>
+          <span class="summary-value">{{ metrics.report_summary.formatting_highlights }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Annotations</span>
+          <span class="summary-value">{{ metrics.model_summary.annotation_count }}</span>
+        </div>
+      </div>
     </div>
-    <div class="insight-card">
-      <div class="insight-header">
-        <span class="insight-icon"><i class="fas fa-chart-pie"></i></span>
-        <h3>Visual Mix & Styling</h3>
+
+    <!-- Visual Distribution -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <i class="fas fa-chart-pie"></i>
+        <h3>Visual Types</h3>
       </div>
-      <ul class="insight-list">
-        <li>
-          <span class="insight-label">Top Visuals:</span>
-          <span class="insight-extras">
-            {% if metrics.visual_distribution %}
-              {% for visual in metrics.visual_distribution %}
-                <span class="insight-pill"><strong>{{ visual[0] }}</strong>{{ visual[1] }}</span>
-              {% endfor %}
-            {% else %}
-              <span class="insight-value">No visuals</span>
-            {% endif %}
-          </span>
-        </li>
-        <li>
-          <span class="insight-label">Custom Formatting:</span>
-          <span class="insight-value">{{ metrics.report_summary.formatting_highlights }}</span>
-          <span class="insight-hint">Tooltips {{ metrics.report_summary.custom_tooltips }}, Titles {{ metrics.report_summary.custom_titles }}, Backgrounds {{ metrics.report_summary.custom_backgrounds }}</span>
-        </li>
-        <li>
-          <span class="insight-label">Borders & Shadows:</span>
-          <span class="insight-value">{{ metrics.report_summary.custom_borders }}</span>
-          <span class="insight-hint">Drop shadows {{ metrics.report_summary.drop_shadows }}</span>
-        </li>
-      </ul>
+      <div class="summary-content">
+        {% if metrics.visual_distribution %}
+          {% for visual in metrics.visual_distribution %}
+          <div class="summary-row">
+            <span class="summary-label">{{ visual[0] }}</span>
+            <span class="summary-value">{{ visual[1] }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="summary-row muted">No visuals found</div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Modern Analysis Tools Section -->
-<section class="modern-tools-section">
+<!-- Quick Access Tools -->
+<section class="tools-section">
   <div class="section-header">
-    <h2 class="section-title">
-      <span class="title-icon">
-        <i class="fas fa-tools"></i>
-      </span>
-      Analysis Toolkit
-    </h2>
-    <div class="section-description">
-      Powerful tools to analyze, optimize, and understand your Power BI reports
-    </div>
+    <h2 class="section-title">Analysis Tools</h2>
   </div>
-
-  <!-- Enhanced Tools Grid -->
-  <div class="modern-tools-grid">
-    <!-- Visual Fields Explorer -->
-    <div class="modern-tool-card" data-category="exploration">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-table"></i>
-        </div>
-
+  <div class="tools-grid">
+    <a href="/table-view" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-table"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Visual Fields</div>
+        <div class="tool-desc">Explore field usage across visuals</div>
       </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Visual Fields Explorer</h3>
-        <p class="tool-description">Deep dive into field usage across all visuals with advanced filtering and search
-          capabilities</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-search"></i>
-            Smart Search
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-filter"></i>
-            Advanced Filters
-          </span>
-        </div>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/lineage-view" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-project-diagram"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Data Lineage</div>
+        <div class="tool-desc">View measure dependencies</div>
       </div>
-      <div class="tool-footer">
-        <a href="/table-view" class="modern-button primary">
-          <span>Explore Fields</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/model-insights" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-layer-group"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Model Insights</div>
+        <div class="tool-desc">Tables, relationships, and roles</div>
       </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- Data Lineage -->
-    <div class="modern-tool-card" data-category="analysis">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-project-diagram"></i>
-        </div>
-
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/report-insights" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Report Insights</div>
+        <div class="tool-desc">Bookmarks, layouts, formatting</div>
       </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Data Lineage Diagram</h3>
-        <p class="tool-description">Visualize complex relationships and dependencies between measures and columns</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-share-alt"></i>
-            Interactive Graph
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-eye"></i>
-            Dependency Tracking
-          </span>
-        </div>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/dax-expressions" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-code"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">DAX Explorer</div>
+        <div class="tool-desc">Browse DAX expressions</div>
       </div>
-      <div class="tool-footer">
-        <a href="/lineage-view" class="modern-button primary">
-          <span>View Diagram</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/source-explorer" class="tool-link">
+      <div class="tool-icon"><i class="fas fa-database"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Source Explorer</div>
+        <div class="tool-desc">M queries and transformations</div>
       </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- DAX Explorer -->
-    <div class="modern-tool-card" data-category="optimization">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-code"></i>
-        </div>
-
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="/unused-measures" class="tool-link{% if metrics.unused_count > 0 %} has-alert{% endif %}">
+      <div class="tool-icon"><i class="fas fa-broom"></i></div>
+      <div class="tool-info">
+        <div class="tool-name">Unused Measures</div>
+        <div class="tool-desc">{% if metrics.unused_count > 0 %}{{ metrics.unused_count }} unused measures found{% else %}No unused measures{% endif %}</div>
       </div>
-      <div class="tool-content">
-        <h3 class="tool-title">DAX Code Analyzer</h3>
-        <p class="tool-description">Browse, analyze, and optimize DAX formulas.</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-code"></i>
-            Syntax Highlighting
-          </span>
-        </div>
-      </div>
-      <div class="tool-footer">
-        <a href="/dax-expressions" class="modern-button primary">
-          <span>Analyze DAX</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- Source Explorer -->
-    <div class="modern-tool-card" data-category="exploration">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-database"></i>
-        </div>
-
-      </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Source Query Explorer</h3>
-        <p class="tool-description">Examine M queries and data transformation logic with intelligent insights</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-magic"></i>
-            M Query Analysis
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-cogs"></i>
-            Transformation Tracking
-          </span>
-        </div>
-      </div>
-      <div class="tool-footer">
-        <a href="/source-explorer" class="modern-button primary">
-          <span>Explore Sources</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- Performance Optimizer -->
-    <div class="modern-tool-card" data-category="optimization">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-tachometer-alt"></i>
-        </div>
-
-      </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Performance Optimizer</h3>
-        <p class="tool-description">Identify unused measures and optimization opportunities to improve report
-          performance</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-search-minus"></i>
-            Unused Detection
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-rocket"></i>
-            Performance Tips
-          </span>
-        </div>
-      </div>
-      <div class="tool-footer">
-        <a href="/unused-measures" class="modern-button primary">
-          <span>Optimize Now</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- Model Insights -->
-    <div class="modern-tool-card" data-category="model">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-layer-group"></i>
-        </div>
-      </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Model Insights</h3>
-        <p class="tool-description">Review table coverage, relationships, and row-level security in one place.</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-diagram-project"></i>
-            Relationships
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-user-shield"></i>
-            RLS Overview
-          </span>
-        </div>
-      </div>
-      <div class="tool-footer">
-        <a href="/model-insights" class="modern-button primary">
-          <span>Open Model Insights</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="card-highlight"></div>
-    </div>
-
-    <!-- Report Insights -->
-    <div class="modern-tool-card" data-category="report">
-      <div class="tool-card-header">
-        <div class="tool-icon">
-          <i class="fas fa-object-group"></i>
-        </div>
-      </div>
-      <div class="tool-content">
-        <h3 class="tool-title">Report Insights</h3>
-        <p class="tool-description">Analyze bookmarks, layouts, and formatting patterns across the report.</p>
-        <div class="tool-features">
-          <span class="feature-tag">
-            <i class="fas fa-bookmark"></i>
-            Bookmarks
-          </span>
-          <span class="feature-tag">
-            <i class="fas fa-paint-brush"></i>
-            Styling Audit
-          </span>
-        </div>
-      </div>
-      <div class="tool-footer">
-        <a href="/report-insights" class="modern-button primary">
-          <span>Open Report Insights</span>
-          <i class="fas fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="card-highlight"></div>
-    </div>
+      <i class="fas fa-chevron-right"></i>
+    </a>
   </div>
 </section>
 {% endblock %}
 
 {% block scripts %}
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Initialize modern dashboard
-    initModernDashboard();
-  });
-
-  function initModernDashboard() {
-    // Animate metric values
-    animateCounters();
-
-    // Add modern hover effects
-    initHoverEffects();
-
-    // Initialize mobile menu if needed
-    initMobileMenu();
-  }
-
-  function animateCounters() {
-    const counters = document.querySelectorAll('.metric-value[data-value]');
-
-    const observerOptions = {
-      threshold: 0.5,
-      rootMargin: '0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const counter = entry.target;
-          const target = parseInt(counter.getAttribute('data-value')) || 0;
-          animateCounter(counter, target);
-          observer.unobserve(counter);
-        }
-      });
-    }, observerOptions);
-
-    counters.forEach(counter => observer.observe(counter));
-  }
-
-  function animateCounter(element, target) {
-    let current = 0;
-    const increment = target / 50; // 50 steps
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        current = target;
-        clearInterval(timer);
-      }
-      element.textContent = Math.floor(current);
-    }, 40); // 2 second total animation
-  }
-
-  function initHoverEffects() {
-    // Tool cards
-    const toolCards = document.querySelectorAll('.modern-tool-card');
-    toolCards.forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        card.style.transform = 'translateY(-8px)';
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'translateY(0)';
-      });
-    });
-
-    // Modern buttons with ripple effect
-    const buttons = document.querySelectorAll('.modern-button');
-    buttons.forEach(button => {
-      button.addEventListener('click', createRipple);
-    });
-  }
-
-  function createRipple(e) {
-    const button = e.currentTarget;
-    const ripple = document.createElement('span');
-    const rect = button.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top - size / 2;
-
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = x + 'px';
-    ripple.style.top = y + 'px';
-    ripple.classList.add('ripple');
-
-    button.appendChild(ripple);
-
-    setTimeout(() => {
-      ripple.remove();
-    }, 600);
-  }
-
-  function initMobileMenu() {
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (sidebarToggle && sidebar) {
-      sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-      });
-
-      // Close sidebar when clicking outside on mobile
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768 &&
-          !sidebar.contains(e.target) &&
-          !sidebarToggle.contains(e.target)) {
-          sidebar.classList.remove('open');
-        }
-      });
-    }
-  }
-</script>
-
 <style>
-  .snapshot-section {
-    margin: 2rem 0 3rem;
+  .summary-section {
+    margin-bottom: var(--space-xl);
   }
 
-  .snapshot-grid {
+  .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
   }
 
-  .insight-card {
-    position: relative;
-    padding: 1.5rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(31, 35, 53, 0.08);
-    color: #1f2333;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 18px 34px -24px rgba(31, 35, 53, 0.35);
+  .summary-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
   }
 
-  .insight-card.primary {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(231, 238, 255, 0.92));
-    border-color: rgba(123, 127, 255, 0.35);
-  }
-
-  .insight-header {
+  .summary-header {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 1rem;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border-light);
   }
 
-  .insight-header h3 {
-    margin: 0;
-    font-size: 1rem;
+  .summary-header i {
+    color: var(--color-primary);
+    font-size: 14px;
+  }
+
+  .summary-header h3 {
+    font-size: 13px;
     font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
   }
 
-  .insight-icon {
-    display: inline-flex;
+  .summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 13px;
+    padding: 2px 0;
+  }
+
+  .summary-label {
+    color: var(--color-text-secondary);
+  }
+
+  .summary-value {
+    color: var(--color-text);
+    font-weight: 500;
+    text-align: right;
+    font-family: var(--font-mono);
+  }
+
+  .summary-value.muted {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+  }
+
+  .tools-section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .tool-link {
+    display: flex;
     align-items: center;
-    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s;
+  }
+
+  .tool-link:hover {
+    border-color: var(--color-primary);
+  }
+
+  .tool-link.has-alert {
+    border-left: 3px solid var(--color-warning);
+  }
+
+  .tool-link .tool-icon {
     width: 36px;
     height: 36px;
-    border-radius: 12px;
-    background: rgba(123, 127, 255, 0.12);
-    color: #5e64ff;
-  }
-
-  .insight-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    row-gap: 0.6rem;
-  }
-
-  .insight-list li {
+    background: var(--color-primary-light);
+    border-radius: var(--radius-sm);
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    font-size: 0.95rem;
-    line-height: 1.45;
-  }
-
-  .insight-label {
-    font-weight: 600;
-    color: #424b66;
-  }
-
-  .insight-value {
-    color: #1f2333;
-    font-weight: 500;
-  }
-
-  .insight-hint {
-    color: #66708e;
-    font-size: 0.85rem;
-  }
-
-  .insight-extras {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .insight-pill {
-    display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    background: rgba(123, 127, 255, 0.12);
-    font-size: 0.85rem;
-    color: #2d3363;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 14px;
+    flex-shrink: 0;
   }
 
-  .insight-pill strong {
-    margin-right: 0.35rem;
-    font-weight: 600;
+  .tool-link .tool-info {
+    flex: 1;
+  }
+
+  .tool-link .tool-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 2px;
+  }
+
+  .tool-link .tool-desc {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .tool-link > i:last-child {
+    color: var(--color-text-muted);
+    font-size: 12px;
   }
 
   @media (max-width: 768px) {
-    .snapshot-section {
-      margin: 1.5rem 0 2rem;
-    }
-  }
-
-  /* Ripple Effect */
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    transform: scale(0);
-    animation: ripple-animation 0.6s linear;
-    pointer-events: none;
-  }
-
-  @keyframes ripple-animation {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  /* Smooth transitions */
-  .modern-tool-card,
-  .metric-card-enhanced,
-  .insight-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Loading animation for metrics */
-  .metric-value {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  /* Focus styles for accessibility */
-  .modern-button:focus,
-  .modern-tool-card:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    .sidebar {
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.open {
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    .tools-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
