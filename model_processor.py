@@ -1,5 +1,8 @@
-﻿import json
+import json
+import logging
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class ModelProcessor:
@@ -17,8 +20,15 @@ class ModelProcessor:
         if self._processed:
             return
 
-        with open(self.json_file_path, "r", encoding="utf-8") as file:
-            data = json.load(file)
+        try:
+            with open(self.json_file_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing JSON file {self.json_file_path}: {e}")
+            raise ValueError(f"Invalid JSON in model file: {e}")
+        except IOError as e:
+            logger.error(f"Error reading file {self.json_file_path}: {e}")
+            raise ValueError(f"Cannot read model file: {e}")
 
         self._raw_model = data.get("model", {})
         self._extract_annotations()

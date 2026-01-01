@@ -1,5 +1,8 @@
-﻿import json
+import json
+import logging
 from typing import Any, Dict, List, Optional, Set
+
+logger = logging.getLogger(__name__)
 
 
 class DataProcessor:
@@ -28,8 +31,11 @@ class DataProcessor:
         try:
             with open(self.json_file_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
-        except json.JSONDecodeError:
-            print("Error reading or parsing the JSON file.")
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing JSON file {self.json_file_path}: {e}")
+            return
+        except IOError as e:
+            logger.error(f"Error reading file {self.json_file_path}: {e}")
             return
 
         self._extract_config_data(data.get('config'))
