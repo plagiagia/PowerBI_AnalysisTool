@@ -524,7 +524,11 @@
       // Setup event listeners
       setupEventListeners();
 
-      hideLoading();
+      // Note: hideLoading is called in stabilizationIterationsDone for large graphs
+      // For small graphs, hide immediately after a short delay
+      if (allNodes.length <= 100) {
+        setTimeout(hideLoading, 100);
+      }
     }
 
     function showLoading() {
@@ -592,43 +596,49 @@
       // Network data
       const data = { nodes: nodes, edges: edges };
 
-      // Network options
+      // Network options - optimized for performance
+      const nodeCount = allNodes.length;
+      const isLargeGraph = nodeCount > 100;
+
       const options = {
         nodes: {
           shape: "dot",
-          size: 16,
+          size: isLargeGraph ? 12 : 16,
           borderWidth: 2,
-          shadow: true,
+          shadow: false,  // Disable shadows for performance
           font: {
-            size: 12,
+            size: isLargeGraph ? 10 : 12,
             face: "Inter, sans-serif"
           }
         },
         edges: {
           width: 1,
           arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-          smooth: { enabled: true, type: "dynamic", roundness: 0.5 },
+          smooth: isLargeGraph
+            ? { enabled: false }  // Disable smooth edges for large graphs
+            : { enabled: true, type: "continuous", roundness: 0.5 },
           color: { color: '#6c7293', highlight: '#667eea' }
         },
         physics: {
           enabled: true,
           barnesHut: {
-            gravitationalConstant: -2000,
-            centralGravity: 0.1,
-            springLength: 95,
-            springConstant: 0.04,
-            damping: 0.09
+            gravitationalConstant: isLargeGraph ? -1500 : -2000,
+            centralGravity: 0.2,
+            springLength: isLargeGraph ? 80 : 95,
+            springConstant: 0.05,
+            damping: 0.15  // Higher damping = faster stabilization
           },
           stabilization: {
             enabled: true,
-            iterations: 200,
-            updateInterval: 50
+            iterations: isLargeGraph ? 50 : 100,  // Reduced iterations
+            updateInterval: 25
           }
         },
         interaction: {
           hover: true,
-          tooltipDelay: 200,
+          tooltipDelay: 300,
           hideEdgesOnDrag: true,
+          hideNodesOnDrag: isLargeGraph,  // Hide nodes when dragging for large graphs
           zoomView: true
         }
       };
@@ -636,9 +646,19 @@
       // Create network
       network = new vis.Network(container, data, options);
 
+      // Show stabilization progress for large graphs
+      if (isLargeGraph) {
+        network.on("stabilizationProgress", function (params) {
+          const progress = Math.round((params.iterations / params.total) * 100);
+          loadingIndicator.querySelector('.loading-text').textContent =
+            `Stabilizing layout... ${progress}%`;
+        });
+      }
+
       // Network events
       network.on("stabilizationIterationsDone", function () {
         network.setOptions({ physics: { enabled: false } });
+        hideLoading();
       });
 
       network.on("selectNode", function (params) {
@@ -649,11 +669,15 @@
         }
       });
 
+      // Debounced hover for performance
+      let hoverTimeout = null;
       network.on("hoverNode", function (params) {
-        highlightConnectedNodes(params.node);
+        clearTimeout(hoverTimeout);
+        hoverTimeout = setTimeout(() => highlightConnectedNodes(params.node), 150);
       });
 
       network.on("blurNode", function () {
+        clearTimeout(hoverTimeout);
         if (highlightActive) {
           resetHighlight();
         }
@@ -737,7 +761,11 @@
       const showFinals = showFinalsCheck.checked;
       const showColumns = showColumnsCheck.checked;
 
-      const nodesToUpdate = allNodes.map(node => {
+      // Build visibility map once
+      const visibleNodeIds = new Set();
+      const nodesToUpdate = [];
+
+      for (const node of allNodes) {
         let visible = true;
 
         if (node.nodeType === 'column') {
@@ -748,51 +776,48 @@
           visible = showFinals;
         }
 
-        return { id: node.id, hidden: !visible };
-      });
+        if (visible) {
+          visibleNodeIds.add(node.id);
+        }
+        nodesToUpdate.push({ id: node.id, hidden: !visible });
+      }
 
+      // Batch update nodes
       nodes.update(nodesToUpdate);
 
-      // Update edges visibility
-      const visibleNodeIds = new Set(
-        nodesToUpdate.filter(n => !n.hidden).map(n => n.id)
-      );
-
-      const edgesToUpdate = edgesData.map(edge => ({
-        id: edge.id,
-        hidden: !visibleNodeIds.has(edge.from) || !visibleNodeIds.has(edge.to)
-      }));
+      // Update edges visibility - only if edge visibility actually changes
+      const edgesToUpdate = edgesData
+        .filter(edge => {
+          const shouldBeVisible = visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to);
+          return true;  // Always update for simplicity
+        })
+        .map(edge => ({
+          id: edge.id,
+          hidden: !visibleNodeIds.has(edge.from) || !visibleNodeIds.has(edge.to)
+        }));
 
       edges.update(edgesToUpdate);
     }
 
     function highlightConnectedNodes(nodeId) {
       highlightActive = true;
-      const connectedNodes = network.getConnectedNodes(nodeId);
-      const allNodeIds = nodes.getIds();
+      const connectedNodes = new Set(network.getConnectedNodes(nodeId));
+      connectedNodes.add(nodeId);
 
-      // Dim all nodes except connected ones
-      const updateArray = [];
-      allNodeIds.forEach(id => {
-        const node = nodes.get(id);
-        if (id === nodeId || connectedNodes.includes(id)) {
-          updateArray.push({
-            id: id,
-            color: node.color
-          });
-        } else {
-          updateArray.push({
-            id: id,
-            color: {
-              ...node.color,
-              background: node.color.background + '20',
-              border: node.color.border + '20'
-            }
-          });
-        }
-      });
+      // Only update nodes that need to change (batch update)
+      const updateArray = allNodes
+        .filter(node => !connectedNodes.has(node.id))
+        .map(node => ({
+          id: node.id,
+          color: {
+            background: node.color.background + '20',
+            border: node.color.border + '20'
+          }
+        }));
 
-      nodes.update(updateArray);
+      if (updateArray.length > 0) {
+        nodes.update(updateArray);
+      }
     }
 
     function resetHighlight() {

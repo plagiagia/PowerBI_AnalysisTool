@@ -4,7 +4,7 @@ import collections
 import json
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from flask import abort, current_app, g
 
@@ -12,42 +12,92 @@ from data_processor import DataProcessor
 from lineage_view import LineageView
 from model_processor import ModelProcessor
 
+# Application-level cache for expensive processors
+_app_cache: Dict[str, Any] = {
+    'lineage': None,
+    'lineage_mtime': 0.0,
+    'data': None,
+    'data_mtime': 0.0,
+    'model': None,
+    'model_mtime': 0.0,
+}
+
+
+def _get_file_mtime(path: str) -> float:
+    """Get file modification time, returns 0 if file doesn't exist."""
+    try:
+        return os.path.getmtime(path)
+    except OSError:
+        return 0.0
+
 
 def get_data_processor() -> DataProcessor:
-    """Retrieve or create the DataProcessor instance for this request."""
-    if not hasattr(g, 'data_processor'):
-        report_path = current_app.config['REPORT_JSON_PATH']
-        if not os.path.exists(report_path):
-            current_app.logger.error(f"Report JSON file not found: {report_path}")
-            abort(500, description="Report data file not found. Please check your data directory.")
+    """Retrieve or create the DataProcessor instance with app-level caching."""
+    report_path = current_app.config['REPORT_JSON_PATH']
 
-        dp = DataProcessor(report_path)
-        dp.process_json()
-        g.data_processor = dp
-    return g.data_processor
+    if not os.path.exists(report_path):
+        current_app.logger.error(f"Report JSON file not found: {report_path}")
+        abort(500, description="Report data file not found. Please check your data directory.")
+
+    current_mtime = _get_file_mtime(report_path)
+
+    # Check if cache is valid
+    if _app_cache['data'] is not None and _app_cache['data_mtime'] == current_mtime:
+        return _app_cache['data']
+
+    # Rebuild cache
+    dp = DataProcessor(report_path)
+    dp.process_json()
+    _app_cache['data'] = dp
+    _app_cache['data_mtime'] = current_mtime
+    current_app.logger.debug(f"DataProcessor cache rebuilt for {report_path}")
+    return dp
 
 
 def get_lineage_view_processor() -> LineageView:
-    """Retrieve or create the LineageView instance for this request."""
-    if not hasattr(g, 'lineage_view_processor'):
-        tsv_path = current_app.config['MEASURE_DEPENDENCIES_TSV_PATH']
-        lvp = LineageView(tsv_path)
-        lvp.process_lineage_data()
-        g.lineage_view_processor = lvp
-    return g.lineage_view_processor
+    """Retrieve or create the LineageView instance with app-level caching."""
+    tsv_path = current_app.config['MEASURE_DEPENDENCIES_TSV_PATH']
+
+    if not os.path.exists(tsv_path):
+        current_app.logger.error(f"Lineage TSV file not found: {tsv_path}")
+        abort(500, description="Lineage data file not found. Please check your data directory.")
+
+    current_mtime = _get_file_mtime(tsv_path)
+
+    # Check if cache is valid
+    if _app_cache['lineage'] is not None and _app_cache['lineage_mtime'] == current_mtime:
+        return _app_cache['lineage']
+
+    # Rebuild cache
+    lvp = LineageView(tsv_path)
+    lvp.process_lineage_data()
+    _app_cache['lineage'] = lvp
+    _app_cache['lineage_mtime'] = current_mtime
+    current_app.logger.debug(f"LineageView cache rebuilt for {tsv_path}")
+    return lvp
 
 
 def get_model_processor() -> ModelProcessor:
-    """Retrieve or create the ModelProcessor instance for this request."""
-    if not hasattr(g, 'model_processor'):
-        model_path = current_app.config['MODEL_JSON_PATH']
-        if not os.path.exists(model_path):
-            current_app.logger.error(f"Model JSON file not found: {model_path}")
-            abort(500, description="Model data file not found. Please check your data directory.")
-        mp = ModelProcessor(model_path)
-        mp.load()
-        g.model_processor = mp
-    return g.model_processor
+    """Retrieve or create the ModelProcessor instance with app-level caching."""
+    model_path = current_app.config['MODEL_JSON_PATH']
+
+    if not os.path.exists(model_path):
+        current_app.logger.error(f"Model JSON file not found: {model_path}")
+        abort(500, description="Model data file not found. Please check your data directory.")
+
+    current_mtime = _get_file_mtime(model_path)
+
+    # Check if cache is valid
+    if _app_cache['model'] is not None and _app_cache['model_mtime'] == current_mtime:
+        return _app_cache['model']
+
+    # Rebuild cache
+    mp = ModelProcessor(model_path)
+    mp.load()
+    _app_cache['model'] = mp
+    _app_cache['model_mtime'] = current_mtime
+    current_app.logger.debug(f"ModelProcessor cache rebuilt for {model_path}")
+    return mp
 
 
 def load_model_data(model_json_path: str) -> Dict[str, Any]:
