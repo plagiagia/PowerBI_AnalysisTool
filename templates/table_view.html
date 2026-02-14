@@ -21,216 +21,16 @@
 {% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <style>
-  .field-overview-section {
-    margin: 2rem 0 2.5rem;
+  .dropdown-trigger {
+    width: 100%;
+    font: inherit;
+    text-align: left;
   }
 
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .summary-card {
-    position: relative;
-    padding: 1.5rem;
-    border-radius: 18px;
-    background: rgba(250, 252, 255, 0.9);
-    border: 1px solid rgba(31, 35, 53, 0.08);
-    box-shadow: 0 18px 32px -26px rgba(31, 35, 53, 0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 1.1rem;
-    color: #1f2333;
-  }
-
-  .summary-card.primary {
-    background: linear-gradient(135deg, rgba(103, 108, 255, 0.22), rgba(36, 208, 255, 0.15));
-    border-color: rgba(123, 127, 255, 0.45);
-  }
-
-  .summary-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-  }
-
-  .summary-card-header h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-
-  .summary-card-header p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: rgba(66, 75, 102, 0.85);
-  }
-
-  .summary-card.primary .summary-card-header p {
-    color: rgba(31, 35, 53, 0.75);
-  }
-
-  .summary-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background: rgba(94, 100, 255, 0.15);
-    color: #5e64ff;
-  }
-
-  .summary-card.primary .summary-icon {
-    background: rgba(255, 255, 255, 0.3);
-    color: #3c41ff;
-  }
-
-  .summary-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    row-gap: 0.55rem;
-  }
-
-  .summary-list li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    font-size: 0.95rem;
-  }
-
-  .summary-label {
-    font-weight: 600;
-    color: #424b66;
-  }
-
-  .summary-value {
-    font-weight: 600;
-    color: #1f2333;
-  }
-
-  .summary-hint {
-    margin-left: auto;
-    font-size: 0.8rem;
-    color: #66708e;
-  }
-
-  .page-breakdown-section {
-    margin: 1rem 0 2.5rem;
-  }
-
-  .page-breakdown-section .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .page-breakdown-section .section-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .page-breakdown-section .section-header p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: rgba(66, 75, 102, 0.85);
-  }
-
-  .page-breakdown-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .page-card {
-    background: rgba(250, 252, 255, 0.88);
-    border-radius: 18px;
-    border: 1px solid rgba(31, 35, 53, 0.08);
-    box-shadow: 0 18px 32px -24px rgba(31, 35, 53, 0.45);
-    padding: 1.4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .page-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .page-card-header h4 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2333;
-  }
-
-  .page-card-count {
-    font-size: 0.85rem;
-    color: #66708e;
-  }
-
-  .page-card-metrics {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
-    text-align: center;
-  }
-
-  .page-card-metrics div {
-    background: rgba(94, 100, 255, 0.08);
-    border-radius: 12px;
-    padding: 0.7rem 0.3rem;
-  }
-
-  .page-card-metrics strong {
-    display: block;
-    font-size: 1rem;
-    color: #1f2333;
-  }
-
-  .page-card-metrics span {
-    font-size: 0.75rem;
-    color: #66708e;
-  }
-
-  .page-card-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .section-label {
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: rgba(31, 35, 53, 0.55);
-  }
-
-  .visual-type-list,
-  .field-chip-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .visual-type-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    background: rgba(94, 100, 255, 0.12);
-    color: #3f46aa;
-    font-size: 0.8rem;
-    font-weight: 500;
+  .search-match-chip {
+    box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.28);
+    border-color: rgba(21, 101, 192, 0.45);
   }
 
   .field-list {
@@ -259,6 +59,11 @@
     transform: translateY(-1px);
     box-shadow: 0 10px 20px -16px rgba(31, 35, 53, 0.6);
     outline: none;
+  }
+
+  .field-chip.active-chip {
+    box-shadow: 0 0 0 2px rgba(94, 100, 255, 0.35);
+    transform: translateY(-1px);
   }
 
   .field-chip.field-measure {
@@ -315,25 +120,13 @@
   .empty-value {
     color: rgba(31, 35, 53, 0.4);
   }
-
-  @media (max-width: 900px) {
-    .summary-grid,
-    .page-breakdown-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .page-card-metrics {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.6rem;
-    }
-  }
 </style>
 {% endblock %} 
 
 {% block breadcrumbs %}
-<li>
+<nav aria-label="Breadcrumb">
   <a href="/table-view"><i class="fas fa-table"></i><span class="breadcrumb-text">Visual Fields</span></a>
-</li>
+</nav>
 {% endblock %} 
 
 {% block content %}
@@ -358,11 +151,17 @@
         Pages
       </label>
       <div class="multi-select-dropdown" id="pageFilterDropdown">
-        <div class="dropdown-trigger">
+        <button
+          type="button"
+          class="dropdown-trigger"
+          aria-expanded="false"
+          aria-controls="pageFilterContent"
+          aria-label="Open page filters"
+        >
           <span class="selected-text">All Pages</span>
           <i class="fas fa-chevron-down"></i>
-        </div>
-        <div class="dropdown-content">
+        </button>
+        <div class="dropdown-content" id="pageFilterContent">
           <div class="select-all-option">
             <label class="checkbox-label">
               <input type="checkbox" id="selectAllPages" checked>
@@ -384,11 +183,17 @@
         Visual Types
       </label>
       <div class="multi-select-dropdown" id="visualTypeFilterDropdown">
-        <div class="dropdown-trigger">
+        <button
+          type="button"
+          class="dropdown-trigger"
+          aria-expanded="false"
+          aria-controls="visualTypeFilterContent"
+          aria-label="Open visual type filters"
+        >
           <span class="selected-text">All Types</span>
           <i class="fas fa-chevron-down"></i>
-        </div>
-        <div class="dropdown-content">
+        </button>
+        <div class="dropdown-content" id="visualTypeFilterContent">
           <div class="select-all-option">
             <label class="checkbox-label">
               <input type="checkbox" id="selectAllVisualTypes" checked>
@@ -416,7 +221,7 @@
           class="field-search-input"
           placeholder="Search visuals, fields, pages..."
         />
-        <button id="clearGlobalSearch" class="clear-search-btn" style="display: none;">
+        <button id="clearGlobalSearch" class="clear-search-btn" style="display: none;" aria-label="Clear search">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -434,147 +239,6 @@
   </div>
 </div>
 
-<!-- Field Overview Section -->
-<section class="field-overview-section">
-  <div class="summary-grid">
-    <div class="summary-card primary">
-      <div class="summary-card-header">
-        <span class="summary-icon"><i class="fas fa-layer-group"></i></span>
-        <div>
-          <h3>Field Coverage</h3>
-          <p>Snapshot of how data fields drive this report.</p>
-        </div>
-      </div>
-      <ul class="summary-list">
-        <li>
-          <span class="summary-label">Unique fields</span>
-          <span class="summary-value">{{ field_overview.unique_fields }}</span>
-        </li>
-        <li>
-          <span class="summary-label">Columns</span>
-          <span class="summary-value">{{ field_overview.unique_columns }}</span>
-        </li>
-        <li>
-          <span class="summary-label">Measures</span>
-          <span class="summary-value">{{ field_overview.unique_measures }}</span>
-        </li>
-        <li>
-          <span class="summary-label">Avg fields / visual</span>
-          <span class="summary-value">{{ field_overview.avg_fields_per_visual }}</span>
-        </li>
-      </ul>
-    </div>
-    <div class="summary-card">
-      <div class="summary-card-header">
-        <span class="summary-icon"><i class="fas fa-exchange-alt"></i></span>
-        <div>
-          <h3>Visual Interactions</h3>
-          <p>How visuals rely on filters and customization.</p>
-        </div>
-      </div>
-      <ul class="summary-list">
-        <li>
-          <span class="summary-label">Visuals with filters</span>
-          <span class="summary-value">{{ field_overview.visuals_with_filters }}</span>
-          <span class="summary-hint">{{ field_overview.filter_ratio }}%</span>
-        </li>
-        <li>
-          <span class="summary-label">Visuals using VC objects</span>
-          <span class="summary-value">{{ field_overview.visuals_with_vc }}</span>
-        </li>
-        <li>
-          <span class="summary-label">Visuals using visual objects</span>
-          <span class="summary-value">{{ field_overview.visuals_with_objects }}</span>
-        </li>
-      </ul>
-    </div>
-    {% if field_usage_summary %}
-    <div class="summary-card">
-      <div class="summary-card-header">
-        <span class="summary-icon"><i class="fas fa-star"></i></span>
-        <div>
-          <h3>Top Fields</h3>
-          <p>Most referenced fields across visuals.</p>
-        </div>
-      </div>
-      <div class="field-chip-cloud">
-        {% for field in field_usage_summary[:8] %}
-        <button type="button" class="field-chip field-{{ field.kind|default('unknown') }}" data-field="{{ field.field }}" title="{{ field.tooltip }}">
-          {% if field.table %}
-          <span class="field-chip-table">{{ field.table }}</span>
-          {% endif %}
-          <span class="field-chip-name">{{ field.name }}</span>
-          <span class="field-chip-count">{{ field.total }}</span>
-        </button>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-  </div>
-</section>
-
-<!-- Page Breakdown Section -->
-<section class="page-breakdown-section">
-  <div class="section-header">
-    <h3><i class="fas fa-file-alt"></i> Page Breakdown</h3>
-    <p>Understand how each page combines visuals, fields, and filters.</p>
-  </div>
-  <div class="page-breakdown-grid">
-    {% for page in page_summaries %}
-    <div class="page-card">
-      <div class="page-card-header">
-        <h4>{{ page.page }}</h4>
-        <span class="page-card-count">{{ page.visual_count }} visuals</span>
-      </div>
-      <div class="page-card-metrics">
-        <div>
-          <strong>{{ page.field_count }}</strong>
-          <span>fields</span>
-        </div>
-        <div>
-          <strong>{{ page.measure_count }}</strong>
-          <span>measures</span>
-        </div>
-        <div>
-          <strong>{{ page.column_count }}</strong>
-          <span>columns</span>
-        </div>
-        <div>
-          <strong>{{ page.filter_visuals }}</strong>
-          <span>visuals with filters</span>
-        </div>
-      </div>
-      {% if page.visual_types %}
-      <div class="page-card-section">
-        <span class="section-label">Top visual types</span>
-        <div class="visual-type-list">
-          {% for visual_type in page.visual_types[:4] %}
-          <span class="visual-type-pill">{{ visual_type.type }} {{ visual_type.count }}</span>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-      {% if page.top_fields %}
-      <div class="page-card-section">
-        <span class="section-label">Frequent fields</span>
-        <div class="field-chip-cloud">
-          {% for field in page.top_fields %}
-          {% set usage = field_usage_lookup.get(field.field, {}) %}
-          <button type="button" class="field-chip field-{{ field.kind|default('unknown') }}" data-field="{{ field.field }}" title="{{ usage.tooltip or '' }}">
-            {% if field.table %}
-            <span class="field-chip-table">{{ field.table }}</span>
-            {% endif %}
-            <span class="field-chip-name">{{ field.name }}</span>
-            <span class="field-chip-count">{{ field.frequency }}</span>
-          </button>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
-</section>
 <!-- Table Section -->
 <div class="table-section">
   <div class="table-toolbar">
@@ -612,7 +276,7 @@
       </thead>
       <tbody>
         {% for visual in visual_rows %}
-        <tr data-page="{{ visual.page }}" data-visual-type="{{ visual.visual_type|lower|replace(' ', '-') }}">
+        <tr>
           <td data-label="Page">{{ visual.page }}</td>
           <td data-label="Visual Type" class="visual-type">
             <span
@@ -744,7 +408,7 @@
 <div class="pagination-container" id="pagination">
   <div class="pagination-info">
     Showing <span id="showingStart">1</span>-<span id="showingEnd">10</span> of
-    <span id="totalItems">0</span> items
+    <span id="totalItems">0</span> visuals
   </div>
   <div class="pagination-controls">
     <button id="prevPage" class="pagination-button" disabled>
@@ -784,7 +448,7 @@
     const exportCSV = document.getElementById("exportCSV");
     const globalSearchInput = document.getElementById("globalSearchInput");
     const clearGlobalSearch = document.getElementById("clearGlobalSearch");
-    const resetAllFilters = document.getElementById("resetAllFilters");
+    const resetAllFiltersBtn = document.getElementById("resetAllFilters");
     const activeFilters = document.getElementById("activeFilters");
     const activeFiltersList = document.getElementById("activeFiltersList");
 
@@ -831,6 +495,7 @@
 
     // Set up event listeners
     setupEventListeners();
+    initializeFieldChips();
 
     /**
      * Initialize modern filter system
@@ -839,16 +504,24 @@
       const pageDropdown = document.getElementById('pageFilterDropdown');
       const visualTypeDropdown = document.getElementById('visualTypeFilterDropdown');
 
-      if (!pageDropdown || !visualTypeDropdown || !globalSearchInput || !clearGlobalSearch || !resetAllFilters || !activeFilters || !activeFiltersList) {
+      if (!pageDropdown || !visualTypeDropdown || !globalSearchInput || !clearGlobalSearch || !resetAllFiltersBtn || !activeFilters || !activeFiltersList) {
         return;
       }
+
+      pageDropdown.dataset.allLabel = pageDropdown.querySelector('.selected-text')?.textContent.trim() || 'All Pages';
+      visualTypeDropdown.dataset.allLabel = visualTypeDropdown.querySelector('.selected-text')?.textContent.trim() || 'All Types';
+
       // Initialize dropdowns
-      initializeDropdown(pageDropdown, 'pageOptions', 'selectAllPages');
-      initializeDropdown(visualTypeDropdown, 'visualTypeOptions', 'selectAllVisualTypes');
+      initializeDropdown(pageDropdown, 'selectAllPages');
+      initializeDropdown(visualTypeDropdown, 'selectAllVisualTypes');
 
       // Populate dropdown options
       populatePageOptions();
       populateVisualTypeOptions();
+      updateSelectAllState(pageDropdown, 'selectAllPages');
+      updateSelectAllState(visualTypeDropdown, 'selectAllVisualTypes');
+      updateDropdownText(pageDropdown);
+      updateDropdownText(visualTypeDropdown);
 
       // Global search functionality
       globalSearchInput.addEventListener('input', function() {
@@ -865,15 +538,18 @@
       });
 
       // Reset all filters
-      resetAllFilters.addEventListener('click', function() {
+      resetAllFiltersBtn.addEventListener('click', function() {
         resetAllFilterValues();
         applyFiltersAndSearch();
       });
 
-      function initializeDropdown(dropdown, optionsContainerId, selectAllId) {
+      function initializeDropdown(dropdown, selectAllId) {
         const trigger = dropdown.querySelector('.dropdown-trigger');
         const content = dropdown.querySelector('.dropdown-content');
         const selectAll = document.getElementById(selectAllId);
+        if (!trigger || !content || !selectAll) {
+          return;
+        }
 
         // Toggle dropdown
         trigger.addEventListener('click', function(e) {
@@ -883,19 +559,31 @@
           // Close all other dropdowns
           document.querySelectorAll('.dropdown-content.show').forEach(dc => {
             dc.classList.remove('show');
-            dc.parentElement.querySelector('.dropdown-trigger').classList.remove('active');
+            const otherTrigger = dc.parentElement.querySelector('.dropdown-trigger');
+            if (otherTrigger) {
+              otherTrigger.classList.remove('active');
+              otherTrigger.setAttribute('aria-expanded', 'false');
+            }
           });
 
           if (!isActive) {
             content.classList.add('show');
             trigger.classList.add('active');
+            trigger.setAttribute('aria-expanded', 'true');
+          } else {
+            trigger.setAttribute('aria-expanded', 'false');
           }
+        });
+
+        content.addEventListener('click', function(e) {
+          e.stopPropagation();
         });
 
         // Select all functionality
         selectAll.addEventListener('change', function() {
           const checkboxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]');
           checkboxes.forEach(cb => cb.checked = this.checked);
+          this.indeterminate = false;
           updateDropdownText(dropdown);
           applyFiltersAndSearch();
         });
@@ -923,8 +611,12 @@
         const trigger = dropdown.querySelector('.dropdown-trigger');
         const selectedText = trigger.querySelector('.selected-text');
         const checkboxes = dropdown.querySelectorAll('.options-container input[type="checkbox"]:checked');
-        
-        if (checkboxes.length === 0) {
+        const totalOptions = dropdown.querySelectorAll('.options-container input[type="checkbox"]').length;
+        const allLabel = dropdown.dataset.allLabel || 'All selected';
+
+        if (totalOptions > 0 && checkboxes.length === totalOptions) {
+          selectedText.textContent = allLabel;
+        } else if (checkboxes.length === 0) {
           selectedText.textContent = 'None selected';
         } else if (checkboxes.length === 1) {
           selectedText.textContent = checkboxes[0].parentElement.querySelector('.label-text').textContent;
@@ -939,24 +631,32 @@
         // Check page filters
         const selectedPages = Array.from(document.querySelectorAll('#pageOptions input[type="checkbox"]:checked'))
           .map(cb => cb.parentElement.querySelector('.label-text').textContent);
-        
-        if (selectedPages.length > 0 && selectedPages.length < uniquePages.size) {
+
+        if (selectedPages.length === 0 && uniquePages.size > 0) {
           activeFilterTags.push({
             type: 'pages',
-            text: `Pages: ${selectedPages.length === 1 ? selectedPages[0] : selectedPages.length + ' pages'}`,
-            value: selectedPages
+            text: 'Pages: none'
+          });
+        } else if (selectedPages.length > 0 && selectedPages.length < uniquePages.size) {
+          activeFilterTags.push({
+            type: 'pages',
+            text: `Pages: ${selectedPages.length === 1 ? selectedPages[0] : selectedPages.length + ' pages'}`
           });
         }
 
         // Check visual type filters
         const selectedTypes = Array.from(document.querySelectorAll('#visualTypeOptions input[type="checkbox"]:checked'))
           .map(cb => cb.parentElement.querySelector('.label-text').textContent);
-        
-        if (selectedTypes.length > 0 && selectedTypes.length < uniqueVisualTypes.size) {
+
+        if (selectedTypes.length === 0 && uniqueVisualTypes.size > 0) {
           activeFilterTags.push({
             type: 'visualTypes',
-            text: `Types: ${selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length + ' types'}`,
-            value: selectedTypes
+            text: 'Types: none'
+          });
+        } else if (selectedTypes.length > 0 && selectedTypes.length < uniqueVisualTypes.size) {
+          activeFilterTags.push({
+            type: 'visualTypes',
+            text: `Types: ${selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length + ' types'}`
           });
         }
 
@@ -965,22 +665,39 @@
         if (globalSearch) {
           activeFilterTags.push({
             type: 'globalSearch',
-            text: `Search: "${globalSearch}"`,
-            value: globalSearch
+            text: `Search: "${globalSearch}"`
           });
         }
 
         // Update active filters display
         if (activeFilterTags.length > 0) {
           activeFilters.style.display = 'block';
-          activeFiltersList.innerHTML = activeFilterTags.map(tag => 
-            `<div class="filter-tag">
-              <span>${tag.text}</span>
-              <button class="filter-tag-remove" onclick="removeFilter('${tag.type}')" title="Remove filter">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>`
-          ).join('');
+          activeFiltersList.replaceChildren();
+
+          activeFilterTags.forEach((tag) => {
+            const tagElement = document.createElement('div');
+            tagElement.className = 'filter-tag';
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = tag.text;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'filter-tag-remove';
+            removeButton.title = 'Remove filter';
+            removeButton.setAttribute('aria-label', `Remove ${tag.type} filter`);
+            removeButton.addEventListener('click', function() {
+              removeFilter(tag.type);
+            });
+
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-times';
+            removeButton.appendChild(icon);
+
+            tagElement.appendChild(textSpan);
+            tagElement.appendChild(removeButton);
+            activeFiltersList.appendChild(tagElement);
+          });
         } else {
           activeFilters.style.display = 'none';
         }
@@ -989,45 +706,89 @@
       function resetAllFilterValues() {
         // Reset page filters
         document.querySelectorAll('#pageOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
-        document.getElementById('selectAllPages').checked = true;
-        
+        const pageSelectAll = document.getElementById('selectAllPages');
+        if (pageSelectAll) {
+          pageSelectAll.checked = true;
+          pageSelectAll.indeterminate = false;
+        }
+
         // Reset visual type filters
         document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
-        document.getElementById('selectAllVisualTypes').checked = true;
-        
+        const visualTypeSelectAll = document.getElementById('selectAllVisualTypes');
+        if (visualTypeSelectAll) {
+          visualTypeSelectAll.checked = true;
+          visualTypeSelectAll.indeterminate = false;
+        }
+
         // Reset global search
         globalSearchInput.value = '';
         clearGlobalSearch.style.display = 'none';
-        
+
         // Update dropdown texts
-        document.querySelector('#pageFilterDropdown .selected-text').textContent = 'All Pages';
-        document.querySelector('#visualTypeFilterDropdown .selected-text').textContent = 'All Types';
+        const pageDropdown = document.getElementById('pageFilterDropdown');
+        const visualTypeDropdown = document.getElementById('visualTypeFilterDropdown');
+        if (pageDropdown) {
+          updateDropdownText(pageDropdown);
+        }
+        if (visualTypeDropdown) {
+          updateDropdownText(visualTypeDropdown);
+        }
       }
 
       function populatePageOptions() {
         const container = document.getElementById('pageOptions');
         const pages = Array.from(uniquePages).sort();
-        
-        container.innerHTML = pages.map(page => 
-          `<label class="checkbox-label">
-            <input type="checkbox" value="${page}" checked>
-            <span class="checkmark"></span>
-            <span class="label-text">${page}</span>
-          </label>`
-        ).join('');
+
+        container.replaceChildren();
+        pages.forEach((page) => {
+          const label = document.createElement('label');
+          label.className = 'checkbox-label';
+
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = page;
+          input.checked = true;
+
+          const checkmark = document.createElement('span');
+          checkmark.className = 'checkmark';
+
+          const text = document.createElement('span');
+          text.className = 'label-text';
+          text.textContent = page;
+
+          label.appendChild(input);
+          label.appendChild(checkmark);
+          label.appendChild(text);
+          container.appendChild(label);
+        });
       }
 
       function populateVisualTypeOptions() {
         const container = document.getElementById('visualTypeOptions');
         const types = Array.from(uniqueVisualTypes).sort();
-        
-        container.innerHTML = types.map(type => 
-          `<label class="checkbox-label">
-            <input type="checkbox" value="${type}" checked>
-            <span class="checkmark"></span>
-            <span class="label-text">${type}</span>
-          </label>`
-        ).join('');
+
+        container.replaceChildren();
+        types.forEach((type) => {
+          const label = document.createElement('label');
+          label.className = 'checkbox-label';
+
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = type;
+          input.checked = true;
+
+          const checkmark = document.createElement('span');
+          checkmark.className = 'checkmark';
+
+          const text = document.createElement('span');
+          text.className = 'label-text';
+          text.textContent = type;
+
+          label.appendChild(input);
+          label.appendChild(checkmark);
+          label.appendChild(text);
+          container.appendChild(label);
+        });
       }
 
       // Make functions accessible globally
@@ -1038,7 +799,11 @@
       document.addEventListener('click', function() {
         document.querySelectorAll('.dropdown-content.show').forEach(content => {
           content.classList.remove('show');
-          content.parentElement.querySelector('.dropdown-trigger').classList.remove('active');
+          const trigger = content.parentElement.querySelector('.dropdown-trigger');
+          if (trigger) {
+            trigger.classList.remove('active');
+            trigger.setAttribute('aria-expanded', 'false');
+          }
         });
       });
     }
@@ -1125,6 +890,20 @@
       return allText.includes(term);
     }
 
+    function clearSearchHighlights() {
+      document.querySelectorAll(".search-highlight").forEach((el) => {
+        const text = el.textContent;
+        const parent = el.parentNode;
+        const textNode = document.createTextNode(text);
+        parent.replaceChild(textNode, el);
+        parent.normalize();
+      });
+
+      document.querySelectorAll(".search-match-chip").forEach((el) => {
+        el.classList.remove("search-match-chip");
+      });
+    }
+
     /**
      * Apply all filters and search
      */
@@ -1139,17 +918,13 @@
       // Get selected visual types from dropdown  
       const selectedVisualTypes = Array.from(document.querySelectorAll('#visualTypeOptions input[type="checkbox"]:checked'))
         .map(cb => cb.value);
+      const hasPageOptions = document.querySelectorAll('#pageOptions input[type="checkbox"]').length > 0;
+      const hasVisualTypeOptions = document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').length > 0;
 
       let visibleItems = 0;
 
       // Clear previous search highlights
-      document.querySelectorAll(".search-highlight").forEach((el) => {
-        const text = el.textContent;
-        const parent = el.parentNode;
-        const textNode = document.createTextNode(text);
-        parent.replaceChild(textNode, el);
-        parent.normalize();
-      });
+      clearSearchHighlights();
 
       // Apply filters to table rows
       tableRows.forEach((row) => {
@@ -1157,8 +932,8 @@
         const pageCell = cells[0].textContent.trim();
         const visualTypeCell = cells[1].textContent.trim();
 
-        const pageMatches = selectedPages.length === 0 || selectedPages.includes(pageCell);
-        const typeMatches = selectedVisualTypes.length === 0 || selectedVisualTypes.includes(visualTypeCell.trim());
+        const pageMatches = !hasPageOptions || selectedPages.includes(pageCell);
+        const typeMatches = !hasVisualTypeOptions || selectedVisualTypes.includes(visualTypeCell.trim());
         
         // Global search - search entire row content
         let searchMatches = true;
@@ -1168,9 +943,10 @@
           // If it matches, highlight occurrences in appropriate cells
           if (searchMatches) {
             cells.forEach((cell) => {
-              // Only highlight in simple text cells, not complex ones
               if (cell.children.length === 0 && cell.textContent.toLowerCase().includes(searchValue)) {
                 highlightSearchTerm(cell, searchValue);
+              } else {
+                highlightSearchMatchesInCell(cell, searchValue);
               }
             });
           }
@@ -1198,27 +974,60 @@
       // Reset modern filters
       window.resetAllFilterValues && window.resetAllFilterValues();
 
-      // Clear highlights
-      document.querySelectorAll(".search-highlight").forEach((el) => {
-        const parent = el.parentNode;
-        parent.textContent = parent.textContent;
-      });
-
-      // Show all rows
-      tableRows.forEach((row) => {
-        row.classList.remove("filtered-out");
-      });
-
       // Reset to first page
       currentPage = 1;
 
-      // Update UI
-      currentVisibleRows = tableRows.length;
-      updateResultCount();
-      updateEmptyState();
-      setupPagination();
-      applyPagination();
+      applyFiltersAndSearch();
     }
+
+    function removeFilter(filterType) {
+      switch(filterType) {
+        case 'pages': {
+          document.querySelectorAll('#pageOptions input[type="checkbox"]').forEach((cb) => {
+            cb.checked = true;
+          });
+          const pageSelectAll = document.getElementById('selectAllPages');
+          if (pageSelectAll) {
+            pageSelectAll.checked = true;
+            pageSelectAll.indeterminate = false;
+          }
+          const pageDropdown = document.getElementById('pageFilterDropdown');
+          const pageText = pageDropdown?.querySelector('.selected-text');
+          if (pageText) {
+            pageText.textContent = pageDropdown?.dataset.allLabel || 'All Pages';
+          }
+          break;
+        }
+        case 'visualTypes': {
+          document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').forEach((cb) => {
+            cb.checked = true;
+          });
+          const visualTypeSelectAll = document.getElementById('selectAllVisualTypes');
+          if (visualTypeSelectAll) {
+            visualTypeSelectAll.checked = true;
+            visualTypeSelectAll.indeterminate = false;
+          }
+          const typeDropdown = document.getElementById('visualTypeFilterDropdown');
+          const typeText = typeDropdown?.querySelector('.selected-text');
+          if (typeText) {
+            typeText.textContent = typeDropdown?.dataset.allLabel || 'All Types';
+          }
+          break;
+        }
+        case 'globalSearch':
+          if (globalSearchInput) {
+            globalSearchInput.value = '';
+          }
+          if (clearGlobalSearch) {
+            clearGlobalSearch.style.display = 'none';
+          }
+          break;
+      }
+
+      applyFiltersAndSearch();
+    }
+
+    window.removeFilter = removeFilter;
 
     /**
      * Highlight search term in a cell
@@ -1237,6 +1046,16 @@
           '<span class="search-highlight">$1</span>'
         );
       }
+    }
+
+    function highlightSearchMatchesInCell(cell, term) {
+      const targetElements = cell.querySelectorAll(".field-chip, .visual-type-badge");
+      targetElements.forEach((element) => {
+        const text = element.textContent.toLowerCase();
+        if (text.includes(term)) {
+          element.classList.add("search-match-chip");
+        }
+      });
     }
 
     /**
@@ -1468,32 +1287,6 @@
       }
     }
 
-    // Make removeFilter function global for the filter tags
-    window.removeFilter = function(filterType) {
-      switch(filterType) {
-        case 'pages':
-          document.querySelectorAll('#pageOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
-          document.getElementById('selectAllPages').checked = true;
-          document.querySelector('#pageFilterDropdown .selected-text').textContent = 'All Pages';
-          break;
-        case 'visualTypes':
-          document.querySelectorAll('#visualTypeOptions input[type="checkbox"]').forEach(cb => cb.checked = true);
-          document.getElementById('selectAllVisualTypes').checked = true;
-          document.querySelector('#visualTypeFilterDropdown .selected-text').textContent = 'All Types';
-          break;
-        case 'globalSearch':
-          document.getElementById('globalSearchInput').value = '';
-          document.getElementById('clearGlobalSearch').style.display = 'none';
-          break;
-      }
-      
-      applyFiltersAndSearch();
-    };
-
-    // Initial setup
-    currentVisibleRows = tableRows.length;
-    updateResultCount();
-    applyPagination();
   });
 </script>
 {% endblock %}

@@ -145,7 +145,6 @@ def table_view() -> str:
         return [segment.strip() for segment in str(raw_value).split(';') if segment.strip()]
 
     visual_rows: List[Dict[str, Any]] = []
-    page_stats: Dict[str, Dict[str, Any]] = {}
     field_usage: Dict[str, Dict[str, Any]] = {}
     unique_pages: Set[str] = set()
 
@@ -233,38 +232,6 @@ def table_view() -> str:
 
         unique_pages.add(page)
 
-        summary = page_stats.setdefault(page, {
-            'visual_count': 0,
-            'field_set': set(),
-            'measure_set': set(),
-            'column_set': set(),
-            'filter_fields': set(),
-            'filter_visuals': 0,
-            'visual_types': collections.Counter(),
-            'field_frequency': collections.Counter()
-        })
-
-        summary['visual_count'] += 1
-        summary['visual_types'][visual_type] += 1
-
-        for field_entry in fields:
-            field_name = field_entry['full']
-            summary['field_set'].add(field_name)
-            summary['field_frequency'][field_name] += 1
-            if field_entry['kind'] == 'measure':
-                summary['measure_set'].add(field_name)
-            elif field_entry['kind'] == 'column':
-                summary['column_set'].add(field_name)
-
-        for field_entry in filter_fields:
-            field_name = field_entry['full']
-            summary['field_set'].add(field_name)
-            summary['filter_fields'].add(field_name)
-            summary['field_frequency'][field_name] += 1
-
-        if filter_fields:
-            summary['filter_visuals'] += 1
-
         visual_rows.append({
             'page': page,
             'visual_type': visual_type,
@@ -283,7 +250,6 @@ def table_view() -> str:
     visual_rows.sort(key=lambda item: (item['page'].lower(), item['visual_type'].lower(), item['visual_name'].lower()))
 
     field_usage_lookup: Dict[str, Dict[str, Any]] = {}
-    field_usage_summary: List[Dict[str, Any]] = []
     field_kind_counter: collections.Counter = collections.Counter()
 
     for field_name, usage in field_usage.items():
@@ -326,48 +292,10 @@ def table_view() -> str:
             tooltip_parts.append(f"Filters: {summary_entry['filter_count']}")
         if summary_entry.get('page_count'):
             tooltip_parts.append(f"Pages: {summary_entry['page_count']}")
-        summary_entry['tooltip'] = ' • '.join(tooltip_parts)
+        summary_entry['tooltip'] = ' | '.join(tooltip_parts)
         summary_entry['kind_label'] = kind_label
 
         field_usage_lookup[field_name] = summary_entry
-        field_usage_summary.append(summary_entry)
-
-    field_usage_summary.sort(key=lambda item: (-item['total'], item['field'].lower()))
-    top_field_usage = field_usage_summary[:12]
-
-    page_summaries: List[Dict[str, Any]] = []
-    for page, data in page_stats.items():
-        visual_types = [
-            {'type': visual_type, 'count': count}
-            for visual_type, count in data['visual_types'].most_common()
-        ]
-
-        top_fields = []
-        for field_name, frequency in data['field_frequency'].most_common(3):
-            usage_info = field_usage_lookup.get(field_name, {})
-            top_fields.append({
-                'field': field_name,
-                'frequency': frequency,
-                'kind': usage_info.get('kind', 'unknown'),
-                'table': usage_info.get('table', ''),
-                'name': usage_info.get('name', field_name),
-                'data_type': usage_info.get('data_type'),
-                'data_category': usage_info.get('data_category')
-            })
-
-        page_summaries.append({
-            'page': page,
-            'visual_count': data['visual_count'],
-            'field_count': len(data['field_set']),
-            'measure_count': len(data['measure_set']),
-            'column_count': len(data['column_set']),
-            'filter_visuals': data['filter_visuals'],
-            'filter_field_count': len(data['filter_fields']),
-            'visual_types': visual_types,
-            'top_fields': top_fields
-        })
-
-    page_summaries.sort(key=lambda item: item['page'].lower())
 
     total_visuals = len(visual_rows)
     total_unique_fields = len(field_usage_lookup)
@@ -391,8 +319,6 @@ def table_view() -> str:
         visual_rows=visual_rows,
         unique_pages=unique_pages_sorted,
         metrics=metrics,
-        page_summaries=page_summaries,
-        field_usage_summary=top_field_usage,
         field_usage_lookup=field_usage_lookup,
         field_overview=field_overview,
         field_kind_counts=dict(field_kind_counter)

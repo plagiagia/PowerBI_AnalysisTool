@@ -8,7 +8,7 @@
   <article class="wb-card wb-health-card">
     <div class="wb-card-head">
       <span class="wb-overline">Model Health</span>
-      <a href="/issues" class="wb-inline-link">Open Action Center <i class="fas fa-arrow-right"></i></a>
+      <a href="/explore" class="wb-inline-link">Open Explore Hub <i class="fas fa-arrow-right"></i></a>
     </div>
 
     <div class="wb-score-ring" style="--score: {{ health.score }}">
@@ -109,7 +109,7 @@
     </div>
     <ol class="wb-workflow-list">
       <li><span>1</span><div><strong>Validate Inputs</strong><small>Confirm JSON/TSV readiness and parse quality.</small></div></li>
-      <li><span>2</span><div><strong>Review Action Center</strong><small>Triage by severity and assign ownership.</small></div></li>
+      <li><span>2</span><div><strong>Review Top Findings</strong><small>Triage by severity and assign ownership.</small></div></li>
       <li><span>3</span><div><strong>Explore Root Causes</strong><small>Drill into model, DAX, and report-level analyzers.</small></div></li>
       <li><span>4</span><div><strong>Simulate Impact</strong><small>Estimate cleanup chain before deleting measures.</small></div></li>
       <li><span>5</span><div><strong>Export Handoff</strong><small>Share artifacts with BI engineering and QA.</small></div></li>
@@ -120,7 +120,7 @@
 <section class="wb-card">
   <div class="wb-card-head">
     <h2>Top Findings</h2>
-    <a href="/issues" class="wb-inline-link">See all findings <i class="fas fa-arrow-right"></i></a>
+    <a href="/explore" class="wb-inline-link">Explore tools <i class="fas fa-arrow-right"></i></a>
   </div>
 
   {% if issues %}

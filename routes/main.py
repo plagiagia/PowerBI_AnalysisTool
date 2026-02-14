@@ -31,7 +31,7 @@ def _severity_rank(severity: str) -> int:
 
 
 def _build_issue_catalog(metrics: Dict[str, Any], model_processor: ModelProcessor) -> List[Dict[str, Any]]:
-    """Create a prioritized issue list for the Action Center."""
+    """Create a prioritized issue list for dashboard triage."""
     issues: List[Dict[str, Any]] = []
 
     measure_count = max(int(metrics.get('measure_count') or 0), 1)
@@ -266,13 +266,6 @@ def index() -> str:
     context = _build_workbench_context()
     context['time_loaded'] = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
     return render_template('index.html', **context)
-
-
-@main_bp.route('/issues')
-def issues() -> str:
-    """Render prioritized issues for remediation planning."""
-    context = _build_workbench_context()
-    return render_template('issues.html', **context)
 
 
 @main_bp.route('/upload-validate')

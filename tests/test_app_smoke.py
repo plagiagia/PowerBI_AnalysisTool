@@ -124,7 +124,6 @@ class RouteSmokeTests(unittest.TestCase):
         routes = [
             "/",
             "/upload-validate",
-            "/issues",
             "/explore",
             "/table-view",
             "/lineage-view",
@@ -142,6 +141,10 @@ class RouteSmokeTests(unittest.TestCase):
             with self.subTest(route=route):
                 response = self.client.get(route)
                 self.assertEqual(response.status_code, 200)
+
+    def test_removed_action_center_route_returns_404(self) -> None:
+        response = self.client.get("/issues")
+        self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":
