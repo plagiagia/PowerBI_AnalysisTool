@@ -1,36 +1,37 @@
-{% extends "base.html" %} {% block title %}Source Explorer - Power BI Analysis
-Tool{% endblock %} {% block header_icon %}<i class="fas fa-database"></i>{%
-endblock %} {% block header_title %}Source Explorer{% endblock %} {% block
-header_subtitle %}Examine and analyze the M queries that form your report's data
-sources{% endblock %} {% block header_stats %}
-<div class="quick-stat">
-  <span class="stat-number">{{ m_queries_info|length if m_queries_info else 0 }}</span>
-  <span class="stat-label">Data Sources</span>
+{% extends "base.html" %}
+{% block title %}Source Explorer - Power BI Workbench{% endblock %}
+
+{% block header_icon %}<i class="fas fa-database"></i>{% endblock %}
+{% block header_title %}Source Explorer{% endblock %}
+{% block header_subtitle %}Examine M queries and map the data-source footprint across your semantic model.{% endblock %}
+
+{% block header_stats %}
+{% set query_count = m_queries_info|length if m_queries_info else 0 %}
+{% set total_characters = m_queries_info|map(attribute='m_query')|map('length')|sum if m_queries_info else 0 %}
+<div class="wb-stat-chip">
+  <span>Queries</span>
+  <strong>{{ query_count }}</strong>
 </div>
-<div class="quick-stat">
-  <span class="stat-number">{{ (m_queries_info|map(attribute='m_query')|map('length')|sum /
-    1000)|round|int if m_queries_info else 0 }}</span>
-  <span class="stat-label">Total Lines (K)</span>
+<div class="wb-stat-chip">
+  <span>Total Chars</span>
+  <strong>{{ total_characters }}</strong>
 </div>
-{% endblock %} {% block head %}
+<div class="wb-stat-chip">
+  <span>Avg Length</span>
+  <strong>{{ (total_characters / query_count)|round(0)|int if query_count else 0 }}</strong>
+</div>
+{% endblock %}
+
+{% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" />
 <!-- Include Prism.js PowerQuery language support -->
 <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/line-numbers/prism-line-numbers.min.css" />
-{% endblock %} {% block breadcrumbs %}
-<li>
-  <a href="/source-explorer"><i class="fas fa-database"></i><span class="breadcrumb-text">Source Explorer</span></a>
-</li>
-{% endblock %} {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title"><i class="fas fa-database"></i> Source Explorer</h1>
-  <p class="page-description">
-    Examine the M queries that form your report's data sources.
-  </p>
-</div>
+{% endblock %}
 
+{% block content %}
+<div class="source-page">
 <!-- Loading Indicator -->
 <div id="loadingIndicator" class="loading-overlay" style="display: none">
   <div class="loading-spinner"></div>
@@ -315,6 +316,8 @@ sources{% endblock %} {% block header_stats %}
       <i class="fas fa-undo"></i> Clear Search
     </button>
   </div>
+</div>
+
 </div>
 
 <!-- Hidden data for JavaScript -->
@@ -1526,6 +1529,41 @@ ${item.query}
 </script>
 
 <style>
+  .source-page {
+    --color-primary: var(--wb-accent);
+    --glass-bg: rgba(255, 255, 255, 0.94);
+    --glass-border: #d4e0ee;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f8ff;
+    --bg-hover: #e8f0fb;
+    --text-primary: #13243a;
+    --text-secondary: #5d718a;
+    --text-muted: #7389a3;
+    --gradient-primary: linear-gradient(145deg, #0d6aa6, #128b84);
+    --gradient-warning: linear-gradient(140deg, #ffe1a8, #ffd28c);
+    --font-primary: "Manrope", sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 999px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+    --space-6: 40px;
+    --shadow-sm: var(--wb-shadow-sm);
+    --shadow-md: 0 18px 34px -24px rgba(16, 41, 74, 0.45);
+    --shadow-lg: var(--wb-shadow-lg);
+    --shadow-glow: 0 0 24px rgba(13, 106, 166, 0.18);
+    --transition-fast: all 0.18s ease;
+    --transition-smooth: all 0.24s ease;
+    color: var(--text-primary);
+  }
+
   /* Additional styles for improvements */
   .loading-overlay {
     position: fixed;
