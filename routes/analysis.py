@@ -407,10 +407,18 @@ def lineage_view_route() -> str:
 
     lvp = get_lineage_view_processor()
     lineage_metrics = calculate_lineage_metrics(lvp)
+    graph_nodes = [
+        {
+            'id': node.get('id'),
+            'label': node.get('label'),
+            'type': node.get('type')
+        }
+        for node in lvp.nodes
+    ]
 
     return render_template(
         'lineage_view.html',
-        nodes=lvp.nodes,
+        nodes=graph_nodes,
         edges=lvp.edges,
         lineage_metrics=lineage_metrics
     )

@@ -1,5 +1,6 @@
 import csv
 import logging
+import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
@@ -22,18 +23,20 @@ class LineageView:
         self.measures_with_children: Set[str] = set()
         self.unique_edges: Set[Tuple[str, str]] = set()
         self.unique_columns: Set[str] = set()
+        self.unique_measure_nodes: Set[str] = set()
         self.measure_data: Dict[str, Dict[str, Any]] = {}
         self._all_measures_cache: Optional[Set[str]] = None
         self._final_measures_cache: Optional[Set[str]] = None
         self._data_loaded: bool = False
 
-    def _load_tsv_data(self) -> List[List[str]]:
-        """Load and return raw data from TSV file with error handling."""
+    def _iter_tsv_rows(self):
+        """Yield TSV rows with robust error handling."""
         try:
             with open(self.tsv_file_path, 'r', encoding='utf-8') as file:
                 reader = csv.reader(file, delimiter='\t')
-                next(reader)  # Skip the header row
-                return list(reader)
+                next(reader, None)  # Skip the header row if it exists
+                for row in reader:
+                    yield row
         except FileNotFoundError:
             logger.error(f"Lineage file not found: {self.tsv_file_path}")
             raise ValueError(f"Lineage file not found: {self.tsv_file_path}")
@@ -49,21 +52,24 @@ class LineageView:
         if self._data_loaded:
             return
 
-        data = self._load_tsv_data()
-
-        for measure in data:
+        for measure in self._iter_tsv_rows():
             if len(measure) <= self.COLUMN_INDEX:
                 logger.warning(f"Skipping malformed row: {measure}")
                 continue
 
-            measure_name = measure[self.MEASURE_INDEX]
+            measure_name = (measure[self.MEASURE_INDEX] or '').strip()
+            if not measure_name:
+                continue
+
             dax_expression = measure[self.DAX_EXPRESSION_INDEX] if len(measure) > self.DAX_EXPRESSION_INDEX else ''
 
-            self.nodes.append({
-                'id': measure_name,
-                'label': measure_name,
-                'dax': dax_expression
-            })
+            if measure_name not in self.unique_measure_nodes:
+                self.nodes.append({
+                    'id': measure_name,
+                    'label': measure_name,
+                    'dax': dax_expression
+                })
+                self.unique_measure_nodes.add(measure_name)
 
             parent_measures = self._parse_list_field(measure[self.PARENT_INDEX])
             child_measures = self._parse_list_field(measure[self.CHILD_INDEX])
@@ -77,12 +83,25 @@ class LineageView:
                 self.measures_with_children.add(measure_name)
 
             # Cache measure data for later use
-            self.measure_data[measure_name] = {
-                'parent_measures': parent_measures,
-                'child_measures': child_measures,
-                'dax': dax_expression,
-                'columns': columns
-            }
+            existing = self.measure_data.get(measure_name)
+            if existing:
+                merged_parents = sorted(set(existing.get('parent_measures', [])) | set(parent_measures))
+                merged_children = sorted(set(existing.get('child_measures', [])) | set(child_measures))
+                merged_columns = sorted(set(existing.get('columns', [])) | set(columns))
+                merged_dax = existing.get('dax') or dax_expression
+                self.measure_data[measure_name] = {
+                    'parent_measures': merged_parents,
+                    'child_measures': merged_children,
+                    'dax': merged_dax,
+                    'columns': merged_columns
+                }
+            else:
+                self.measure_data[measure_name] = {
+                    'parent_measures': parent_measures,
+                    'child_measures': child_measures,
+                    'dax': dax_expression,
+                    'columns': columns
+                }
 
             # Process columns
             for column in columns:
@@ -113,19 +132,15 @@ class LineageView:
         """Parse a semicolon-separated field into a list of non-empty strings."""
         if not field:
             return []
-        return [item.strip() for item in field.split('; ') if item.strip()]
+        return [item.strip() for item in re.split(r'\s*;\s*', field) if item.strip()]
 
     def extract_dax_expressions(self) -> List[Tuple[str, str]]:
         """Extract DAX expressions from all measures."""
         self.process_lineage_data()
 
         dax_expressions: List[Tuple[str, str]] = []
-        for measure in self.nodes:
-            if measure.get('type') == 'column':
-                continue
-
-            label = (measure.get('label') or '').strip()
-            dax_expression = measure.get('dax', '')
+        for label, data in self.measure_data.items():
+            dax_expression = data.get('dax', '')
 
             if label and dax_expression:
                 # Replace escape sequences with their corresponding characters

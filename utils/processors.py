@@ -13,6 +13,11 @@ from lineage_view import LineageView
 from model_processor import ModelProcessor
 
 
+def _get_processor_cache() -> Dict[str, Any]:
+    """Get app-level processor cache."""
+    return current_app.extensions.setdefault('processor_cache', {})
+
+
 def get_data_processor() -> DataProcessor:
     """Retrieve or create the DataProcessor instance for this request."""
     if not hasattr(g, 'data_processor'):
@@ -31,8 +36,29 @@ def get_lineage_view_processor() -> LineageView:
     """Retrieve or create the LineageView instance for this request."""
     if not hasattr(g, 'lineage_view_processor'):
         tsv_path = current_app.config['MEASURE_DEPENDENCIES_TSV_PATH']
-        lvp = LineageView(tsv_path)
-        lvp.process_lineage_data()
+        if not os.path.exists(tsv_path):
+            current_app.logger.error(f"Lineage TSV file not found: {tsv_path}")
+            abort(500, description="Lineage data file not found. Please check your data directory.")
+
+        path_mtime = os.path.getmtime(tsv_path)
+        cache = _get_processor_cache()
+        cached_entry = cache.get('lineage_view')
+
+        if (
+            cached_entry
+            and cached_entry.get('path') == tsv_path
+            and cached_entry.get('mtime') == path_mtime
+        ):
+            lvp = cached_entry['processor']
+        else:
+            lvp = LineageView(tsv_path)
+            lvp.process_lineage_data()
+            cache['lineage_view'] = {
+                'path': tsv_path,
+                'mtime': path_mtime,
+                'processor': lvp
+            }
+
         g.lineage_view_processor = lvp
     return g.lineage_view_processor
 

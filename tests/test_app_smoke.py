@@ -136,6 +136,7 @@ class RouteSmokeTests(unittest.TestCase):
             "/report-insights",
             "/source-explorer",
             "/api/model-json",
+            "/api/lineage-node?name=Total%20Sales",
         ]
         for route in routes:
             with self.subTest(route=route):

@@ -3,9 +3,9 @@
 import json
 import os
 
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, request
 
-from utils.processors import load_model_data
+from utils.processors import get_lineage_view_processor, load_model_data
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -29,4 +29,39 @@ def get_model_json():
         return jsonify({"error": "Error reading model file"}), 500
     except Exception as e:
         current_app.logger.error(f"Unexpected error loading model JSON: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@api_bp.route('/lineage-node', methods=['GET'])
+def get_lineage_node_details():
+    """API endpoint to fetch lineage detail for a specific node."""
+    node_name = (request.args.get('name') or '').strip()
+    if not node_name:
+        return jsonify({"error": "Missing node name"}), 400
+
+    try:
+        lvp = get_lineage_view_processor()
+        if node_name in lvp.measure_data:
+            details = lvp.get_measure_dependencies(node_name)
+            dax = lvp.measure_data.get(node_name, {}).get('dax', '')
+            return jsonify({
+                "name": node_name,
+                "node_type": details.get('type', 'unknown'),
+                "parent_measures": details.get('parent_measures', []),
+                "child_measures": details.get('child_measures', []),
+                "columns": details.get('columns', []),
+                "dax": dax
+            })
+
+        # Columns and unknown nodes do not have measure metadata
+        return jsonify({
+            "name": node_name,
+            "node_type": "column",
+            "parent_measures": [],
+            "child_measures": [],
+            "columns": [],
+            "dax": ""
+        })
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error loading lineage node '{node_name}': {e}")
         return jsonify({"error": "Internal server error"}), 500

@@ -1,941 +1,864 @@
 {% extends "base.html" %}
-{% block title %}Data Lineage - Power BI Explorer{% endblock %}
-
+{% block title %}Data Lineage - Power BI Workbench{% endblock %}
 {% block header_icon %}<i class="fas fa-project-diagram"></i>{% endblock %}
-{% block header_title %}Data Lineage Diagram{% endblock %}
-{% block header_subtitle %}Interactive visualization of measure dependencies and relationships{% endblock %}
-
-{% block header_stats %}
-<div class="quick-stat">
-  <span class="stat-number">{{ lineage_metrics.total_measures if lineage_metrics else 0 }}</span>
-  <span class="stat-label">Total Measures</span>
-</div>
-<div class="quick-stat">
-  <span class="stat-number">{{ lineage_metrics.total_relationships if lineage_metrics else 0 }}</span>
-  <span class="stat-label">Relationships</span>
-</div>
-{% endblock %}
+{% block header_title %}Data Lineage{% endblock %}
+{% block header_subtitle %}Trace measure dependencies with a performance-tuned graph built for large semantic models.{% endblock %}
 
 {% block head %}
-<!-- Vis Network CSS -->
 <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 <style>
-  /* Optimized Lineage View Styles */
-  .lineage-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 200px);
-    gap: var(--space-lg);
+  .lineage-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
-  /* Control Bar */
-  .lineage-controls {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    display: flex;
-    justify-content: space-between;
+  .lineage-toolbar {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) auto auto auto;
+    gap: 10px;
     align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .lineage-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #cedced;
+    background: #f8fbff;
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+
+  .lineage-search i {
+    color: #4e6784;
+    font-size: 0.85rem;
+  }
+
+  .lineage-search input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    color: #1f3e5f;
+    font-size: 0.85rem;
+  }
+
+  .lineage-toggle-row {
+    display: flex;
     flex-wrap: wrap;
-    gap: var(--space-lg);
+    gap: 7px;
+    margin-bottom: 12px;
   }
 
-  .control-group {
-    display: flex;
+  .lineage-toggle {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-lg);
+    gap: 6px;
+    border: 1px solid #cad9eb;
+    background: #f8fbff;
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    color: #2f4b6a;
   }
 
-  .control-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
+  .lineage-toggle input {
+    accent-color: #0d6aa6;
   }
 
-  .control-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
+  .lineage-action {
+    border: 1px solid #bfd3e8;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1f476d;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 600;
   }
 
-  /* Network Diagram */
-  .network-wrapper {
-    flex: 1;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
+  .lineage-action:hover {
+    background: #f2f8ff;
+  }
+
+  .lineage-network-wrap {
+    border: 1px solid #d5e2f1;
+    border-radius: 14px;
     overflow: hidden;
+    background: linear-gradient(180deg, #fbfdff 0%, #f2f8ff 100%);
+    min-height: 660px;
     position: relative;
   }
 
-  #mynetwork {
+  #lineageNetwork {
+    height: 660px;
     width: 100%;
-    height: 100%;
-    min-height: 600px;
   }
 
-  /* Legend */
-  .network-legend {
+  .lineage-status {
     position: absolute;
-    top: var(--space-lg);
-    left: var(--space-lg);
-    background: var(--bg-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    display: flex;
-    gap: var(--space-lg);
-    z-index: 10;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    font-size: 0.875rem;
-  }
-
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid var(--glass-border);
-  }
-
-  .legend-dot.parent {
-    background: #F1C83B;
-  }
-
-  .legend-dot.final {
-    background: #23C4A7;
-  }
-
-  .legend-dot.column {
-    background: #4FACFE;
-  }
-
-  /* Network Controls */
-  .network-controls {
-    position: absolute;
-    bottom: var(--space-lg);
-    right: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    z-index: 10;
-  }
-
-  .network-btn {
-    width: 40px;
-    height: 40px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition-fast);
-  }
-
-  .network-btn:hover {
-    background: var(--bg-hover);
-    border-color: var(--color-primary);
-    transform: translateY(-2px);
-  }
-
-  /* Loading State */
-  .network-loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    display: none;
-  }
-
-  .loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid var(--glass-border);
-    border-radius: 50%;
-    border-top-color: var(--color-primary);
-    animation: spin 1s ease-in-out infinite;
-    margin: 0 auto var(--space-md);
-  }
-
-  /* Measure Details Modal */
-  .measure-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg-primary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-xl);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: none;
-    z-index: 1000;
-    overflow: hidden;
-  }
-
-  .measure-modal.active {
-    display: block;
-  }
-
-  .modal-header {
-    padding: var(--space-lg);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--glass-border);
-    display: flex;
-    justify-content: space-between;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    border: 1px solid #c9dced;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 7px 10px;
+    font-size: 0.74rem;
+    color: #365473;
+    display: inline-flex;
+    gap: 6px;
     align-items: center;
   }
 
-  .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
+  .lineage-status i {
+    color: #0d6aa6;
   }
 
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 1.5rem;
-    padding: var(--space-sm);
-    border-radius: var(--radius-md);
-    transition: var(--transition-fast);
-  }
-
-  .modal-close:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-  }
-
-  .modal-body {
-    padding: var(--space-lg);
-    overflow-y: auto;
-    max-height: calc(80vh - 80px);
-  }
-
-  .dax-code {
-    background: var(--bg-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    overflow-x: auto;
-    margin: var(--space-md) 0;
-  }
-
-  .measure-info {
+  .lineage-meta-grid {
     display: grid;
-    gap: var(--space-md);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
   }
 
-  .info-row {
-    display: flex;
-    gap: var(--space-md);
+  .lineage-meta-cell {
+    border: 1px solid #d7e4f4;
+    background: #f8fbff;
+    border-radius: 10px;
+    padding: 10px;
   }
 
-  .info-label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 120px;
+  .lineage-meta-cell span {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6a819c;
+    margin-bottom: 5px;
   }
 
-  .info-value {
-    color: var(--text-primary);
+  .lineage-meta-cell strong {
+    font-family: "JetBrains Mono", monospace;
+    color: #15395d;
+    font-size: 0.89rem;
   }
 
-  .tag-list {
+  .lineage-panel {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .lineage-panel h3 {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    color: #15395d;
+    font-size: 1rem;
+  }
+
+  .lineage-panel p {
+    margin: 0;
+    font-size: 0.83rem;
+    color: #5a718c;
+  }
+
+  .lineage-chip-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs);
+    gap: 6px;
+    max-height: 136px;
+    overflow: auto;
   }
 
-  .tag {
-    background: var(--gradient-primary);
-    color: white;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 500;
+  .lineage-chip {
+    font-size: 0.73rem;
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #eef5fd;
+    border: 1px solid #c9ddef;
+    color: #214766;
   }
 
-  /* Modal Overlay */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    z-index: 999;
-    display: none;
+  .lineage-empty {
+    font-size: 0.78rem;
+    color: #7389a3;
+    margin: 0;
   }
 
-  .modal-overlay.active {
-    display: block;
+  .lineage-code-block {
+    background: #0f1f31;
+    color: #dbe8f6;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 140px;
+    max-height: 240px;
+    overflow: auto;
+    border: 1px solid #273f5b;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
   }
 
-  /* Checkbox Styling */
-  .custom-checkbox {
-    accent-color: var(--color-primary);
+  .lineage-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
   }
 
-  /* Search Highlight */
-  .highlight {
-    background: rgba(102, 126, 234, 0.3);
-    border: 2px solid var(--color-primary);
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+  .lineage-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.74rem;
+    color: #4f6782;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
+  .lineage-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .lineage-dot.parent { background: #0d6aa6; }
+  .lineage-dot.final { background: #128b84; }
+  .lineage-dot.intermediate { background: #c2801d; }
+  .lineage-dot.column { background: #657f9a; }
+
+  .lineage-note {
+    margin-top: 10px;
+    font-size: 0.76rem;
+    color: #56708c;
+  }
+
+  @media (max-width: 1200px) {
+    .lineage-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .lineage-network-wrap,
+    #lineageNetwork {
+      min-height: 560px;
+      height: 560px;
     }
   }
 
-  /* Responsive */
-  @media (max-width: 768px) {
-    .lineage-controls {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .control-group {
-      flex-direction: column;
-      align-items: stretch;
-      width: 100%;
-    }
-
-    .network-legend {
-      flex-direction: column;
-      gap: var(--space-sm);
-      font-size: 0.75rem;
-    }
-
-    .measure-modal {
-      width: 95%;
+  @media (max-width: 900px) {
+    .lineage-toolbar {
+      grid-template-columns: 1fr;
     }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="lineage-container">
-  <!-- Simplified Control Bar -->
-  <div class="lineage-controls">
-    <div class="control-group">
-      <!-- Search -->
-      <div class="control-item">
-        <label class="control-label" for="searchMeasure">Search:</label>
-        <input type="text" id="searchMeasure" class="filter-select" placeholder="Find measure..." />
-      </div>
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Total Measures</span>
+    <strong>{{ lineage_metrics.total_measures if lineage_metrics else 0 }}</strong>
+    <small>Measures represented in lineage graph</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Parent Measures</span>
+    <strong>{{ lineage_metrics.parent_measures_count if lineage_metrics else 0 }}</strong>
+    <small>Measures referenced by other measures</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Final Measures</span>
+    <strong>{{ lineage_metrics.final_measures_count if lineage_metrics else 0 }}</strong>
+    <small>Measures with no downstream dependencies</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Relationships</span>
+    <strong>{{ lineage_metrics.total_relationships if lineage_metrics else 0 }}</strong>
+    <small>Dependency edges</small>
+  </article>
+</section>
 
-      <!-- Filter Checkboxes -->
-      <div class="control-item">
-        <input type="checkbox" id="showParents" class="custom-checkbox" checked />
-        <label for="showParents" class="control-label">Parent Measures</label>
-      </div>
+<section class="lineage-layout">
+  <article class="wb-card">
+    <div class="lineage-toolbar">
+      <label class="lineage-search" for="lineageSearch">
+        <i class="fas fa-search"></i>
+        <input id="lineageSearch" type="search" placeholder="Search measure or column..." />
+      </label>
 
-      <div class="control-item">
-        <input type="checkbox" id="showFinals" class="custom-checkbox" checked />
-        <label for="showFinals" class="control-label">Final Measures</label>
-      </div>
-
-      <div class="control-item">
-        <input type="checkbox" id="showColumns" class="custom-checkbox" checked />
-        <label for="showColumns" class="control-label">Columns</label>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <!-- Layout Options -->
-      <button id="resetView" class="action-button secondary">
-        <i class="fas fa-undo"></i> Reset View
+      <button id="lineageReset" class="lineage-action">
+        <i class="fas fa-rotate-left"></i>
+        Reset
       </button>
-      <button id="exportDiagram" class="action-button outline">
-        <i class="fas fa-download"></i> Export
+      <button id="lineageFit" class="lineage-action">
+        <i class="fas fa-expand"></i>
+        Fit
       </button>
-    </div>
-  </div>
-
-  <!-- Network Diagram -->
-  <div class="network-wrapper">
-    <!-- Legend -->
-    <div class="network-legend">
-      <div class="legend-item">
-        <span class="legend-dot parent"></span>
-        <span>Parent Measure</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot final"></span>
-        <span>Final Measure</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot column"></span>
-        <span>Column</span>
-      </div>
-    </div>
-
-    <!-- Network Container -->
-    <div id="mynetwork"></div>
-
-    <!-- Loading -->
-    <div class="network-loading" id="loadingIndicator">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading diagram...</div>
-    </div>
-
-    <!-- Network Controls -->
-    <div class="network-controls">
-      <button class="network-btn" id="zoomIn" title="Zoom in">
-        <i class="fas fa-plus"></i>
-      </button>
-      <button class="network-btn" id="zoomOut" title="Zoom out">
-        <i class="fas fa-minus"></i>
-      </button>
-      <button class="network-btn" id="fitView" title="Fit to view">
-        <i class="fas fa-compress"></i>
+      <button id="lineageReflow" class="lineage-action">
+        <i class="fas fa-sitemap"></i>
+        Reflow
       </button>
     </div>
-  </div>
-</div>
 
-<!-- Measure Details Modal -->
-<div class="modal-overlay" id="modalOverlay"></div>
-<div class="measure-modal" id="measureModal">
-  <div class="modal-header">
-    <h3 class="modal-title" id="modalMeasureName">Measure Details</h3>
-    <button class="modal-close" id="closeModal">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <div class="modal-body">
-    <div class="measure-info">
-      <div class="info-row">
-        <span class="info-label">Type:</span>
-        <span class="info-value" id="modalMeasureType">-</span>
+    <div class="lineage-toggle-row">
+      <label class="lineage-toggle"><input id="showParents" type="checkbox" checked /> Parent</label>
+      <label class="lineage-toggle"><input id="showIntermediate" type="checkbox" checked /> Intermediate</label>
+      <label class="lineage-toggle"><input id="showFinals" type="checkbox" checked /> Final</label>
+      <label class="lineage-toggle"><input id="showColumns" type="checkbox" checked /> Columns</label>
+    </div>
+
+    <div class="lineage-network-wrap">
+      <div id="lineageNetwork"></div>
+      <div id="lineageStatus" class="lineage-status"><i class="fas fa-gauge"></i> Ready</div>
+    </div>
+
+    <div class="lineage-meta-grid">
+      <div class="lineage-meta-cell">
+        <span>Visible Nodes</span>
+        <strong id="visibleNodeCount">0</strong>
       </div>
-
-      <div class="info-row" id="modalParentsRow">
-        <span class="info-label">Parent Measures:</span>
-        <div class="info-value tag-list" id="modalParentMeasures">-</div>
+      <div class="lineage-meta-cell">
+        <span>Visible Edges</span>
+        <strong id="visibleEdgeCount">0</strong>
       </div>
-
-      <div class="info-row" id="modalChildrenRow">
-        <span class="info-label">Child Measures:</span>
-        <div class="info-value tag-list" id="modalChildMeasures">-</div>
+      <div class="lineage-meta-cell">
+        <span>Search Matches</span>
+        <strong id="searchMatchCount">0</strong>
       </div>
-
-      <div class="info-row" id="modalColumnsRow">
-        <span class="info-label">Columns Used:</span>
-        <div class="info-value tag-list" id="modalColumns">-</div>
-      </div>
-
-      <div class="info-row">
-        <span class="info-label">DAX Expression:</span>
-      </div>
-      <pre class="dax-code" id="modalDaxCode">-</pre>
-
-      <div class="info-row">
-        <button class="action-button primary" id="copyDax">
-          <i class="fas fa-copy"></i> Copy DAX
-        </button>
+      <div class="lineage-meta-cell">
+        <span>View Mode</span>
+        <strong id="lineageMode">Standard</strong>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Data for JavaScript -->
-<script>
-  const nodesData = {{ nodes | tojson | safe }};
-  const edgesData = {{ edges | tojson | safe }};
-</script>
+    <div class="lineage-legend">
+      <span><i class="lineage-dot parent"></i>Parent</span>
+      <span><i class="lineage-dot intermediate"></i>Intermediate</span>
+      <span><i class="lineage-dot final"></i>Final</span>
+      <span><i class="lineage-dot column"></i>Column</span>
+    </div>
+
+    <p class="lineage-note">
+      Tip: click any node to inspect dependencies. In large models, columns are hidden by default for faster rendering.
+    </p>
+  </article>
+
+  <aside class="wb-card lineage-panel">
+    <h3 id="detailTitle">Select a node</h3>
+    <p id="detailSubtitle">Choose a measure or column from the graph to inspect dependencies.</p>
+
+    <div class="lineage-meta-grid">
+      <div class="lineage-meta-cell">
+        <span>Node Type</span>
+        <strong id="detailType">-</strong>
+      </div>
+      <div class="lineage-meta-cell">
+        <span>Incoming</span>
+        <strong id="detailIncoming">0</strong>
+      </div>
+      <div class="lineage-meta-cell">
+        <span>Outgoing</span>
+        <strong id="detailOutgoing">0</strong>
+      </div>
+      <div class="lineage-meta-cell">
+        <span>Total Degree</span>
+        <strong id="detailDegree">0</strong>
+      </div>
+    </div>
+
+    <div>
+      <h3>Parent Measures</h3>
+      <div id="detailParents" class="lineage-chip-list">
+        <p class="lineage-empty">No selection</p>
+      </div>
+    </div>
+
+    <div>
+      <h3>Child Measures</h3>
+      <div id="detailChildren" class="lineage-chip-list">
+        <p class="lineage-empty">No selection</p>
+      </div>
+    </div>
+
+    <div>
+      <h3>Referenced Columns</h3>
+      <div id="detailColumns" class="lineage-chip-list">
+        <p class="lineage-empty">No selection</p>
+      </div>
+    </div>
+
+    <div>
+      <h3>DAX Expression</h3>
+      <pre id="detailDax" class="lineage-code-block">Select a measure to preview its DAX expression.</pre>
+    </div>
+  </aside>
+</section>
 {% endblock %}
 
 {% block scripts %}
-<!-- Vis Network JS -->
 <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // State
-    let network = null;
-    let nodes = null;
-    let edges = null;
-    let allNodes = [];
-    let highlightActive = false;
+    const rawNodes = {{ nodes | tojson }};
+    const rawEdges = {{ edges | tojson }};
 
-    // DOM Elements
-    const container = document.getElementById("mynetwork");
-    const loadingIndicator = document.getElementById("loadingIndicator");
-    const searchInput = document.getElementById("searchMeasure");
-    const showParentsCheck = document.getElementById("showParents");
-    const showFinalsCheck = document.getElementById("showFinals");
-    const showColumnsCheck = document.getElementById("showColumns");
-    const resetViewBtn = document.getElementById("resetView");
-    const exportBtn = document.getElementById("exportDiagram");
-    const zoomInBtn = document.getElementById("zoomIn");
-    const zoomOutBtn = document.getElementById("zoomOut");
-    const fitViewBtn = document.getElementById("fitView");
+    const elements = {
+      network: document.getElementById("lineageNetwork"),
+      search: document.getElementById("lineageSearch"),
+      reset: document.getElementById("lineageReset"),
+      fit: document.getElementById("lineageFit"),
+      reflow: document.getElementById("lineageReflow"),
+      showParents: document.getElementById("showParents"),
+      showIntermediate: document.getElementById("showIntermediate"),
+      showFinals: document.getElementById("showFinals"),
+      showColumns: document.getElementById("showColumns"),
+      status: document.getElementById("lineageStatus"),
+      visibleNodeCount: document.getElementById("visibleNodeCount"),
+      visibleEdgeCount: document.getElementById("visibleEdgeCount"),
+      searchMatchCount: document.getElementById("searchMatchCount"),
+      mode: document.getElementById("lineageMode"),
+      detailTitle: document.getElementById("detailTitle"),
+      detailSubtitle: document.getElementById("detailSubtitle"),
+      detailType: document.getElementById("detailType"),
+      detailIncoming: document.getElementById("detailIncoming"),
+      detailOutgoing: document.getElementById("detailOutgoing"),
+      detailDegree: document.getElementById("detailDegree"),
+      detailParents: document.getElementById("detailParents"),
+      detailChildren: document.getElementById("detailChildren"),
+      detailColumns: document.getElementById("detailColumns"),
+      detailDax: document.getElementById("detailDax"),
+    };
 
-    // Modal Elements
-    const modalOverlay = document.getElementById("modalOverlay");
-    const measureModal = document.getElementById("measureModal");
-    const closeModalBtn = document.getElementById("closeModal");
-    const modalMeasureName = document.getElementById("modalMeasureName");
-    const modalMeasureType = document.getElementById("modalMeasureType");
-    const modalParentMeasures = document.getElementById("modalParentMeasures");
-    const modalChildMeasures = document.getElementById("modalChildMeasures");
-    const modalColumns = document.getElementById("modalColumns");
-    const modalDaxCode = document.getElementById("modalDaxCode");
-    const copyDaxBtn = document.getElementById("copyDax");
-    const modalParentsRow = document.getElementById("modalParentsRow");
-    const modalChildrenRow = document.getElementById("modalChildrenRow");
-    const modalColumnsRow = document.getElementById("modalColumnsRow");
+    const performanceMode = rawNodes.length > 600 || rawEdges.length > 1800;
+    const initialState = {
+      search: "",
+      showParents: true,
+      showIntermediate: true,
+      showFinals: true,
+      showColumns: !performanceMode,
+    };
 
-    // Initialize
-    init();
-
-    function init() {
-      showLoading();
-
-      // Process nodes and edges
-      processNodesAndEdges();
-
-      // Create network
-      createNetwork();
-
-      // Setup event listeners
-      setupEventListeners();
-
-      hideLoading();
+    if (performanceMode) {
+      elements.mode.textContent = "Performance";
+      elements.status.textContent = "Performance mode enabled";
+      elements.status.prepend(document.createElement("i"));
+      elements.status.firstChild.className = "fas fa-gauge-high";
+    } else {
+      elements.mode.textContent = "Standard";
     }
 
-    function showLoading() {
-      loadingIndicator.style.display = "block";
+    elements.showColumns.checked = initialState.showColumns;
+
+    const incomingMap = new Map();
+    const outgoingMap = new Map();
+    const nodeIndex = new Map();
+
+    rawNodes.forEach((node) => {
+      incomingMap.set(node.id, []);
+      outgoingMap.set(node.id, []);
+      nodeIndex.set(node.id, node);
+    });
+
+    const normalizedEdges = rawEdges.map((edge, index) => ({
+      id: index,
+      from: edge.from,
+      to: edge.to
+    }));
+
+    normalizedEdges.forEach((edge) => {
+      if (!incomingMap.has(edge.to)) {
+        incomingMap.set(edge.to, []);
+      }
+      if (!outgoingMap.has(edge.from)) {
+        outgoingMap.set(edge.from, []);
+      }
+      incomingMap.get(edge.to).push(edge.from);
+      outgoingMap.get(edge.from).push(edge.to);
+    });
+
+    function classifyNode(node) {
+      if (node.type === "column") {
+        return "column";
+      }
+
+      const incoming = incomingMap.get(node.id) || [];
+      const outgoing = outgoingMap.get(node.id) || [];
+
+      if (incoming.length === 0 && outgoing.length > 0) {
+        return "parent";
+      }
+      if (incoming.length > 0 && outgoing.length > 0) {
+        return "intermediate";
+      }
+      if (incoming.length > 0 && outgoing.length === 0) {
+        return "final";
+      }
+      return "isolated";
     }
 
-    function hideLoading() {
-      loadingIndicator.style.display = "none";
-    }
+    const palette = {
+      parent: { background: "#0d6aa6", border: "#084d78" },
+      intermediate: { background: "#c2801d", border: "#8f5f16" },
+      final: { background: "#128b84", border: "#0e665f" },
+      column: { background: "#657f9a", border: "#475f78" },
+      isolated: { background: "#8ca0b5", border: "#6a7e93" },
+    };
 
-    function processNodesAndEdges() {
-      // Create sets to track node types
-      const parentNodeIds = new Set();
-      const childNodeIds = new Set();
+    const processedNodes = rawNodes.map((node) => {
+      const nodeType = classifyNode(node);
+      const label = String(node.label || node.id || "");
 
-      // Analyze edges to determine node types
-      edgesData.forEach(edge => {
-        parentNodeIds.add(edge.from);
-        childNodeIds.add(edge.to);
-      });
-
-      // Process nodes
-      allNodes = nodesData.map(node => {
-        let nodeType = 'isolated';
-        let color;
-
-        if (node.type === 'column') {
-          nodeType = 'column';
-          color = { background: '#4FACFE', border: '#00A0DC' };
-        } else if (parentNodeIds.has(node.id) && !childNodeIds.has(node.id)) {
-          nodeType = 'parent';
-          color = { background: '#F1C83B', border: '#DAA520' };
-        } else if (!parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          nodeType = 'final';
-          color = { background: '#23C4A7', border: '#20B2AA' };
-        } else if (parentNodeIds.has(node.id) && childNodeIds.has(node.id)) {
-          nodeType = 'intermediate';
-          color = { background: '#F1C83B', border: '#DAA520' };
-        }
-
-        return {
-          ...node,
-          nodeType: nodeType,
-          color: color,
-          shape: node.type === 'column' ? 'box' : 'dot',
-          title: createNodeTooltip(node),
-          font: { size: 12 }
-        };
-      });
-    }
-
-    function createNodeTooltip(node) {
-      return `<div style="padding: 8px; background: var(--bg-secondary); border-radius: 4px;">
-      <strong>${node.label}</strong><br/>
-      Type: ${node.nodeType || node.type}<br/>
-      Click for details
-    </div>`;
-    }
-
-    function createNetwork() {
-      // Create datasets
-      nodes = new vis.DataSet(allNodes);
-      edges = new vis.DataSet(edgesData);
-
-      // Network data
-      const data = { nodes: nodes, edges: edges };
-
-      // Network options
-      const options = {
-        nodes: {
-          shape: "dot",
-          size: 16,
-          borderWidth: 2,
-          shadow: true,
-          font: {
-            size: 12,
-            face: "Inter, sans-serif"
-          }
+      return {
+        id: node.id,
+        nodeType: nodeType,
+        label: performanceMode && nodeType === "column" ? "" : label,
+        fullLabel: label,
+        shape: nodeType === "column" ? "box" : "dot",
+        size: nodeType === "column" ? 10 : nodeType === "final" ? 15 : 13,
+        borderWidth: 1.5,
+        color: palette[nodeType] || palette.isolated,
+        font: {
+          face: "IBM Plex Sans",
+          size: nodeType === "column" ? 9 : 12,
+          color: "#0f365a",
+          strokeWidth: 0,
         },
-        edges: {
-          width: 1,
-          arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-          smooth: { enabled: true, type: "dynamic", roundness: 0.5 },
-          color: { color: '#6c7293', highlight: '#667eea' }
-        },
-        physics: {
-          enabled: true,
-          barnesHut: {
-            gravitationalConstant: -2000,
-            centralGravity: 0.1,
-            springLength: 95,
-            springConstant: 0.04,
-            damping: 0.09
-          },
-          stabilization: {
-            enabled: true,
-            iterations: 200,
-            updateInterval: 50
-          }
-        },
-        interaction: {
-          hover: true,
-          tooltipDelay: 200,
-          hideEdgesOnDrag: true,
-          zoomView: true
-        }
       };
+    });
 
-      // Create network
-      network = new vis.Network(container, data, options);
+    const nodeData = new vis.DataSet(processedNodes);
+    const edgeData = new vis.DataSet(
+      normalizedEdges.map((edge) => ({
+        id: edge.id,
+        from: edge.from,
+        to: edge.to,
+        arrows: "to",
+        smooth: false,
+        width: 1,
+        color: {
+          color: "#9ab0c8",
+          highlight: "#0d6aa6",
+          inherit: false,
+        },
+      }))
+    );
 
-      // Network events
-      network.on("stabilizationIterationsDone", function () {
-        network.setOptions({ physics: { enabled: false } });
-      });
+    const network = new vis.Network(
+      elements.network,
+      { nodes: nodeData, edges: edgeData },
+      {
+        layout: {
+          hierarchical: {
+            enabled: true,
+            direction: "LR",
+            sortMethod: "directed",
+            levelSeparation: 170,
+            nodeSpacing: 130,
+            treeSpacing: 200,
+            blockShifting: false,
+            edgeMinimization: true,
+            parentCentralization: true,
+          },
+        },
+        physics: false,
+        interaction: {
+          hover: false,
+          hideEdgesOnDrag: true,
+          dragNodes: true,
+          keyboard: true,
+        },
+      }
+    );
 
-      network.on("selectNode", function (params) {
-        if (params.nodes.length > 0) {
-          const nodeId = params.nodes[0];
-          const node = nodes.get(nodeId);
-          showMeasureDetails(node);
-        }
-      });
+    const state = { ...initialState };
+    const processedIndex = new Map(processedNodes.map((node) => [node.id, node]));
+    const daxCache = new Map();
+    let activeNodeId = null;
 
-      network.on("hoverNode", function (params) {
-        highlightConnectedNodes(params.node);
-      });
-
-      network.on("blurNode", function () {
-        if (highlightActive) {
-          resetHighlight();
-        }
-      });
+    function showEmptyList(container, message) {
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      const placeholder = document.createElement("p");
+      placeholder.className = "lineage-empty";
+      placeholder.textContent = message;
+      container.appendChild(placeholder);
     }
 
-    function setupEventListeners() {
-      // Search
-      let searchTimeout;
-      searchInput.addEventListener("input", function () {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => searchMeasures(this.value), 300);
-      });
+    function renderChipList(container, values) {
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
 
-      // Filters
-      showParentsCheck.addEventListener("change", applyFilters);
-      showFinalsCheck.addEventListener("change", applyFilters);
-      showColumnsCheck.addEventListener("change", applyFilters);
-
-      // Controls
-      resetViewBtn.addEventListener("click", resetView);
-      exportBtn.addEventListener("click", exportDiagram);
-      zoomInBtn.addEventListener("click", () => network.moveTo({ scale: network.getScale() * 1.2 }));
-      zoomOutBtn.addEventListener("click", () => network.moveTo({ scale: network.getScale() / 1.2 }));
-      fitViewBtn.addEventListener("click", () => network.fit({ animation: { duration: 1000 } }));
-
-      // Modal
-      closeModalBtn.addEventListener("click", hideModal);
-      modalOverlay.addEventListener("click", hideModal);
-      copyDaxBtn.addEventListener("click", copyDaxCode);
-
-      // Keyboard shortcuts
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-          hideModal();
-        }
-        if (e.ctrlKey && e.key === "f") {
-          e.preventDefault();
-          searchInput.focus();
-        }
-      });
-    }
-
-    function searchMeasures(searchTerm) {
-      if (!searchTerm) {
-        resetHighlight();
+      if (!values.length) {
+        showEmptyList(container, "None");
         return;
       }
 
-      const term = searchTerm.toLowerCase();
-      const matchingNodes = allNodes.filter(node =>
-        node.label.toLowerCase().includes(term)
-      );
+      const fragment = document.createDocumentFragment();
+      const limit = 30;
+      values.slice(0, limit).forEach((value) => {
+        const chip = document.createElement("span");
+        chip.className = "lineage-chip";
+        chip.textContent = value;
+        fragment.appendChild(chip);
+      });
 
-      if (matchingNodes.length > 0) {
-        // Highlight matching nodes
-        const updateArray = allNodes.map(node => {
-          const matches = node.label.toLowerCase().includes(term);
-          return {
-            id: node.id,
-            color: matches ?
-              { background: '#667eea', border: '#5968d8' } :
-              { ...node.color, background: node.color.background + '40' }
-          };
-        });
-
-        nodes.update(updateArray);
-
-        // Focus on first match
-        if (matchingNodes.length === 1) {
-          network.focus(matchingNodes[0].id, {
-            scale: 1.5,
-            animation: { duration: 500 }
-          });
-        }
+      if (values.length > limit) {
+        const overflowChip = document.createElement("span");
+        overflowChip.className = "lineage-chip";
+        overflowChip.textContent = "+" + (values.length - limit) + " more";
+        fragment.appendChild(overflowChip);
       }
+
+      container.appendChild(fragment);
+    }
+
+    function updateSelection(nodeId) {
+      activeNodeId = nodeId;
+
+      if (!nodeId) {
+        elements.detailTitle.textContent = "Select a node";
+        elements.detailSubtitle.textContent = "Choose a measure or column from the graph to inspect dependencies.";
+        elements.detailType.textContent = "-";
+        elements.detailIncoming.textContent = "0";
+        elements.detailOutgoing.textContent = "0";
+        elements.detailDegree.textContent = "0";
+        elements.detailDax.textContent = "Select a measure to preview its DAX expression.";
+        showEmptyList(elements.detailParents, "No selection");
+        showEmptyList(elements.detailChildren, "No selection");
+        showEmptyList(elements.detailColumns, "No selection");
+        return;
+      }
+
+      const node = processedIndex.get(nodeId);
+      if (!node) {
+        return;
+      }
+
+      const incoming = incomingMap.get(nodeId) || [];
+      const outgoing = outgoingMap.get(nodeId) || [];
+      const incomingMeasures = [];
+      const incomingColumns = [];
+      const outgoingMeasures = [];
+
+      incoming.forEach((sourceId) => {
+        const source = processedIndex.get(sourceId);
+        if (!source) {
+          return;
+        }
+        if (source.nodeType === "column") {
+          incomingColumns.push(source.fullLabel);
+        } else {
+          incomingMeasures.push(source.fullLabel);
+        }
+      });
+
+      outgoing.forEach((targetId) => {
+        const target = processedIndex.get(targetId);
+        if (target && target.nodeType !== "column") {
+          outgoingMeasures.push(target.fullLabel);
+        }
+      });
+
+      elements.detailTitle.textContent = node.fullLabel;
+      elements.detailSubtitle.textContent = node.nodeType === "column"
+        ? "Column node used by measures."
+        : "Measure dependency profile.";
+      elements.detailType.textContent = node.nodeType.charAt(0).toUpperCase() + node.nodeType.slice(1);
+      elements.detailIncoming.textContent = String(incoming.length);
+      elements.detailOutgoing.textContent = String(outgoing.length);
+      elements.detailDegree.textContent = String(incoming.length + outgoing.length);
+      elements.detailDax.textContent = node.nodeType === "column"
+        ? "Columns do not have DAX expressions."
+        : "Loading DAX expression...";
+
+      renderChipList(elements.detailParents, incomingMeasures.sort((a, b) => a.localeCompare(b)));
+      renderChipList(elements.detailChildren, outgoingMeasures.sort((a, b) => a.localeCompare(b)));
+      renderChipList(elements.detailColumns, incomingColumns.sort((a, b) => a.localeCompare(b)));
+
+      if (node.nodeType === "column") {
+        return;
+      }
+
+      if (daxCache.has(node.id)) {
+        elements.detailDax.textContent = daxCache.get(node.id);
+        return;
+      }
+
+      fetch("/api/lineage-node?name=" + encodeURIComponent(String(node.id)))
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Unable to load node detail");
+          }
+          return response.json();
+        })
+        .then((payload) => {
+          const daxText = String(payload.dax || "")
+            .replace(/\\n/g, "\n")
+            .replace(/\\t/g, "\t")
+            .replace(/\\r/g, "\r");
+          const finalDax = daxText || "No DAX expression available for this measure.";
+          daxCache.set(node.id, finalDax);
+          if (activeNodeId === node.id) {
+            elements.detailDax.textContent = finalDax;
+          }
+        })
+        .catch(() => {
+          if (activeNodeId === node.id) {
+            elements.detailDax.textContent = "Unable to load DAX expression.";
+          }
+        });
+    }
+
+    function shouldShowType(nodeType) {
+      if (nodeType === "column") {
+        return state.showColumns;
+      }
+      if (nodeType === "parent") {
+        return state.showParents;
+      }
+      if (nodeType === "intermediate") {
+        return state.showIntermediate;
+      }
+      if (nodeType === "final" || nodeType === "isolated") {
+        return state.showFinals;
+      }
+      return true;
     }
 
     function applyFilters() {
-      const showParents = showParentsCheck.checked;
-      const showFinals = showFinalsCheck.checked;
-      const showColumns = showColumnsCheck.checked;
+      const searchTerm = state.search.trim().toLowerCase();
+      const visibleNodeIds = new Set();
+      const nodeUpdates = [];
+      let searchMatches = 0;
 
-      const nodesToUpdate = allNodes.map(node => {
-        let visible = true;
+      processedNodes.forEach((node) => {
+        const typeVisible = shouldShowType(node.nodeType);
+        const matchesSearch = !searchTerm || node.fullLabel.toLowerCase().includes(searchTerm);
+        const visible = typeVisible && matchesSearch;
 
-        if (node.nodeType === 'column') {
-          visible = showColumns;
-        } else if (node.nodeType === 'parent' || node.nodeType === 'intermediate') {
-          visible = showParents;
-        } else if (node.nodeType === 'final') {
-          visible = showFinals;
+        if (matchesSearch && searchTerm) {
+          searchMatches += 1;
         }
 
-        return { id: node.id, hidden: !visible };
-      });
-
-      nodes.update(nodesToUpdate);
-
-      // Update edges visibility
-      const visibleNodeIds = new Set(
-        nodesToUpdate.filter(n => !n.hidden).map(n => n.id)
-      );
-
-      const edgesToUpdate = edgesData.map(edge => ({
-        id: edge.id,
-        hidden: !visibleNodeIds.has(edge.from) || !visibleNodeIds.has(edge.to)
-      }));
-
-      edges.update(edgesToUpdate);
-    }
-
-    function highlightConnectedNodes(nodeId) {
-      highlightActive = true;
-      const connectedNodes = network.getConnectedNodes(nodeId);
-      const allNodeIds = nodes.getIds();
-
-      // Dim all nodes except connected ones
-      const updateArray = [];
-      allNodeIds.forEach(id => {
-        const node = nodes.get(id);
-        if (id === nodeId || connectedNodes.includes(id)) {
-          updateArray.push({
-            id: id,
-            color: node.color
-          });
-        } else {
-          updateArray.push({
-            id: id,
-            color: {
-              ...node.color,
-              background: node.color.background + '20',
-              border: node.color.border + '20'
-            }
-          });
+        nodeUpdates.push({
+          id: node.id,
+          hidden: !visible
+        });
+        if (visible) {
+          visibleNodeIds.add(node.id);
         }
       });
+      nodeData.update(nodeUpdates);
 
-      nodes.update(updateArray);
-    }
-
-    function resetHighlight() {
-      highlightActive = false;
-      const updateArray = allNodes.map(node => ({
-        id: node.id,
-        color: node.color
-      }));
-      nodes.update(updateArray);
-    }
-
-    function resetView() {
-      // Reset search
-      searchInput.value = "";
-
-      // Reset filters
-      showParentsCheck.checked = true;
-      showFinalsCheck.checked = true;
-      showColumnsCheck.checked = true;
-
-      // Reset highlights
-      resetHighlight();
-
-      // Apply filters
-      applyFilters();
-
-      // Fit view
-      network.fit({ animation: { duration: 1000 } });
-    }
-
-    function showMeasureDetails(node) {
-      if (node.nodeType === 'column') return;
-
-      // Update modal content
-      modalMeasureName.textContent = node.label;
-      modalMeasureType.textContent = node.nodeType.charAt(0).toUpperCase() + node.nodeType.slice(1) + ' Measure';
-      modalDaxCode.textContent = node.dax || 'No DAX expression available';
-
-      // Get connected nodes
-      const connectedEdges = edgesData.filter(edge =>
-        edge.to === node.id || edge.from === node.id
-      );
-
-      const parentMeasures = [];
-      const childMeasures = [];
-      const columns = [];
-
-      connectedEdges.forEach(edge => {
-        if (edge.to === node.id) {
-          const parentNode = nodes.get(edge.from);
-          if (parentNode) {
-            if (parentNode.type === 'column') {
-              columns.push(parentNode.label);
-            } else {
-              parentMeasures.push(parentNode.label);
-            }
-          }
-        } else {
-          const childNode = nodes.get(edge.to);
-          if (childNode && childNode.type !== 'column') {
-            childMeasures.push(childNode.label);
-          }
+      const edgeUpdates = [];
+      let visibleEdgeCount = 0;
+      normalizedEdges.forEach((edge) => {
+        const visible = visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to);
+        if (visible) {
+          visibleEdgeCount += 1;
         }
+        edgeUpdates.push({
+          id: edge.id,
+          hidden: !visible
+        });
       });
+      edgeData.update(edgeUpdates);
 
-      // Update modal lists
-      updateModalList(modalParentMeasures, parentMeasures);
-      updateModalList(modalChildMeasures, childMeasures);
-      updateModalList(modalColumns, columns);
+      elements.visibleNodeCount.textContent = String(visibleNodeIds.size);
+      elements.visibleEdgeCount.textContent = String(visibleEdgeCount);
+      elements.searchMatchCount.textContent = searchTerm ? String(searchMatches) : "0";
 
-      // Show/hide rows
-      modalParentsRow.style.display = parentMeasures.length > 0 ? 'flex' : 'none';
-      modalChildrenRow.style.display = childMeasures.length > 0 ? 'flex' : 'none';
-      modalColumnsRow.style.display = columns.length > 0 ? 'flex' : 'none';
-
-      // Show modal
-      measureModal.classList.add('active');
-      modalOverlay.classList.add('active');
-    }
-
-    function updateModalList(element, items) {
-      if (items.length === 0) {
-        element.textContent = '-';
+      if (searchTerm && searchMatches > 0) {
+        elements.status.textContent = searchMatches + " matching nodes";
+        elements.status.prepend(document.createElement("i"));
+        elements.status.firstChild.className = "fas fa-search";
+      } else if (performanceMode) {
+        elements.status.textContent = "Performance mode enabled";
+        elements.status.prepend(document.createElement("i"));
+        elements.status.firstChild.className = "fas fa-gauge-high";
       } else {
-        element.innerHTML = items.map(item =>
-          `<span class="tag">${item}</span>`
-        ).join('');
+        elements.status.textContent = "Ready";
+        elements.status.prepend(document.createElement("i"));
+        elements.status.firstChild.className = "fas fa-gauge";
       }
     }
 
-    function hideModal() {
-      measureModal.classList.remove('active');
-      modalOverlay.classList.remove('active');
-    }
-
-    function copyDaxCode() {
-      const daxCode = modalDaxCode.textContent;
-
-      navigator.clipboard.writeText(daxCode).then(() => {
-        // Show success
-        const originalText = copyDaxBtn.innerHTML;
-        copyDaxBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        copyDaxBtn.classList.add('success');
-
-        setTimeout(() => {
-          copyDaxBtn.innerHTML = originalText;
-          copyDaxBtn.classList.remove('success');
-        }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-      });
-    }
-
-    function exportDiagram() {
-      // Get network data
-      const positions = network.getPositions();
-      const exportData = {
-        nodes: allNodes.map(node => ({
-          ...node,
-          position: positions[node.id]
-        })),
-        edges: edgesData,
-        timestamp: new Date().toISOString()
+    function debounce(fn, wait) {
+      let timeout;
+      return function () {
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(null, args), wait);
       };
-
-      // Create and download file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json'
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `lineage_diagram_${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Show notification
-      if (window.PowerBIExplorer && window.PowerBIExplorer.showNotification) {
-        window.PowerBIExplorer.showNotification('Diagram exported successfully', 'success');
-      }
     }
+
+    elements.search.addEventListener("input", debounce(function (event) {
+      state.search = event.target.value || "";
+      applyFilters();
+    }, 220));
+
+    elements.showParents.addEventListener("change", function () {
+      state.showParents = this.checked;
+      applyFilters();
+    });
+    elements.showIntermediate.addEventListener("change", function () {
+      state.showIntermediate = this.checked;
+      applyFilters();
+    });
+    elements.showFinals.addEventListener("change", function () {
+      state.showFinals = this.checked;
+      applyFilters();
+    });
+    elements.showColumns.addEventListener("change", function () {
+      state.showColumns = this.checked;
+      applyFilters();
+    });
+
+    elements.reset.addEventListener("click", function () {
+      state.search = "";
+      state.showParents = true;
+      state.showIntermediate = true;
+      state.showFinals = true;
+      state.showColumns = !performanceMode;
+
+      elements.search.value = "";
+      elements.showParents.checked = state.showParents;
+      elements.showIntermediate.checked = state.showIntermediate;
+      elements.showFinals.checked = state.showFinals;
+      elements.showColumns.checked = state.showColumns;
+
+      applyFilters();
+      network.fit({ animation: { duration: 250 } });
+      network.unselectAll();
+      updateSelection(null);
+    });
+
+    elements.fit.addEventListener("click", function () {
+      network.fit({ animation: { duration: 250 } });
+    });
+
+    elements.reflow.addEventListener("click", function () {
+      network.setOptions({ layout: { hierarchical: { enabled: true } }, physics: false });
+      network.fit({ animation: { duration: 250 } });
+    });
+
+    network.on("selectNode", function (event) {
+      const selectedId = event.nodes && event.nodes.length ? event.nodes[0] : null;
+      updateSelection(selectedId);
+    });
+
+    network.on("deselectNode", function () {
+      updateSelection(null);
+    });
+
+    applyFilters();
+    updateSelection(null);
+    network.fit({ animation: { duration: 250 } });
   });
 </script>
 {% endblock %}
