@@ -176,6 +176,8 @@ def report_insights() -> str:
         'filters': sum(bookmark['filter_count'] for bookmark in bookmarks),
         'targets': sum(len(bookmark['target_visuals']) for bookmark in bookmarks)
     }
+    custom_theme = theme_info.get('customTheme') or {}
+    base_theme = theme_info.get('baseTheme') or {}
 
     report_summary = {
         'bookmark_count': len(bookmarks),
@@ -184,8 +186,8 @@ def report_insights() -> str:
         'query_with_order': sum(1 for entry in query_details if entry['order_by']),
         'query_with_filters': sum(1 for entry in query_details if entry['where']),
         'formatting_custom_count': len(formatting_highlights),
-        'theme_name': theme_info.get('customTheme', {}).get('name')
-            or theme_info.get('baseTheme', {}).get('name')
+        'theme_name': custom_theme.get('name')
+            or base_theme.get('name')
             or 'Default'
     }
 

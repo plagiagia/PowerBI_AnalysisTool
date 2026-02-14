@@ -174,10 +174,12 @@ def get_report_metrics() -> Dict[str, Any]:
     )
 
     navigation_counts = collections.Counter((item.get('visual_type') or 'Other') for item in navigation_items)
+    custom_theme = theme_info.get('customTheme') or {}
+    base_theme = theme_info.get('baseTheme') or {}
 
     report_summary = {
-        'theme_name': theme_info.get('customTheme', {}).get('name')
-        or theme_info.get('baseTheme', {}).get('name')
+        'theme_name': custom_theme.get('name')
+        or base_theme.get('name')
         or 'Power BI Default',
         'bookmark_count': len(bookmarks),
         'bookmark_filters': bookmark_filters,

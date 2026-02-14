@@ -117,6 +117,9 @@ def create_app(config_object=None) -> Flask:
     # Load configuration
     if config_object is None:
         config_object = get_config()
+    elif isinstance(config_object, type):
+        # Support callers passing a config class while still honoring __init__ checks.
+        config_object = config_object()
 
     app.config.from_object(config_object)
 

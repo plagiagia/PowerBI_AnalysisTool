@@ -81,7 +81,7 @@ config = {
 
 def get_config():
     """
-    Return the appropriate configuration object based on environment.
+    Return the appropriate configuration instance based on environment.
 
     Uses FLASK_DEBUG for Flask 2.3+ compatibility.
     Falls back to FLASK_ENV for backwards compatibility.
@@ -96,4 +96,11 @@ def get_config():
         # Default to development if nothing is set
         env = 'default'
 
-    return config.get(env, config['default'])
+    selected_config = config.get(env, config['default'])
+
+    # Always instantiate config classes so runtime checks (e.g. production
+    # SECRET_KEY validation in __init__) are enforced.
+    if isinstance(selected_config, type):
+        return selected_config()
+
+    return selected_config

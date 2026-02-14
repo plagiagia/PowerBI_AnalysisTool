@@ -177,7 +177,7 @@ sources{% endblock %} {% block header_stats %}
     <button class="filter-chip" data-filter="sql">
       <i class="fas fa-database"></i> SQL
     </button>
-    <button class="filter-chip" data-filter="datrabricks">
+    <button class="filter-chip" data-filter="databricks">
       <i class="fas fa-fire" style="color: #FF3621;"></i> Databricks
     </button>
     <button class="filter-chip" data-filter="web">
@@ -334,6 +334,7 @@ sources{% endblock %} {% block header_stats %}
     // DOM Elements
     const searchQueries = document.getElementById("searchQueries");
     const clearSearch = document.getElementById("clearSearch");
+    const searchCount = document.getElementById("searchCount");
     const resultCount = document.getElementById("resultCount");
     const queriesList = document.getElementById("queriesList");
     const queryCards = document.querySelectorAll(".improved-query-card");

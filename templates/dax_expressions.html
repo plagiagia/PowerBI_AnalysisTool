@@ -481,7 +481,6 @@
 
     applyFilters() {
       const searchTerm = document.getElementById('searchDax').value.toLowerCase();
-      const complexity = document.getElementById('complexityFilter').value;
       const functionFilter = document.getElementById('functionFilter').value;
 
       this.filteredExpressions = this.daxExpressions.filter(expr => {
