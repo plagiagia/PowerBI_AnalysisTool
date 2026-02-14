@@ -892,34 +892,47 @@ body.wb-shell {
 
 .notification-container {
   position: fixed;
+  top: 18px;
   right: 18px;
-  bottom: 18px;
   display: grid;
-  gap: 8px;
-  z-index: 1200;
+  gap: 10px;
+  z-index: 1800;
+  width: min(420px, calc(100vw - 36px));
+  pointer-events: none;
 }
 
 .notification {
-  min-width: 240px;
-  max-width: 320px;
+  width: 100%;
+  min-width: 260px;
+  max-width: 420px;
   border-radius: 11px;
   border: 1px solid transparent;
   background: #ffffff;
   color: #1f3e5f;
   box-shadow: var(--wb-shadow-sm);
   padding: 10px 12px;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 9px;
+  align-items: flex-start;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateX(10px);
   transition: opacity 0.22s ease, transform 0.22s ease;
   font-size: 0.84rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
 }
 
 .notification.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
+}
+
+.notification i {
+  margin-top: 1px;
+  font-size: 0.92rem;
 }
 
 .notification-success {
@@ -1008,5 +1021,17 @@ body.wb-shell {
 
   .wb-issue-meta {
     grid-template-columns: 1fr;
+  }
+
+  .notification-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .notification {
+    min-width: 0;
+    max-width: none;
   }
 }

@@ -63,9 +63,16 @@
     const notificationType = type || "info";
     const removeAfter = typeof duration === "number" ? duration : 2800;
     const container = ensureNotificationContainer();
+    const maxVisibleToasts = 4;
+
+    while (container.childElementCount >= maxVisibleToasts) {
+      container.firstElementChild.remove();
+    }
 
     const toast = document.createElement("div");
     toast.className = "notification notification-" + notificationType;
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
 
     const iconByType = {
       success: "fa-check-circle",

@@ -1,43 +1,35 @@
 {% extends "base.html" %}
-{% block title %}DAX Explorer - Power BI Explorer{% endblock %}
+{% block title %}DAX Analyzer - Power BI Workbench{% endblock %}
 
 {% block header_icon %}<i class="fas fa-code"></i>{% endblock %}
-{% block header_title %}DAX Code Analyzer{% endblock %}
-{% block header_subtitle %}Browse and analyze DAX formulas with advanced features{% endblock %}
+{% block header_title %}DAX Analyzer{% endblock %}
+{% block header_subtitle %}Browse formulas, detect overlap, and export a clean DAX catalog for review workflows.{% endblock %}
 
 {% block header_stats %}
-<div class="quick-stat">
-  <span class="stat-number">{{ dax_expressions|length if dax_expressions else 0 }}</span>
-  <span class="stat-label">DAX Expressions</span>
+{% set expression_count = dax_expressions|length if dax_expressions else 0 %}
+{% set total_characters = dax_expressions|map(attribute='1')|map('length')|sum if dax_expressions else 0 %}
+<div class="wb-stat-chip">
+  <span>Measures</span>
+  <strong>{{ expression_count }}</strong>
 </div>
-<div class="quick-stat">
-  <span class="stat-number">{{ (dax_expressions|map(attribute='1')|map('length')|sum / 1000)|round(1) if dax_expressions
-    else 0 }}K</span>
-  <span class="stat-label">Total Characters</span>
+<div class="wb-stat-chip">
+  <span>Total Chars</span>
+  <strong>{{ total_characters }}</strong>
+</div>
+<div class="wb-stat-chip">
+  <span>Avg Length</span>
+  <strong>{{ (total_characters / expression_count)|round(0)|int if expression_count else 0 }}</strong>
 </div>
 {% endblock %}
 
 {% block head %}
 <!-- Include Prism.js CSS for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" />
-<!-- Include FontAwesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-{% endblock %}
-
-{% block breadcrumbs %}
-<li>
-  <a href="/dax-expressions"><i class="fas fa-code"></i><span class="breadcrumb-text">DAX Explorer</span></a>
-</li>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" />
 {% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-  <h1 class="page-title"><i class="fas fa-code"></i> DAX Explorer</h1>
-  <p class="page-description">
-    Browse, analyze, and optimize your DAX formulas with advanced search and similarity detection.
-  </p>
-</div>
+<div class="dax-page">
 
 <!-- Enhanced Search and Filter Bar -->
 <div class="search-filter-container">
@@ -253,6 +245,7 @@
     <div class="loading-spinner"></div>
     <div class="loading-text">Analyzing measures...</div>
   </div>
+</div>
 </div>
 
 {% endblock %}
@@ -555,6 +548,10 @@
         analysisSection.style.display = isExpanded ? 'none' : 'block';
       }
 
+      if (!isExpanded) {
+        this.populateMeasureAnalysis(card);
+      }
+
       // Re-highlight if needed
       const searchTerm = document.getElementById('searchDax').value;
       if (searchTerm && !isExpanded) {
@@ -578,6 +575,10 @@
         const analysisSection = card.querySelector('.measure-analysis');
         if (analysisSection) {
           analysisSection.style.display = expand ? 'block' : 'none';
+        }
+
+        if (expand) {
+          this.populateMeasureAnalysis(card);
         }
       });
     }
@@ -622,6 +623,22 @@
     }
 
     analyzeMeasureDependencies(card) {
+      if (!card.classList.contains('expanded')) {
+        this.toggleCard(card);
+      }
+
+      const summary = this.populateMeasureAnalysis(card);
+      if (!summary) {
+        return;
+      }
+
+      this.showNotification(
+        `Dependencies analyzed: ${summary.references} references, ${summary.referencedBy} dependents.`,
+        'info',
+        4000
+      );
+      return;
+
       const measureName = card.getAttribute('data-measure');
       const measure = this.daxExpressions.find(m => m.name === measureName);
 
@@ -650,6 +667,68 @@
       }
 
       this.showNotification(message, 'info', 5000);
+    }
+
+    populateMeasureAnalysis(card) {
+      const measureName = card.getAttribute('data-measure');
+      const measure = this.daxExpressions.find(m => m.name === measureName);
+
+      if (!measure) {
+        return null;
+      }
+
+      const functions = this.extractFunctions(measure.code);
+      const references = this.findReferencedMeasures(measure.code);
+      const referencedBy = this.findMeasuresReferencingThis(measureName);
+
+      const functionContainer = card.querySelector('.function-tags');
+      const referenceContainer = card.querySelector('.reference-list');
+
+      if (functionContainer) {
+        functionContainer.innerHTML = '';
+        if (functions.length) {
+          functions.forEach((fnName) => {
+            const tag = document.createElement('span');
+            tag.className = 'function-tag';
+            tag.textContent = fnName;
+            functionContainer.appendChild(tag);
+          });
+        } else {
+          const empty = document.createElement('span');
+          empty.className = 'no-references';
+          empty.textContent = 'No DAX functions detected.';
+          functionContainer.appendChild(empty);
+        }
+      }
+
+      if (referenceContainer) {
+        referenceContainer.innerHTML = '';
+        if (references.length || referencedBy.length) {
+          references.forEach((refName) => {
+            const tag = document.createElement('span');
+            tag.className = 'reference-item';
+            tag.textContent = `Uses [${refName}]`;
+            referenceContainer.appendChild(tag);
+          });
+
+          referencedBy.forEach((refName) => {
+            const tag = document.createElement('span');
+            tag.className = 'reference-item';
+            tag.textContent = `Used by [${refName}]`;
+            referenceContainer.appendChild(tag);
+          });
+        } else {
+          const empty = document.createElement('span');
+          empty.className = 'no-references';
+          empty.textContent = 'No measure dependencies detected.';
+          referenceContainer.appendChild(empty);
+        }
+      }
+
+      return {
+        references: references.length,
+        referencedBy: referencedBy.length
+      };
     }
 
     findMeasuresReferencingThis(measureName) {
@@ -853,28 +932,13 @@
 
     compareMeasures(index) {
       const result = this.similarityResults[index];
-
-      // Create comparison view
-      const comparisonHTML = `
-      <div class="comparison-modal">
-        <h3>Measure Comparison</h3>
-        <div class="comparison-grid">
-          <div class="comparison-pane">
-            <h4>${result.measure1}</h4>
-            <pre><code class="language-dax">${result.code1}</code></pre>
-          </div>
-          <div class="comparison-pane">
-            <h4>${result.measure2}</h4>
-            <pre><code class="language-dax">${result.code2}</code></pre>
-          </div>
-        </div>
-        <div class="similarity-details">
-          <strong>Similarity:</strong> ${Math.round(result.similarity * 100)}%
-        </div>
-      </div>
-    `;
-
-      this.showNotification(comparisonHTML, 'info', 10000);
+      const score = Math.round(result.similarity * 100);
+      this.highlightMeasures(result.measure1, result.measure2);
+      this.showNotification(
+        `Highlighted ${result.measure1} and ${result.measure2} (${score}% similarity).`,
+        'info',
+        5000
+      );
     }
 
     highlightMeasures(measure1, measure2) {
@@ -1023,7 +1087,35 @@
 </script>
 
 <style>
-  /* Enhanced DAX Explorer Styles */
+  .dax-page {
+    --color-primary: var(--wb-accent);
+    --color-success: var(--wb-good);
+    --glass-bg: rgba(255, 255, 255, 0.94);
+    --glass-border: #d4e0ee;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f8ff;
+    --bg-hover: #e8f0fb;
+    --text-primary: #13243a;
+    --text-secondary: #5d718a;
+    --text-muted: #7389a3;
+    --gradient-primary: linear-gradient(145deg, #0d6aa6, #128b84);
+    --gradient-warning: linear-gradient(140deg, #ffe1a8, #ffd28c);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 999px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --shadow-md: var(--wb-shadow-sm);
+    --transition-fast: all 0.18s ease;
+    --transition-smooth: all 0.24s ease;
+    color: var(--text-primary);
+  }
 
   /* Search and Filter Container */
   .search-filter-container {
@@ -1031,6 +1123,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     padding: var(--space-xl);
     margin-bottom: var(--space-xl);
     display: flex;
@@ -1237,6 +1330,26 @@
   .measure-actions {
     display: flex;
     gap: var(--space-sm);
+  }
+
+  .icon-button {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--glass-border);
+    background: #ffffff;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+  }
+
+  .icon-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--bg-hover);
   }
 
   /* DAX Card Content */
