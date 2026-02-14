@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Impact Simulator - Power BI Workbench{% endblock %}
+{% block header_icon %}<i class="fas fa-bezier-curve"></i>{% endblock %}
+{% block header_title %}Impact Simulator{% endblock %}
+{% block header_subtitle %}Estimate dependency impact before measure cleanup and refactoring decisions.{% endblock %}
+
+{% block content %}
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Total Measures</span>
+    <strong>{{ impact_summary.all_measures }}</strong>
+    <small>{{ impact_summary.used_measures }} currently used</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Unused Pool</span>
+    <strong>{{ impact_summary.unused_total }}</strong>
+    <small>{{ impact_summary.immediate_unused }} immediate</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Cascade Potential</span>
+    <strong>{{ impact_summary.cascade_unused }}</strong>
+    <small>Additional measures after first pass</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Health Impact</span>
+    <strong>{% if impact_summary.unused_total %}High{% else %}Low{% endif %}</strong>
+    <small>Use scenarios below to estimate blast radius</small>
+  </article>
+</section>
+
+<section class="wb-grid wb-grid-split">
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Deletion Chain Levels</h2>
+      <span class="wb-muted">Measures unlocked at each stage</span>
+    </div>
+
+    {% if deletion_levels %}
+    <ol class="wb-workflow-list">
+      {% for level in deletion_levels %}
+      <li>
+        <span>{{ level.level }}</span>
+        <div>
+          <strong>{{ level.count }} measures</strong>
+          <small>Sample: {{ level.sample|join(', ') }}</small>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="wb-empty-note">No deletion chains available. Your model currently shows minimal removable dependencies.</p>
+    {% endif %}
+  </article>
+
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Simulation Guidance</h2>
+      <span class="wb-muted">How to execute safely</span>
+    </div>
+    <ul class="wb-checklist">
+      <li><a href="#">1. Start with leaf measures</a><small>Prioritize measures with no children to avoid unintended breakage.</small></li>
+      <li><a href="#">2. Remove in small batches</a><small>Promote rollback confidence by deleting 5-10 measures per iteration.</small></li>
+      <li><a href="#">3. Validate report pages</a><small>Run smoke checks on pages tied to affected measure groups.</small></li>
+      <li><a href="#">4. Export before/after artifacts</a><small>Capture impact evidence for peer review.</small></li>
+    </ul>
+  </article>
+</section>
+
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Single-Measure Scenarios</h2>
+    <span class="wb-muted">Preview impact for top removable candidates</span>
+  </div>
+
+  {% if scenarios %}
+  <div class="wb-grid wb-grid-issues">
+    {% for scenario in scenarios %}
+    <article class="wb-card wb-issue-card">
+      <div class="wb-issue-head">
+        <span class="wb-issue-rank">{{ loop.index }}</span>
+        <span class="wb-badge medium">Scenario</span>
+      </div>
+      <h3>{{ scenario.measure }}</h3>
+      <p class="wb-issue-impact">Estimated impact score: <strong>{{ scenario.impact_score }}</strong></p>
+      <dl class="wb-issue-meta">
+        <div><dt>Level 1</dt><dd>{{ scenario.level1 }}</dd></div>
+        <div><dt>Level 2</dt><dd>{{ scenario.level2 }}</dd></div>
+        <div><dt>Level 3</dt><dd>{{ scenario.level3 }}</dd></div>
+      </dl>
+      <p class="wb-issue-reco">Total potentially impacted measures: {{ scenario.total }}</p>
+      <a href="/unused-measures" class="wb-action-link">Open Cleanup View <i class="fas fa-arrow-right"></i></a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="wb-empty-note">No simulation scenarios are available yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

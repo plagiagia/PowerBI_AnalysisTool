@@ -1,349 +1,160 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Power BI Analysis Tool{% endblock %}
+{% block title %}Health Dashboard - Power BI Workbench{% endblock %}
 
-{% block header_subtitle %}Report analysis and metrics overview{% endblock %}
+{% block header_subtitle %}One place to prioritize the next fixes for model quality, report usability, and performance.{% endblock %}
 
 {% block content %}
-<!-- Key Metrics -->
-<section class="enhanced-metrics-section">
-  <div class="metrics-container">
-    <div class="metric-card-enhanced">
-      <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
-      <div class="metric-value">{{ metrics.visual_count }}</div>
-      <div class="metric-label">Visuals</div>
+<section class="wb-grid wb-grid-hero">
+  <article class="wb-card wb-health-card">
+    <div class="wb-card-head">
+      <span class="wb-overline">Model Health</span>
+      <a href="/issues" class="wb-inline-link">Open Action Center <i class="fas fa-arrow-right"></i></a>
     </div>
-    <div class="metric-card-enhanced">
-      <div class="card-icon"><i class="fas fa-calculator"></i></div>
-      <div class="metric-value">{{ metrics.measure_count }}</div>
-      <div class="metric-label">Measures</div>
+
+    <div class="wb-score-ring" style="--score: {{ health.score }}">
+      <div class="wb-score-core">
+        <strong>{{ health.score }}</strong>
+        <small>/100</small>
+      </div>
     </div>
-    <div class="metric-card-enhanced">
-      <div class="card-icon"><i class="fas fa-file-alt"></i></div>
-      <div class="metric-value">{{ metrics.page_count }}</div>
-      <div class="metric-label">Pages</div>
+
+    <p class="wb-health-message">
+      <strong>{{ health.label }}</strong>:
+      {{ health.issue_count }} prioritized issues, including
+      {{ health.critical_count }} critical and {{ health.high_count }} high severity findings.
+    </p>
+
+    <div class="wb-health-breakdown">
+      <span class="wb-badge critical">Critical {{ health.critical_count }}</span>
+      <span class="wb-badge high">High {{ health.high_count }}</span>
+      <span class="wb-badge medium">Medium {{ health.medium_count }}</span>
+      <span class="wb-badge low">Low {{ health.low_count }}</span>
     </div>
-    <div class="metric-card-enhanced">
-      <div class="card-icon"><i class="fas fa-exclamation-circle"></i></div>
-      <div class="metric-value">{{ metrics.unused_count }}</div>
-      <div class="metric-label">Unused</div>
+  </article>
+
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Focus Areas</h2>
+      <span class="wb-muted">Top priorities today</span>
     </div>
-  </div>
+
+    {% if focus_areas %}
+    <ol class="wb-priority-list">
+      {% for issue in focus_areas %}
+      <li>
+        <div>
+          <p>{{ issue.title }}</p>
+          <small>{{ issue.impact }}</small>
+        </div>
+        <span class="wb-badge {{ issue.severity }}">{{ issue.severity|title }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="wb-empty-note">No major issues found. Keep monitoring before each release.</p>
+    {% endif %}
+
+    <div class="wb-card-divider"></div>
+    <p class="wb-muted">Last loaded: {{ time_loaded }}</p>
+  </article>
 </section>
 
-<!-- Summary Cards -->
-<section class="summary-section">
-  <div class="summary-grid">
-    <!-- Report Info -->
-    <div class="summary-card">
-      <div class="summary-header">
-        <i class="fas fa-info-circle"></i>
-        <h3>Report Info</h3>
-      </div>
-      <div class="summary-content">
-        <div class="summary-row">
-          <span class="summary-label">Name</span>
-          <span class="summary-value">{{ report_name }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Theme</span>
-          <span class="summary-value">{{ metrics.report_summary.theme_name }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Most Used Visual</span>
-          <span class="summary-value">{{ metrics.most_common_visual }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Loaded</span>
-          <span class="summary-value muted">{{ time_loaded }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Model Summary -->
-    <div class="summary-card">
-      <div class="summary-header">
-        <i class="fas fa-database"></i>
-        <h3>Model Summary</h3>
-      </div>
-      <div class="summary-content">
-        <div class="summary-row">
-          <span class="summary-label">Tables</span>
-          <span class="summary-value">{{ metrics.model_summary.table_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Columns</span>
-          <span class="summary-value">{{ metrics.model_summary.column_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Relationships</span>
-          <span class="summary-value">{{ metrics.model_summary.relationship_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Roles (RLS)</span>
-          <span class="summary-value">{{ metrics.model_summary.role_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Hidden Objects</span>
-          <span class="summary-value muted">{{ metrics.model_summary.hidden_table_count }} tables, {{ metrics.model_summary.hidden_column_count }} cols, {{ metrics.model_summary.hidden_measure_count }} measures</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Report Features -->
-    <div class="summary-card">
-      <div class="summary-header">
-        <i class="fas fa-sliders-h"></i>
-        <h3>Report Features</h3>
-      </div>
-      <div class="summary-content">
-        <div class="summary-row">
-          <span class="summary-label">Bookmarks</span>
-          <span class="summary-value">{{ metrics.report_summary.bookmark_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Navigation Elements</span>
-          <span class="summary-value">{{ metrics.report_summary.navigation_count }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Custom Formatting</span>
-          <span class="summary-value">{{ metrics.report_summary.formatting_highlights }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Annotations</span>
-          <span class="summary-value">{{ metrics.model_summary.annotation_count }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Visual Distribution -->
-    <div class="summary-card">
-      <div class="summary-header">
-        <i class="fas fa-chart-pie"></i>
-        <h3>Visual Types</h3>
-      </div>
-      <div class="summary-content">
-        {% if metrics.visual_distribution %}
-          {% for visual in metrics.visual_distribution %}
-          <div class="summary-row">
-            <span class="summary-label">{{ visual[0] }}</span>
-            <span class="summary-value">{{ visual[1] }}</span>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="summary-row muted">No visuals found</div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Visuals</span>
+    <strong>{{ metrics.visual_count }}</strong>
+    <small>{{ metrics.page_count }} pages</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Measures</span>
+    <strong>{{ metrics.measure_count }}</strong>
+    <small>{{ metrics.model_summary.measure_count }} in model metadata</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Unused Opportunities</span>
+    <strong>{{ metrics.unused_count }}</strong>
+    <small>{{ metrics.unused_breakdown.cascade }} cascade candidates</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Theme</span>
+    <strong>{{ metrics.report_summary.theme_name }}</strong>
+    <small>{{ metrics.report_summary.bookmark_count }} bookmarks</small>
+  </article>
 </section>
 
-<!-- Quick Access Tools -->
-<section class="tools-section">
-  <div class="section-header">
-    <h2 class="section-title">Analysis Tools</h2>
-  </div>
-  <div class="tools-grid">
-    <a href="/table-view" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-table"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Visual Fields</div>
-        <div class="tool-desc">Explore field usage across visuals</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/lineage-view" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-project-diagram"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Data Lineage</div>
-        <div class="tool-desc">View measure dependencies</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/model-insights" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-layer-group"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Model Insights</div>
-        <div class="tool-desc">Tables, relationships, and roles</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/report-insights" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-file-alt"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Report Insights</div>
-        <div class="tool-desc">Bookmarks, layouts, formatting</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/dax-expressions" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-code"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">DAX Explorer</div>
-        <div class="tool-desc">Browse DAX expressions</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/source-explorer" class="tool-link">
-      <div class="tool-icon"><i class="fas fa-database"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Source Explorer</div>
-        <div class="tool-desc">M queries and transformations</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    <a href="/unused-measures" class="tool-link{% if metrics.unused_count > 0 %} has-alert{% endif %}">
-      <div class="tool-icon"><i class="fas fa-broom"></i></div>
-      <div class="tool-info">
-        <div class="tool-name">Unused Measures</div>
-        <div class="tool-desc">{% if metrics.unused_count > 0 %}{{ metrics.unused_count }} unused measures found{% else %}No unused measures{% endif %}</div>
-      </div>
-      <i class="fas fa-chevron-right"></i>
-    </a>
-  </div>
+<section class="wb-grid wb-grid-split">
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Quick Wins</h2>
+      <span class="wb-muted">Low to medium effort</span>
+    </div>
+    {% if quick_wins %}
+    <ul class="wb-checklist">
+      {% for issue in quick_wins %}
+      <li>
+        <a href="{{ issue.link }}">{{ issue.title }}</a>
+        <small>{{ issue.recommendation }}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="wb-empty-note">No quick wins detected from current metadata.</p>
+    {% endif %}
+  </article>
+
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Recommended Workflow</h2>
+      <span class="wb-muted">For each report intake</span>
+    </div>
+    <ol class="wb-workflow-list">
+      <li><span>1</span><div><strong>Validate Inputs</strong><small>Confirm JSON/TSV readiness and parse quality.</small></div></li>
+      <li><span>2</span><div><strong>Review Action Center</strong><small>Triage by severity and assign ownership.</small></div></li>
+      <li><span>3</span><div><strong>Explore Root Causes</strong><small>Drill into model, DAX, and report-level analyzers.</small></div></li>
+      <li><span>4</span><div><strong>Simulate Impact</strong><small>Estimate cleanup chain before deleting measures.</small></div></li>
+      <li><span>5</span><div><strong>Export Handoff</strong><small>Share artifacts with BI engineering and QA.</small></div></li>
+    </ol>
+  </article>
 </section>
-{% endblock %}
 
-{% block scripts %}
-<style>
-  .summary-section {
-    margin-bottom: var(--space-xl);
-  }
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Top Findings</h2>
+    <a href="/issues" class="wb-inline-link">See all findings <i class="fas fa-arrow-right"></i></a>
+  </div>
 
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-md);
-  }
-
-  .summary-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
-  }
-
-  .summary-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--color-border-light);
-  }
-
-  .summary-header i {
-    color: var(--color-primary);
-    font-size: 14px;
-  }
-
-  .summary-header h3 {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text);
-    margin: 0;
-  }
-
-  .summary-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-  }
-
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: 13px;
-    padding: 2px 0;
-  }
-
-  .summary-label {
-    color: var(--color-text-secondary);
-  }
-
-  .summary-value {
-    color: var(--color-text);
-    font-weight: 500;
-    text-align: right;
-    font-family: var(--font-mono);
-  }
-
-  .summary-value.muted {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    font-family: var(--font-sans);
-    font-weight: 400;
-  }
-
-  .tools-section {
-    margin-bottom: var(--space-xl);
-  }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-sm);
-  }
-
-  .tool-link {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    padding: var(--space-md) var(--space-lg);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: inherit;
-    transition: border-color 0.15s;
-  }
-
-  .tool-link:hover {
-    border-color: var(--color-primary);
-  }
-
-  .tool-link.has-alert {
-    border-left: 3px solid var(--color-warning);
-  }
-
-  .tool-link .tool-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--color-primary-light);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-
-  .tool-link .tool-info {
-    flex: 1;
-  }
-
-  .tool-link .tool-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text);
-    margin-bottom: 2px;
-  }
-
-  .tool-link .tool-desc {
-    font-size: 12px;
-    color: var(--color-text-muted);
-  }
-
-  .tool-link > i:last-child {
-    color: var(--color-text-muted);
-    font-size: 12px;
-  }
-
-  @media (max-width: 768px) {
-    .tools-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
+  {% if issues %}
+  <div class="wb-table-wrap">
+    <table class="wb-table">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Issue</th>
+          <th>Severity</th>
+          <th>Impact</th>
+          <th>Effort</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for issue in issues[:6] %}
+        <tr>
+          <td>#{{ issue.rank }}</td>
+          <td>
+            <strong>{{ issue.title }}</strong>
+            <small>{{ issue.why }}</small>
+          </td>
+          <td><span class="wb-badge {{ issue.severity }}">{{ issue.severity|title }}</span></td>
+          <td>{{ issue.impact }}</td>
+          <td>{{ issue.effort|title }}</td>
+          <td><a href="{{ issue.link }}" class="wb-inline-link">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="wb-empty-note">No findings available for the current report inputs.</p>
+  {% endif %}
+</section>
 {% endblock %}

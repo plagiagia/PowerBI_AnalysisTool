@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Export Center - Power BI Workbench{% endblock %}
+{% block header_icon %}<i class="fas fa-box-open"></i>{% endblock %}
+{% block header_title %}Export Center{% endblock %}
+{% block header_subtitle %}Package analysis artifacts for engineering handoff, QA reviews, and portfolio reporting.{% endblock %}
+
+{% block content %}
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Visuals</span>
+    <strong>{{ metrics.visual_count }}</strong>
+    <small>Available for field usage exports</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Measures</span>
+    <strong>{{ metrics.measure_count }}</strong>
+    <small>DAX export candidates</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Unused Candidates</span>
+    <strong>{{ metrics.unused_count }}</strong>
+    <small>Can be bundled as cleanup backlog</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Report Theme</span>
+    <strong>{{ metrics.report_summary.theme_name }}</strong>
+    <small>Context for design audits</small>
+  </article>
+</section>
+
+<section class="wb-grid wb-grid-tools">
+  {% for item in export_items %}
+  <article class="wb-card wb-export-card">
+    <span class="wb-badge low">{{ item.format }}</span>
+    <h3>{{ item.name }}</h3>
+    <p>{{ item.description }}</p>
+    <code>{{ item.path }}</code>
+    <a class="wb-action-link" href="{{ item.path }}">
+      {{ item.action_label }}
+      <i class="fas fa-arrow-right"></i>
+    </a>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Recommended Portfolio Bundle</h2>
+    <span class="wb-muted">A concise package for case-study storytelling</span>
+  </div>
+  <ol class="wb-workflow-list">
+    <li><span>1</span><div><strong>Health Snapshot</strong><small>Capture score, issue counts, and top findings from dashboard.</small></div></li>
+    <li><span>2</span><div><strong>Action Backlog</strong><small>Export top issue list with impact and effort for roadmap transparency.</small></div></li>
+    <li><span>3</span><div><strong>Technical Evidence</strong><small>Include DAX/source exports and impact simulation notes.</small></div></li>
+    <li><span>4</span><div><strong>Outcome Summary</strong><small>Document what changed and expected business effect.</small></div></li>
+  </ol>
+</section>
+{% endblock %}

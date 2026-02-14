@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Action Center - Power BI Workbench{% endblock %}
+{% block header_icon %}<i class="fas fa-list-check"></i>{% endblock %}
+{% block header_title %}Action Center{% endblock %}
+{% block header_subtitle %}Prioritized remediation backlog with clear impact, effort, and suggested next action.{% endblock %}
+
+{% block content %}
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Total Issues</span>
+    <strong>{{ health.issue_count }}</strong>
+    <small>Across model, report, and governance checks</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Critical + High</span>
+    <strong>{{ health.critical_count + health.high_count }}</strong>
+    <small>Needs immediate triage</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Quick Wins</span>
+    <strong>{{ quick_wins|length }}</strong>
+    <small>Low/medium effort opportunities</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Health Score</span>
+    <strong>{{ health.score }}</strong>
+    <small>{{ health.label }}</small>
+  </article>
+</section>
+
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Filter Findings</h2>
+    <span class="wb-muted">Client-side filter for triage sessions</span>
+  </div>
+  <div class="wb-filter-row">
+    <button class="wb-filter-btn active" data-filter="all">All</button>
+    <button class="wb-filter-btn" data-filter="critical">Critical</button>
+    <button class="wb-filter-btn" data-filter="high">High</button>
+    <button class="wb-filter-btn" data-filter="medium">Medium</button>
+    <button class="wb-filter-btn" data-filter="low">Low</button>
+  </div>
+</section>
+
+<section class="wb-grid wb-grid-issues" id="issuesGrid">
+  {% if issues %}
+    {% for issue in issues %}
+    <article class="wb-card wb-issue-card" data-severity="{{ issue.severity }}">
+      <div class="wb-issue-head">
+        <span class="wb-issue-rank">#{{ issue.rank }}</span>
+        <span class="wb-badge {{ issue.severity }}">{{ issue.severity|title }}</span>
+      </div>
+
+      <h3>{{ issue.title }}</h3>
+      <p class="wb-issue-impact">{{ issue.impact }}</p>
+
+      <dl class="wb-issue-meta">
+        <div>
+          <dt>Category</dt>
+          <dd>{{ issue.category }}</dd>
+        </div>
+        <div>
+          <dt>Effort</dt>
+          <dd>{{ issue.effort|title }}</dd>
+        </div>
+        <div>
+          <dt>Finding Size</dt>
+          <dd>{{ issue.count }}</dd>
+        </div>
+      </dl>
+
+      <div class="wb-card-divider"></div>
+      <p class="wb-issue-why">{{ issue.why }}</p>
+      <p class="wb-issue-reco">{{ issue.recommendation }}</p>
+
+      <a href="{{ issue.link }}" class="wb-action-link">
+        Open Related Tool
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </article>
+    {% endfor %}
+  {% else %}
+    <article class="wb-card">
+      <p class="wb-empty-note">No issues were generated from the available metadata.</p>
+    </article>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll(".wb-filter-btn");
+    const issueCards = document.querySelectorAll(".wb-issue-card");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const filter = this.getAttribute("data-filter");
+
+        filterButtons.forEach((item) => item.classList.remove("active"));
+        this.classList.add("active");
+
+        issueCards.forEach((card) => {
+          const severity = card.getAttribute("data-severity");
+          const visible = filter === "all" || severity === filter;
+          card.style.display = visible ? "" : "none";
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -123,10 +123,15 @@ class RouteSmokeTests(unittest.TestCase):
     def test_primary_routes_return_success(self) -> None:
         routes = [
             "/",
+            "/upload-validate",
+            "/issues",
+            "/explore",
             "/table-view",
             "/lineage-view",
             "/dax-expressions",
             "/unused-measures",
+            "/impact-simulator",
+            "/exports",
             "/model-insights",
             "/report-insights",
             "/source-explorer",

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Upload & Validate - Power BI Workbench{% endblock %}
+{% block header_icon %}<i class="fas fa-upload"></i>{% endblock %}
+{% block header_title %}Upload & Validate{% endblock %}
+{% block header_subtitle %}Confirm required files, parse quality, and readiness before starting analysis work.{% endblock %}
+
+{% block content %}
+<section class="wb-grid wb-grid-hero">
+  <article class="wb-card wb-health-card">
+    <div class="wb-card-head">
+      <span class="wb-overline">Readiness Score</span>
+      <span class="wb-muted">File presence + parse checks</span>
+    </div>
+    <div class="wb-score-ring" style="--score: {{ readiness_score }}">
+      <div class="wb-score-core">
+        <strong>{{ readiness_score }}</strong>
+        <small>/100</small>
+      </div>
+    </div>
+    <p class="wb-health-message">
+      {% if readiness_score >= 90 %}
+      <strong>Ready for audit.</strong> Inputs are complete and parsable.
+      {% elif readiness_score >= 60 %}
+      <strong>Partially ready.</strong> Resolve validation failures before sharing findings.
+      {% else %}
+      <strong>Not ready.</strong> Required files or parse checks are failing.
+      {% endif %}
+    </p>
+  </article>
+
+  <article class="wb-card">
+    <div class="wb-card-head">
+      <h2>Workflow Gate</h2>
+      <span class="wb-muted">Recommended sequence</span>
+    </div>
+    <ol class="wb-workflow-list">
+      <li><span>1</span><div><strong>Drop raw files into `data/`</strong><small>`report.json`, `MeasureDependencies.tsv`, `model.json`.</small></div></li>
+      <li><span>2</span><div><strong>Run readiness checks</strong><small>Confirm parser can extract visuals, measures, and tables.</small></div></li>
+      <li><span>3</span><div><strong>Open dashboard</strong><small>Start triage from Action Center priorities.</small></div></li>
+    </ol>
+  </article>
+</section>
+
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Required Files</h2>
+    <span class="wb-muted">Current environment paths</span>
+  </div>
+  <div class="wb-table-wrap">
+    <table class="wb-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Expected Name</th>
+          <th>Status</th>
+          <th>Size</th>
+          <th>Modified</th>
+          <th>Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in file_checks %}
+        <tr>
+          <td><strong>{{ file.label }}</strong></td>
+          <td><code>{{ file.expected_name }}</code></td>
+          <td>
+            {% if file.exists %}
+            <span class="wb-badge low">Available</span>
+            {% else %}
+            <span class="wb-badge critical">Missing</span>
+            {% endif %}
+          </td>
+          <td>{{ file.size_kb }} KB</td>
+          <td>{{ file.modified }}</td>
+          <td><code>{{ file.path }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="wb-card">
+  <div class="wb-card-head">
+    <h2>Validation Results</h2>
+    <span class="wb-muted">Parser-level checks</span>
+  </div>
+  <ul class="wb-checklist">
+    {% for check in validation_checks %}
+    <li>
+      <span class="wb-badge {{ 'low' if check.status == 'pass' else 'critical' }}">
+        {{ 'Pass' if check.status == 'pass' else 'Fail' }}
+      </span>
+      <div>
+        <a href="#">{{ check.name }}</a>
+        <small>{{ check.detail }}</small>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

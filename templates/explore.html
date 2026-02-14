@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Explore Hub - Power BI Workbench{% endblock %}
+{% block header_icon %}<i class="fas fa-compass"></i>{% endblock %}
+{% block header_title %}Explore Hub{% endblock %}
+{% block header_subtitle %}Jump into report, model, and code analyzers from a single navigation layer.{% endblock %}
+
+{% block content %}
+<section class="wb-grid wb-grid-kpi">
+  <article class="wb-card wb-kpi">
+    <span>Visual Inventory</span>
+    <strong>{{ metrics.visual_count }}</strong>
+    <small>{{ metrics.page_count }} pages analyzed</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Measure Inventory</span>
+    <strong>{{ metrics.measure_count }}</strong>
+    <small>{{ metrics.model_summary.measure_count }} with metadata</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Unused Candidates</span>
+    <strong>{{ metrics.unused_count }}</strong>
+    <small>{{ metrics.unused_breakdown.immediate }} immediate removals</small>
+  </article>
+  <article class="wb-card wb-kpi">
+    <span>Navigation Assets</span>
+    <strong>{{ metrics.report_summary.navigation_count }}</strong>
+    <small>{{ metrics.report_summary.bookmark_count }} bookmarks</small>
+  </article>
+</section>
+
+{% for section in explore_sections %}
+<section class="wb-card wb-explore-section">
+  <div class="wb-card-head">
+    <h2>{{ section.title }}</h2>
+    <span class="wb-muted">{{ section.description }}</span>
+  </div>
+
+  <div class="wb-grid wb-grid-tools">
+    {% for tool in section.tools %}
+    <a href="{{ tool.href }}" class="wb-tool-card">
+      <div>
+        <h3>{{ tool.name }}</h3>
+        <p>{{ tool.description }}</p>
+      </div>
+      <div class="wb-tool-meta">
+        <span>{{ tool.kpi }}</span>
+        <i class="fas fa-arrow-up-right-from-square"></i>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}
