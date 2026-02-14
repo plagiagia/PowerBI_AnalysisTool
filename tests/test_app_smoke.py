@@ -131,7 +131,6 @@ class RouteSmokeTests(unittest.TestCase):
             "/unused-measures",
             "/impact-simulator",
             "/exports",
-            "/model-insights",
             "/report-insights",
             "/source-explorer",
             "/api/model-json",
@@ -143,8 +142,14 @@ class RouteSmokeTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
 
     def test_removed_action_center_route_returns_404(self) -> None:
-        response = self.client.get("/issues")
-        self.assertEqual(response.status_code, 404)
+        removed_routes = [
+            "/issues",
+            "/model-insights",
+        ]
+        for route in removed_routes:
+            with self.subTest(route=route):
+                response = self.client.get(route)
+                self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":

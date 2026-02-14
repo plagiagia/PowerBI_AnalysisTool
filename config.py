@@ -31,7 +31,6 @@ class Config:
     APP_AUTHOR = "Dimitrios"
 
     # Feature flags
-    ENABLE_MODEL_INSIGHTS = True
     ENABLE_REPORT_INSIGHTS = True
     ENABLE_SOURCE_EXPLORER = True
     ENABLE_DAX_EXPLORER = True

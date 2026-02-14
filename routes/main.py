@@ -97,7 +97,7 @@ def _build_issue_catalog(metrics: Dict[str, Any], model_processor: ModelProcesso
             'penalty': min(18, round(missing_count * 0.45)),
             'why': 'Lack of descriptions slows onboarding and increases semantic drift.',
             'recommendation': 'Document business logic for high-use measures first, then enforce via review checklist.',
-            'link': '/model-insights'
+            'link': '/explore'
         })
 
     if measures_without_format:
@@ -114,7 +114,7 @@ def _build_issue_catalog(metrics: Dict[str, Any], model_processor: ModelProcesso
             'penalty': min(14, round(missing_count * 0.30)),
             'why': 'Unformatted values reduce trust and make reports harder to scan.',
             'recommendation': 'Apply numeric/currency/percentage formats in bulk from model metadata.',
-            'link': '/model-insights'
+            'link': '/explore'
         })
 
     if columns_without_category:
@@ -131,7 +131,7 @@ def _build_issue_catalog(metrics: Dict[str, Any], model_processor: ModelProcesso
             'penalty': min(10, round(missing_count * 0.18)),
             'why': 'Missing categories can impact geospatial and semantic behaviors.',
             'recommendation': 'Prioritize geographic, URL, and image-like columns for categorization.',
-            'link': '/model-insights'
+            'link': '/explore'
         })
 
     if visuals_per_page >= 18:
@@ -183,7 +183,7 @@ def _build_issue_catalog(metrics: Dict[str, Any], model_processor: ModelProcesso
             'penalty': min(6, round(hidden_total * 0.02)),
             'why': 'Hidden assets accumulate technical debt when no ownership policy exists.',
             'recommendation': 'Label intentional hidden assets and remove deprecated artifacts.',
-            'link': '/model-insights'
+            'link': '/explore'
         })
 
     issues.sort(
@@ -409,16 +409,16 @@ def explore() -> str:
             'description': 'Validate structure, metadata quality, and dependencies.',
             'tools': [
                 {
-                    'name': 'Model Insights',
-                    'description': 'Review tables, columns, relationships, and RLS roles.',
-                    'href': '/model-insights',
-                    'kpi': f"{(metrics.get('model_summary') or {}).get('table_count', 0)} tables"
-                },
-                {
                     'name': 'Data Lineage',
                     'description': 'Trace measure dependencies and upstream calculations.',
                     'href': '/lineage-view',
                     'kpi': f"{metrics.get('measure_count', 0)} measures"
+                },
+                {
+                    'name': 'Unused Measures',
+                    'description': 'Review immediate and cascade cleanup candidates.',
+                    'href': '/unused-measures',
+                    'kpi': f"{metrics.get('unused_count', 0)} candidates"
                 },
             ]
         },

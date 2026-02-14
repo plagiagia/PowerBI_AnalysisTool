@@ -3,18 +3,21 @@
 
 {% block header_icon %}<i class="fas fa-exclamation-triangle"></i>{% endblock %}
 {% block header_title %}Performance Optimizer{% endblock %}
-{% block header_subtitle %}Identify and manage measures not used in any visuals to optimize your Power BI model
+{% block header_subtitle %}Review direct unused measures and cascade cleanup candidates to optimize your Power BI model
 performance{% endblock %}
 
 {% block header_stats %}
 <div class="quick-stat">
   <span class="stat-number">{{ unused_measures|length if unused_measures else 0 }}</span>
-  <span class="stat-label">Unused Measures</span>
+  <span class="stat-label">Total Candidates</span>
 </div>
 <div class="quick-stat">
-  <span class="stat-number">{{ ((unused_measures|length / (unused_measures|length + (metrics.measure_count if metrics is
-    defined else 258))) * 100)|round|int if unused_measures else 0 }}%</span>
-  <span class="stat-label">Cleanup Potential</span>
+  <span class="stat-number">{{ unused_analysis.immediate_unused if unused_analysis is defined else 0 }}</span>
+  <span class="stat-label">Directly Unused</span>
+</div>
+<div class="quick-stat">
+  <span class="stat-number">{{ unused_analysis.cascade_unused if unused_analysis is defined else 0 }}</span>
+  <span class="stat-label">Cascade Candidates</span>
 </div>
 {% endblock %}
 
@@ -35,7 +38,7 @@ performance{% endblock %}
     Performance Optimizer
   </h1>
   <p class="page-description">
-    Identify measures not used in any visuals to optimize your Power BI model performance and reduce complexity.
+    Identify measures that are directly unused in visuals and measures that become removable after dependency cleanup.
   </p>
 </div>
 
@@ -264,8 +267,8 @@ performance{% endblock %}
     <div class="modal-body">
       <div class="help-section">
         <h4><i class="fas fa-question-circle"></i> What are unused measures?</h4>
-        <p>Unused measures are DAX calculations that exist in your model but are not referenced by any visuals, other
-          measures, or calculated columns. Removing them can improve model performance and reduce complexity.</p>
+        <p>This page combines two groups: measures not referenced by report visuals and additional measures that become
+          removable after their dependent children are removed. Removing them can improve model performance and reduce complexity.</p>
       </div>
 
       <div class="help-section">

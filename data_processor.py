@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class DataProcessor:
         self.visual_formatting: List[Dict[str, Any]] = []
         self.visual_queries: List[Dict[str, Any]] = []
         self.navigation_items: List[Dict[str, Any]] = []
+        self.used_measure_refs: Set[str] = set()
 
     def process_json(self) -> None:
         self._reset_state()
@@ -65,21 +67,19 @@ class DataProcessor:
             visual_data = self.extract_visual_data(visual, page_name)
             self.visuals_data.append(visual_data)
 
-    def extract_filter_fields(self, filter_data: list) -> str:
-        filter_fields = []
-        for f in filter_data:
-            if 'expression' in f:
-                expr_name = self._describe_expression(f['expression'])
-                if expr_name:
-                    filter_fields.append(expr_name)
-            if 'filter' in f:
-                where_clauses = f['filter'].get('Where', [])
-                for clause in where_clauses:
-                    condition = clause.get('Condition', {})
-                    described = self._describe_expression(condition)
-                    if described:
-                        filter_fields.append(described)
-        return "; ".join(filter_fields)
+    def extract_filter_fields(self, filter_data: list, entity_aliases: Optional[Dict[str, str]] = None) -> str:
+        filter_fields: List[str] = []
+        measure_refs: List[str] = []
+
+        for filter_entry in filter_data:
+            refs, measures = self._extract_references_from_payload(filter_entry, entity_aliases)
+            filter_fields.extend(refs)
+            measure_refs.extend(measures)
+
+        for measure_ref in measure_refs:
+            self.used_measure_refs.add(measure_ref)
+
+        return "; ".join(self._dedupe_preserving_order(filter_fields))
 
     def extract_visual_data(self, visual: dict, page_name: str) -> List[str]:
         config = json.loads(visual['config'])
@@ -109,13 +109,19 @@ class DataProcessor:
 
         filter_data = visual.get('filters', '[]')
         filter_data = json.loads(filter_data)
-        filter_fields = self.extract_filter_fields(filter_data)
+        filter_fields = self.extract_filter_fields(filter_data, entity_aliases)
 
         object_data = visual_config.get('objects', {})
         object_fields = self.extract_vc_objects_fields(object_data)
+        _, object_measure_refs = self._extract_references_from_payload(object_data, entity_aliases)
+        for measure_ref in object_measure_refs:
+            self.used_measure_refs.add(measure_ref)
 
         vc_objects_data = visual_config.get('vcObjects', {})
         vc_objects_fields = self.extract_vc_objects_fields(vc_objects_data)
+        _, vc_object_measure_refs = self._extract_references_from_payload(vc_objects_data, entity_aliases)
+        for measure_ref in vc_object_measure_refs:
+            self.used_measure_refs.add(measure_ref)
 
         prototype_query = visual_config.get('prototypeQuery', {})
         if prototype_query:
@@ -193,16 +199,26 @@ class DataProcessor:
             if entity_name and property_name:
                 field_name = f"{entity_name}[{property_name}]"
                 extracted_fields.append(field_name)
+                if 'Measure' in field:
+                    self.used_measure_refs.add(field_name)
 
         return "; ".join(extracted_fields)
 
     def get_used_measures(self, known_measures: Optional[Set[str]] = None) -> Set[str]:
         used_measures: Set[str] = set()
-        lookup = None
+        lookup = self._build_measure_lookup(known_measures) if known_measures else None
 
-        if known_measures:
-            lookup = {name.lower(): name for name in known_measures}
+        explicit_candidates = set(self.used_measure_refs)
+        for candidate in explicit_candidates:
+            self._add_measure_candidate(
+                used_measures=used_measures,
+                candidate=candidate,
+                lookup=lookup,
+                allow_name_fallback=True
+            )
 
+        # Fallback heuristics from extracted field blocks.
+        # This is intentionally stricter to avoid column/measure name collisions.
         for visual_data in self.visuals_data:
             for index in [3, 4, 5, 6]:
                 if index >= len(visual_data):
@@ -212,23 +228,119 @@ class DataProcessor:
                 if not field_block:
                     continue
 
-                for field in field_block.split('; '):
-                    field = field.strip()
-                    if not field or '[' not in field or not field.endswith(']'):
-                        continue
-
-                    candidate = field[field.rfind('[') + 1:-1].strip()
+                for field in re.split(r'\s*;\s*', field_block):
+                    candidate = field.strip()
                     if not candidate:
                         continue
-
-                    if lookup is not None:
-                        match = lookup.get(candidate.lower())
-                        if match:
-                            used_measures.add(match)
-                    else:
-                        used_measures.add(candidate)
+                    self._add_measure_candidate(
+                        used_measures=used_measures,
+                        candidate=candidate,
+                        lookup=lookup,
+                        allow_name_fallback=False
+                    )
 
         return used_measures
+
+    @staticmethod
+    def _dedupe_preserving_order(items: List[str]) -> List[str]:
+        seen: Set[str] = set()
+        deduped: List[str] = []
+        for item in items:
+            normalized = item.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            deduped.append(normalized)
+        return deduped
+
+    @staticmethod
+    def _strip_quoted_identifier(identifier: str) -> str:
+        token = (identifier or '').strip()
+        if token.startswith("'") and token.endswith("'") and len(token) >= 2:
+            token = token[1:-1]
+        return token.replace("''", "'")
+
+    def _split_reference(self, reference: str) -> tuple:
+        token = (reference or '').strip()
+        if not token:
+            return '', ''
+
+        if '[' in token and token.endswith(']'):
+            table_part, name_part = token.rsplit('[', 1)
+            table_name = self._strip_quoted_identifier(table_part.strip())
+            measure_name = name_part[:-1].strip()
+            return table_name, measure_name
+
+        return '', token
+
+    @staticmethod
+    def _normalize_token(value: str) -> str:
+        return re.sub(r'\s+', ' ', (value or '').strip()).lower()
+
+    def _normalize_reference_key(self, reference: str) -> str:
+        table_name, measure_name = self._split_reference(reference)
+        if measure_name:
+            if table_name:
+                return f"{self._normalize_token(table_name)}::{self._normalize_token(measure_name)}"
+            return f"::{self._normalize_token(measure_name)}"
+        return self._normalize_token(reference)
+
+    def _build_measure_lookup(self, known_measures: Set[str]) -> Dict[str, Any]:
+        by_ref: Dict[str, List[str]] = {}
+        by_name: Dict[str, List[str]] = {}
+
+        for known_measure in known_measures:
+            reference_key = self._normalize_reference_key(known_measure)
+            by_ref.setdefault(reference_key, []).append(known_measure)
+
+            _, measure_name = self._split_reference(known_measure)
+            name_key = self._normalize_token(measure_name or known_measure)
+            by_name.setdefault(name_key, []).append(known_measure)
+
+        return {
+            'by_ref': by_ref,
+            'by_name': by_name
+        }
+
+    def _resolve_known_measure(
+        self,
+        candidate: str,
+        lookup: Dict[str, Any],
+        allow_name_fallback: bool
+    ) -> Optional[str]:
+        reference_key = self._normalize_reference_key(candidate)
+        by_ref = lookup['by_ref']
+        matches = by_ref.get(reference_key, [])
+        if len(matches) == 1:
+            return matches[0]
+
+        if allow_name_fallback:
+            _, measure_name = self._split_reference(candidate)
+            name_key = self._normalize_token(measure_name or candidate)
+            name_matches = lookup['by_name'].get(name_key, [])
+            if len(name_matches) == 1:
+                return name_matches[0]
+
+        return None
+
+    def _add_measure_candidate(
+        self,
+        used_measures: Set[str],
+        candidate: str,
+        lookup: Optional[Dict[str, Any]],
+        allow_name_fallback: bool
+    ) -> None:
+        table_name, measure_name = self._split_reference(candidate)
+        if not measure_name:
+            return
+
+        if lookup is None:
+            used_measures.add(measure_name if table_name else candidate)
+            return
+
+        resolved = self._resolve_known_measure(candidate, lookup, allow_name_fallback)
+        if resolved:
+            used_measures.add(resolved)
 
     def get_theme_info(self) -> Dict[str, Any]:
         return self.theme_info
@@ -307,41 +419,80 @@ class DataProcessor:
         return results
 
     def _describe_expression(self, expression: Any) -> Optional[str]:
-        if isinstance(expression, dict):
-            if 'Measure' in expression:
-                return self._describe_measure(expression['Measure'])
-            if 'Column' in expression:
-                return self._describe_column(expression['Column'])
-            if 'Aggregation' in expression:
-                return self._describe_expression(expression['Aggregation'])
-            if 'Expression' in expression:
-                return self._describe_expression(expression['Expression'])
-            if 'Condition' in expression:
-                return self._describe_expression(expression['Condition'])
-            if 'Not' in expression:
-                return self._describe_expression(expression['Not'])
-            if 'In' in expression:
-                for expr in expression['In'].get('Expressions', []):
-                    described = self._describe_expression(expr)
-                    if described:
-                        return described
-        return None
+        refs, _ = self._extract_references_from_payload(expression)
+        return refs[0] if refs else None
 
-    def _describe_measure(self, measure_payload: Dict[str, Any]) -> Optional[str]:
-        source_ref = measure_payload.get('Expression', {}).get('SourceRef', {})
-        entity = source_ref.get('Entity') or source_ref.get('Source')
-        prop = measure_payload.get('Property')
+    def _resolve_entity_name(
+        self,
+        source_ref: Dict[str, Any],
+        entity_aliases: Optional[Dict[str, str]] = None
+    ) -> str:
+        entity_name = (source_ref.get('Entity') or '').strip()
+        if entity_name:
+            return entity_name
+
+        source_name = (source_ref.get('Source') or '').strip()
+        if entity_aliases and source_name:
+            return (entity_aliases.get(source_name) or source_name).strip()
+        return source_name
+
+    def _describe_measure(
+        self,
+        measure_payload: Dict[str, Any],
+        entity_aliases: Optional[Dict[str, str]] = None
+    ) -> Optional[str]:
+        expression_obj = measure_payload.get('Expression', {})
+        source_ref = expression_obj.get('SourceRef', {})
+        entity = self._resolve_entity_name(source_ref, entity_aliases)
+        prop = (measure_payload.get('Property') or '').strip()
         if entity and prop:
             return f"{entity}[{prop}]"
         return None
 
-    def _describe_column(self, column_payload: Dict[str, Any]) -> Optional[str]:
-        source_ref = column_payload.get('Expression', {}).get('SourceRef', {})
-        entity = source_ref.get('Entity') or source_ref.get('Source')
-        prop = column_payload.get('Property')
+    def _describe_column(
+        self,
+        column_payload: Dict[str, Any],
+        entity_aliases: Optional[Dict[str, str]] = None
+    ) -> Optional[str]:
+        expression_obj = column_payload.get('Expression', {})
+        source_ref = expression_obj.get('SourceRef', {})
+        entity = self._resolve_entity_name(source_ref, entity_aliases)
+        prop = (column_payload.get('Property') or '').strip()
         if entity and prop:
             return f"{entity}[{prop}]"
         return None
+
+    def _extract_references_from_payload(
+        self,
+        payload: Any,
+        entity_aliases: Optional[Dict[str, str]] = None
+    ) -> tuple:
+        field_refs: List[str] = []
+        measure_refs: List[str] = []
+
+        def walk(node: Any) -> None:
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key == 'Measure' and isinstance(value, dict):
+                        described = self._describe_measure(value, entity_aliases)
+                        if described:
+                            field_refs.append(described)
+                            measure_refs.append(described)
+                    elif key == 'Column' and isinstance(value, dict):
+                        described = self._describe_column(value, entity_aliases)
+                        if described:
+                            field_refs.append(described)
+                    else:
+                        walk(value)
+            elif isinstance(node, list):
+                for item in node:
+                    walk(item)
+
+        walk(payload)
+        return (
+            self._dedupe_preserving_order(field_refs),
+            self._dedupe_preserving_order(measure_refs)
+        )
 
     def _collect_visual_metadata(self, page_name: str, visual_name: str, visual_type: str,
                                   config: Dict[str, Any], visual_config: Dict[str, Any]) -> None:

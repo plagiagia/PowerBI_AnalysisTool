@@ -86,7 +86,6 @@ http://localhost:5000
 
 ### Insights
 
-- `/model-insights`: Semantic model deep dive
 - `/report-insights`: Report structure and UX insights
 
 ### Sources
@@ -110,7 +109,6 @@ Configuration is defined in `config.py`.
   - `MEASURE_DEPENDENCIES_TSV_PATH`
   - `MODEL_JSON_PATH`
 - Feature flags are available in config classes:
-  - `ENABLE_MODEL_INSIGHTS`
   - `ENABLE_REPORT_INSIGHTS`
   - `ENABLE_SOURCE_EXPLORER`
   - `ENABLE_DAX_EXPLORER`

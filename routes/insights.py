@@ -1,4 +1,4 @@
-"""Insights routes blueprint - model and report insights."""
+"""Insights routes blueprint - report insights."""
 
 from typing import Any, Dict
 
@@ -6,91 +6,10 @@ from flask import Blueprint, abort, current_app, render_template
 
 from utils.processors import (
     get_data_processor,
-    get_model_processor,
     get_report_metrics,
 )
 
 insights_bp = Blueprint('insights', __name__)
-
-
-@insights_bp.route('/model-insights')
-def model_insights() -> str:
-    """Render the model insights page."""
-    if not current_app.config.get('ENABLE_MODEL_INSIGHTS', True):
-        abort(404, description="This feature is currently disabled.")
-
-    mp = get_model_processor()
-    metrics = get_report_metrics()
-
-    tables = sorted(mp.get_tables(), key=lambda item: (item.get('name') or '').lower())
-    measures = mp.get_measures()
-    relationships = sorted(
-        mp.get_relationships(),
-        key=lambda item: ((item.get('fromTable') or '').lower(), (item.get('toTable') or '').lower())
-    )
-    roles = sorted(mp.get_roles(), key=lambda item: (item.get('name') or '').lower())
-    annotations = mp.get_annotations()
-    annotation_items = [{'name': key, 'value': value} for key, value in sorted(annotations.items())]
-
-    column_count = sum(len(table.get('columns', [])) for table in tables)
-    hidden_table_count = sum(1 for table in tables if table.get('isHidden'))
-    hidden_column_count = sum(
-        1 for table in tables
-        for column in table.get('columns', [])
-        if column.get('isHidden')
-    )
-
-    measure_gaps = [
-        {
-            'table': measure.get('table'),
-            'name': measure.get('name'),
-            'missing_format': not (measure.get('formatString') or '').strip(),
-            'missing_description': not (measure.get('description') or '').strip(),
-            'display_folder': measure.get('displayFolder'),
-            'is_hidden': measure.get('isHidden', False)
-        }
-        for measure in measures
-        if not (measure.get('formatString') or '').strip() or not (measure.get('description') or '').strip()
-    ]
-
-    column_gaps = [
-        {
-            'table': table.get('name'),
-            'name': column.get('name'),
-            'data_type': column.get('dataType'),
-            'data_category': column.get('dataCategory'),
-            'is_hidden': column.get('isHidden', False)
-        }
-        for table in tables
-        for column in table.get('columns', [])
-        if not (column.get('dataCategory') or '').strip()
-    ]
-
-    model_summary = {
-        'table_count': len(tables),
-        'column_count': column_count,
-        'measure_count': len(measures),
-        'relationship_count': len(relationships),
-        'role_count': len(roles),
-        'annotations_count': len(annotation_items),
-        'hidden_table_count': hidden_table_count,
-        'hidden_column_count': hidden_column_count,
-        'measures_without_description': sum(1 for item in measure_gaps if item['missing_description']),
-        'measures_without_format': sum(1 for item in measure_gaps if item['missing_format']),
-        'columns_without_category': len(column_gaps)
-    }
-
-    return render_template(
-        'model_insights.html',
-        metrics=metrics,
-        model_summary=model_summary,
-        tables=tables,
-        relationships=relationships,
-        roles=roles,
-        annotation_items=annotation_items,
-        measure_gaps=sorted(measure_gaps, key=lambda item: ((item['table'] or ''), item['name'] or '')),
-        column_gaps=sorted(column_gaps, key=lambda item: ((item['table'] or ''), item['name'] or ''))
-    )
 
 
 @insights_bp.route('/report-insights')
