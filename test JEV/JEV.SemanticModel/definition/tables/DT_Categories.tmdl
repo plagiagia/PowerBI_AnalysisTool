@@ -1,0 +1,48 @@
+table DT_Categories
+	lineageTag: f18167a2-9148-46ea-95c1-cabe9a8893fa
+
+	column Lohnart
+		dataType: string
+		lineageTag: 0d626481-481e-4e6c-80fc-7ab1d5543cd0
+		summarizeBy: none
+		sourceColumn: Lohnart
+		sortByColumn: Index
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Explanation
+		dataType: string
+		lineageTag: 3c621089-12b7-4989-9708-7c684bd0661b
+		summarizeBy: none
+		sourceColumn: Explanation
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: afda3a9c-ffbc-4c96-acbf-e4c937a890cd
+		summarizeBy: none
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DT_Categories = m
+		mode: import
+		source =
+				let
+				    Source = Payslips,
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Lohnart"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Merged Queries" = Table.NestedJoin(#"Removed Duplicates", {"Lohnart"}, #"Payroll Legend", {"Category"}, "Payroll Legend", JoinKind.LeftOuter),
+				    #"Expanded Payroll Legend" = Table.ExpandTableColumn(#"Merged Queries", "Payroll Legend", {"#", "Explanation"}, {"#", "Explanation"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Expanded Payroll Legend",{{"#", "Index"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

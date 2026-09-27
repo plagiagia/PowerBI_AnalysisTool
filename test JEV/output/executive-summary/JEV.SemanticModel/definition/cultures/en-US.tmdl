@@ -1,0 +1,1983 @@
+cultureInfo en-US
+
+	linguisticMetadata =
+			{
+			  "Version": "3.5.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "payslip": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "payslip": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.lohnart": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Lohnart"
+			        }
+			      },
+			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
+			      "Terms": [
+			        {
+			          "lohnart": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.betrag": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Betrag"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "betrag": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Date"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "date": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "moment": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "payslip.filter_payslips": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Filter_Payslips"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "filter payslips": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "Filter_Payslips": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "payslips": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.month_netto": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Month Netto"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "month netto": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "mth netto": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.6
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.total_netto": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "Total Netto"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "total netto": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "aggregate netto": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.582
+			          }
+			        },
+			        {
+			          "overall netto": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.582
+			          }
+			        }
+			      ]
+			    },
+			    "payslip.PY_total_netto": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Payslips",
+			          "ConceptualProperty": "PY Total Netto"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "PY total netto": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "py aggregate netto": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.591
+			          }
+			        },
+			        {
+			          "py overall netto": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.591
+			          }
+			        }
+			      ]
+			    },
+			    "DT_category": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Categories"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "DT category": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DT_Categories": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "dt classification": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.75
+			          }
+			        },
+			        {
+			          "dt class": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "dt group": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "dt type": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "dt grouping": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "dt kind": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        }
+			      ]
+			    },
+			    "DT_category.lohnart": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Categories",
+			          "ConceptualProperty": "Lohnart"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "lohnart": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "DT_calendar": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "DT calendar": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DT_Calendar": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "calendar": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "dt almanac": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "dt datebook": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "dt agenda": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "dt logbook": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "dt diary": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "almanac": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.491
+			          }
+			        },
+			        {
+			          "datebook": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.491
+			          }
+			        },
+			        {
+			          "agenda": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.491
+			          }
+			        },
+			        {
+			          "logbook": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.491
+			          }
+			        },
+			        {
+			          "diary": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.491
+			          }
+			        }
+			      ]
+			    },
+			    "DT_calendar.date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "Date"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "date": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "moment": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "DT_calendar.year": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "Year"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "year": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "yr": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "DT_calendar.quarter": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "Quarter"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "quarter": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "qtr": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.818
+			          }
+			        }
+			      ]
+			    },
+			    "DT_calendar.month": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "Month"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "month": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "mth": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        }
+			      ]
+			    },
+			    "DT_calendar.viz_quarter": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "vizQuarter"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "viz quarter": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "vizQuarter": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "viz qtr": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.833
+			          }
+			        }
+			      ]
+			    },
+			    "DT_calendar.month_name": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DT_Calendar",
+			          "ConceptualProperty": "Month Name"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "month name": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "month nickname": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "month title": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "month label": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "month tag": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        },
+			        {
+			          "mth name": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.6
+			          }
+			        }
+			      ]
+			    },
+			    "expense_new": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Expenses_New"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "expense new": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "Expenses_New": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "expenditure new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "disbursement new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "payment new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.5
+			          }
+			        },
+			        {
+			          "outlay new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "outflow new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "cost new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "overhead new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "price new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.461
+			          }
+			        },
+			        {
+			          "rate new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.461
+			          }
+			        },
+			        {
+			          "amount new": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.461
+			          }
+			        }
+			      ]
+			    },
+			    "expense_new.date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Expenses_New",
+			          "ConceptualProperty": "Date"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "date": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "moment": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "expense_new.description": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Expenses_New",
+			          "ConceptualProperty": "Description"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "description": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "appearance": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "descriptor": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "explanation": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "specification": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "account": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        },
+			        {
+			          "overview": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        },
+			        {
+			          "report": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        }
+			      ]
+			    },
+			    "expense_new.category": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Expenses_New",
+			          "ConceptualProperty": "Category"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "category": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "classification": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.736
+			          }
+			        },
+			        {
+			          "class": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        },
+			        {
+			          "type": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        },
+			        {
+			          "grouping": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        },
+			        {
+			          "kind": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.714
+			          }
+			        }
+			      ]
+			    }
+			  },
+			  "Relationships": {
+			    "expense_new_has_PYTD_total_expenses": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.PYTD_total_expenses": {
+			          "Target": {
+			            "Entity": "expense_new.PYTD_total_expenses"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.PYTD_total_expenses"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_PYTD_total_expenses"
+			        }
+			      ]
+			    },
+			    "expense_new_has_total_expenses": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.total_expenses": {
+			          "Target": {
+			            "Entity": "expense_new.total_expenses"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.total_expenses"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_total_expenses"
+			        }
+			      ]
+			    },
+			    "expense_new_has_positive_amount": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.positive_amount": {
+			          "Target": {
+			            "Entity": "expense_new.positive_amount"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.positive_amount"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_positive_amounts"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "expense_new.positive_amount"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "positive_amount_indicates_how_expensive_expense_new_are"
+			        }
+			      ]
+			    },
+			    "expense_new_has_column_1": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.column_1": {
+			          "Target": {
+			            "Entity": "expense_new.column_1"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.column_1"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_column_1"
+			        }
+			      ]
+			    },
+			    "expense_new_has_category": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.category": {
+			          "Target": {
+			            "Entity": "expense_new.category"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.category"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_categories"
+			        }
+			      ]
+			    },
+			    "expense_new_has_amount_EUR": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.amount_EUR": {
+			          "Target": {
+			            "Entity": "expense_new.amount_EUR"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.amount_EUR"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_amount_EUR"
+			        }
+			      ]
+			    },
+			    "expense_new_has_description": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.description": {
+			          "Target": {
+			            "Entity": "expense_new.description"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.description"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_descriptions"
+			        }
+			      ]
+			    },
+			    "expense_new_has_date": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.date": {
+			          "Target": {
+			            "Entity": "expense_new.date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_dates"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_month_name": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.month_name": {
+			          "Target": {
+			            "Entity": "DT_calendar.month_name"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.month_name"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_month_names"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_viz_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.viz_quarter": {
+			          "Target": {
+			            "Entity": "DT_calendar.viz_quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.viz_quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_viz_quarters"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_month": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.month": {
+			          "Target": {
+			            "Entity": "DT_calendar.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_months"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.quarter": {
+			          "Target": {
+			            "Entity": "DT_calendar.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_quarters"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_year": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.year": {
+			          "Target": {
+			            "Entity": "DT_calendar.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_years"
+			        }
+			      ]
+			    },
+			    "DT_calendar_has_date": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Calendar"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        },
+			        "DT_calendar.date": {
+			          "Target": {
+			            "Entity": "DT_calendar.date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar.date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_dates"
+			        }
+			      ]
+			    },
+			    "DT_category_has_index": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Categories"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_category": {
+			          "Target": {
+			            "Entity": "DT_category"
+			          }
+			        },
+			        "DT_category.index": {
+			          "Target": {
+			            "Entity": "DT_category.index"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_category"
+			            },
+			            "Object": {
+			              "Role": "DT_category.index"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_categories_have_indices"
+			        }
+			      ]
+			    },
+			    "DT_category_has_lohnart": {
+			      "Binding": {
+			        "ConceptualEntity": "DT_Categories"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "DT_category": {
+			          "Target": {
+			            "Entity": "DT_category"
+			          }
+			        },
+			        "DT_category.lohnart": {
+			          "Target": {
+			            "Entity": "DT_category.lohnart"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_category"
+			            },
+			            "Object": {
+			              "Role": "DT_category.lohnart"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_categories_have_lohnarts"
+			        }
+			      ]
+			    },
+			    "payslip_has_PY_total_netto": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.PY_total_netto": {
+			          "Target": {
+			            "Entity": "payslip.PY_total_netto"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.PY_total_netto"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_PY_total_netto"
+			        }
+			      ]
+			    },
+			    "payslip_has_total_netto": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.total_netto": {
+			          "Target": {
+			            "Entity": "payslip.total_netto"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.total_netto"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_total_netto"
+			        }
+			      ]
+			    },
+			    "payslip_has_month_netto": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.month_netto": {
+			          "Target": {
+			            "Entity": "payslip.month_netto"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.month_netto"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_month_netto"
+			        }
+			      ]
+			    },
+			    "payslip_has_filter_payslips": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.filter_payslips": {
+			          "Target": {
+			            "Entity": "payslip.filter_payslips"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.filter_payslips"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_filter_payslips"
+			        }
+			      ]
+			    },
+			    "payslip_has_is_extra": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.is_extra": {
+			          "Target": {
+			            "Entity": "payslip.is_extra"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.is_extra"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_is_extras"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Adjectives": [
+			              {
+			                "extra": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "payslip.is_extra"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "is_extra_indicates_how_extra_payslips_are"
+			        }
+			      ]
+			    },
+			    "payslip_has_date": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.date": {
+			          "Target": {
+			            "Entity": "payslip.date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_dates"
+			        }
+			      ]
+			    },
+			    "payslip_has_betrag": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "payslip.betrag": {
+			          "Target": {
+			            "Entity": "payslip.betrag"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "payslip.betrag"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_betrags"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "payslip.betrag"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "betrag_indicates_how_expensive_payslips_are"
+			        }
+			      ]
+			    },
+			    "expense_new_has_AVG_monthly_spend": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "expense_new.AVG_monthly_spend": {
+			          "Target": {
+			            "Entity": "expense_new.AVG_monthly_spend"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "expense_new.AVG_monthly_spend"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_AVG_monthly_spend"
+			        }
+			      ]
+			    },
+			    "payslip_has_DT_category": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "DT_category": {
+			          "Target": {
+			            "Entity": "DT_category"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "DT_category"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_DT_categories"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_category"
+			            },
+			            "Object": {
+			              "Role": "payslip"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_categories_have_payslips"
+			        }
+			      ]
+			    },
+			    "payslip_has_DT_calendar": {
+			      "Binding": {
+			        "ConceptualEntity": "Payslips"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "payslip": {
+			          "Target": {
+			            "Entity": "payslip"
+			          }
+			        },
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "payslip"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "payslips_have_DT_calendars"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "payslip"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_payslips"
+			        }
+			      ]
+			    },
+			    "expense_new_has_DT_calendar": {
+			      "Binding": {
+			        "ConceptualEntity": "Expenses_New"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "expense_new": {
+			          "Target": {
+			            "Entity": "expense_new"
+			          }
+			        },
+			        "DT_calendar": {
+			          "Target": {
+			            "Entity": "DT_calendar"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "expense_new"
+			            },
+			            "Object": {
+			              "Role": "DT_calendar"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "expense_new_have_DT_calendars"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "DT_calendar"
+			            },
+			            "Object": {
+			              "Role": "expense_new"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "DT_calendars_have_expense_new"
+			        }
+			      ]
+			    }
+			  }
+			}
+		contentType: json
+

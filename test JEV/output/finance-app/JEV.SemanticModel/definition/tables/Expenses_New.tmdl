@@ -1,0 +1,190 @@
+table Expenses_New
+	lineageTag: 20e61c18-5cd3-4a83-b1a8-e4353d2a8e05
+
+	measure 'Total Expenses' = SUM(Expenses_New[Amount])
+		formatString: "€"\ #,0.0;-"€"\ #,0.0;"€"\ #,0.0
+		lineageTag: 90736f80-9042-45d7-8d5c-bfb4aaf80217
+
+	measure 'Total absolute expenses' = SUM(Expenses_New[AbsoluteAmount])
+		formatString: "€"\ #,0.0;-"€"\ #,0.0;"€"\ #,0.0
+		lineageTag: 5b6e8137-d80e-4968-9a76-dd2cdab9f171
+
+	measure 'Total Expenses Clean' = CALCULATE([Total absolute expenses], Expenses_New[Category]="Debit")
+		formatString: "€"\ #,0.0;-"€"\ #,0.0;"€"\ #,0.0
+		lineageTag: 995677f0-2e9f-4260-ac73-5a0d9b76af83
+
+	measure 'Total Income Clean' = CALCULATE([Total absolute expenses], Expenses_New[Category]="Credit")
+		formatString: "€"\ #,0.0;-"€"\ #,0.0;"€"\ #,0.0
+		lineageTag: d6374370-6e14-4b89-b9ff-1fff59f41b14
+
+	measure 'Income Run Out' = ```
+			
+			// Get current row date context
+			VAR CurrentDate = MAX(Expenses_New[Date])
+			
+			// Find the previous payday
+			VAR PreviousPayday = 
+			    CALCULATE(
+			        MAX(Expenses_New[Date]),
+			        FILTER(
+			            ALL(Expenses_New),
+			            Expenses_New[Date] <= CurrentDate &&
+			            Expenses_New[Description] = "Gehalt/Rente BASF SERVICES EUROPE GMBH" &&
+			            Expenses_New[Category] = "Credit"
+			        )
+			    )
+			
+			// Calculate income since previous payday to current date
+			VAR IncomeToDate = 
+			    CALCULATE(
+			        SUM(Expenses_New[Amount]), // Replace with your actual amount column
+			        FILTER(
+			            ALL(Expenses_New),
+			            Expenses_New[Date] >= PreviousPayday &&
+			            Expenses_New[Date] <= CurrentDate &&
+			            Expenses_New[Category] = "Credit"
+			        )
+			    )
+			
+			// Calculate expenses since previous payday to current date
+			VAR ExpensesToDate = 
+			    CALCULATE(
+			        SUM(Expenses_New[Amount]), // Replace with your actual amount column
+			        FILTER(
+			            ALL(Expenses_New),
+			            Expenses_New[Date] >= PreviousPayday &&
+			            Expenses_New[Date] <= CurrentDate &&
+			            Expenses_New[Category] = "Debit"
+			        )
+			    )
+			
+			// Return the running balance
+			RETURN
+			    IF(
+			        ISBLANK(PreviousPayday),
+			        BLANK(),
+			        IncomeToDate - ExpensesToDate
+			    )
+			```
+		lineageTag: 09059ebe-c32b-4700-a6df-9080b80e5a7e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: cfbe087c-f6d4-4e91-bc68-a4e795055ab2
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Description
+		dataType: string
+		lineageTag: beadbb6c-29ba-4b21-8fb2-742240d0e36c
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 5eb32528-c0b5-4f48-9d2b-f09426f89961
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Amount
+		dataType: double
+		lineageTag: 4c285951-fc0c-4ae0-8af8-c8859b7a88de
+		summarizeBy: sum
+		sourceColumn: Amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AbsoluteAmount
+		dataType: double
+		lineageTag: b6b52e35-2e7b-4924-a4bb-562f49ba985a
+		summarizeBy: sum
+		sourceColumn: AbsoluteAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: 53e382a7-57ba-49b9-9544-dfe4528751ba
+		summarizeBy: sum
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 73a4f41b-deab-4dd1-bd8f-0a83ab77ae2d
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column PageRef
+		dataType: string
+		lineageTag: fac867c9-94e7-4a9a-8a80-d096051e78c4
+		summarizeBy: none
+		sourceColumn: PageRef
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		dataType: string
+		lineageTag: 43828134-1946-4f80-843d-0de0976b3725
+		summarizeBy: none
+		sourceColumn: Type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Expenses_New = m
+		mode: import
+		source = ```
+				// let
+				//     Source = Folder.Files("C:\Users\berlin\Desktop\Expenses"),
+				//     #"Filtered Rows" = Table.SelectRows(Source, each ([Extension] = ".txt")),
+				//     #"Filtered Hidden Files1" = Table.SelectRows(#"Filtered Rows", each [Attributes]?[Hidden]? <> true),
+				//     #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File (3)", each #"Transform File (3)"([Content])),
+				//     #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+				//     #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "Transform File (3)"}),
+				//     #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Other Columns1", "Transform File (3)", Table.ColumnNames(#"Transform File (3)"(#"Sample File (3)"))),
+				//     #"Changed Type" = Table.TransformColumnTypes(#"Expanded Table Column1",{{"Source.Name", type text}, {"Date", type date}, {"Description", type text}, {"Amount (EUR)", type text}, {"Category", type text}, {"", type text}}),
+				//     #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Source.Name"}),
+				//     #"Changed Type with Locale" = Table.TransformColumnTypes(#"Removed Columns", {{"Amount (EUR)", type number}}, "en-US")
+				// in
+				//     #"Changed Type with Locale"
+				
+				let
+				    // Read all PDF files from the specified folder
+				    SourceFolder = Folder.Files("C:\Users\berlin\Desktop\Expenses"),
+				    
+				    // Filter to include only PDF files (exclude folders and non-PDF files)
+				    FilteredFiles = Table.SelectRows(SourceFolder, each [Extension] = ".pdf" and not [Attributes]?[Directory]?),
+				    #"Filtered Hidden Files1" = Table.SelectRows(FilteredFiles, each [Attributes]?[Hidden]? <> true),
+				    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File (2)", each #"Transform File (2)"([Content])),
+				    #"Expanded Transform File (2)" = Table.ExpandTableColumn(#"Invoke Custom Function1", "Transform File (2)", {"Date", "Description", "Amount", "AbsoluteAmount", "Category", "Month", "Year", "PageRef"}, {"Date", "Description", "Amount", "AbsoluteAmount", "Category", "Month", "Year", "PageRef"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Expanded Transform File (2)",{"Content", "Name", "Extension", "Date accessed", "Date modified", "Date created", "Attributes", "Folder Path"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns",{{"Date", type date}, {"Description", type text}, {"Amount", type number}, {"AbsoluteAmount", type number}, {"Category", type text}, {"Month", Int64.Type}, {"Year", Int64.Type}, {"PageRef", type text}}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Changed Type", "Type", each if Text.Contains([Description], "OSA") then "Salary" else if Text.Contains([Description], "BASF") then "Salary" else "Other")
+				in
+				    #"Added Conditional Column"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

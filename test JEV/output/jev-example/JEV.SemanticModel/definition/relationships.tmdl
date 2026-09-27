@@ -1,0 +1,12 @@
+relationship 8df0630e-ab0d-4950-b95f-e905e4d1f99a
+	fromColumn: Payslips.Lohnart
+	toColumn: DT_Categories.Lohnart
+
+relationship bf8a1640-5c28-4663-b94d-47ae6e6c3534
+	fromColumn: Payslips.Date
+	toColumn: DT_Calendar.Date
+
+relationship 80100c10-63a1-68f9-fbbc-c132454787e0
+	fromColumn: Expenses_New.Date
+	toColumn: DT_Calendar.Date
+

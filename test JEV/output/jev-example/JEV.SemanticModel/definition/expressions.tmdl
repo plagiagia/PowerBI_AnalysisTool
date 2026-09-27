@@ -1,0 +1,296 @@
+expression Parameter1 = #"Sample File" meta [IsParameterQuery=true, BinaryIdentifier=#"Sample File", Type="Binary", IsParameterQueryRequired=true]
+	lineageTag: 71628903-8836-4461-9ac8-fd9c6469f98a
+	queryGroup: 'Transform File from Payslips\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression 'Transform Sample File' =
+		let
+		    Source = Pdf.Tables(Parameter1, [Implementation="1.3"]),
+		    #"Filtered Rows2" = Table.SelectRows(Source, each ([Kind] = "Page")),
+		    #"Expanded Data1" = Table.ExpandTableColumn(#"Filtered Rows2", "Data", {"Column1", "Column2", "Column3", "Column4", "Column5", "Column6", "Column7", "Column8", "Column9", "Column10", "Column11", "Column12", "Column13", "Column14"}, {"Data.Column1", "Data.Column2", "Data.Column3", "Data.Column4", "Data.Column5", "Data.Column6", "Data.Column7", "Data.Column8", "Data.Column9", "Data.Column10", "Data.Column11", "Data.Column12", "Data.Column13", "Data.Column14"}),
+		    #"Removed Top Rows" = Table.Skip(#"Expanded Data1",21),
+		    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+		    #"Inserted Text After Delimiter" = Table.AddColumn(#"Promoted Headers", "Date", each Text.AfterDelimiter([Lohnart], "bis "), type text),
+		    #"Replaced Value" = Table.ReplaceValue(#"Inserted Text After Delimiter",":","",Replacer.ReplaceText,{"Date"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Replaced Value",{{"Date", type date}}),
+		    #"Filled Down" = Table.FillDown(#"Changed Type",{"Date"}),
+		    #"Removed Top Rows1" = Table.Skip(#"Filled Down",1),
+		    #"Filtered Rows1" = Table.SelectRows(#"Removed Top Rows1", each ([Betrag] <> null)),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Filtered Rows1",{{"Betrag", type number}}),
+		    #"Filtered Rows" = Table.SelectRows(#"Changed Type1", each ([Lohnart] <> null)),
+		    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Filtered Rows", {"Betrag"}),
+		    #"Grouped Rows" = Table.Group(#"Removed Errors", {"Lohnart", "Date"}, {{"Betrag", each List.Sum([Betrag]), type nullable number}})
+		in
+		    #"Grouped Rows"
+	lineageTag: 35119f2b-6724-4a3d-a927-dcc80f731737
+	queryGroup: 'Transform File from Payslips'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'Sample File' =
+		let
+		    Source = Folder.Files("C:\Users\berlin\Desktop\Payslips"),
+		    #"Removed Other Columns" = Table.SelectColumns(Source,{"Name", "Content"}),
+		    Content = #"Removed Other Columns"{3}[Content]
+		in
+		    Content
+	lineageTag: d9510063-0c42-4a3e-baf3-65e17e49de10
+	queryGroup: 'Transform File from Payslips\Helper Queries'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Binary
+
+expression 'Transform File' =
+		let
+		    Source = (Parameter1 as binary) => let
+		    Source = Pdf.Tables(Parameter1, [Implementation="1.3"]),
+		    #"Filtered Rows2" = Table.SelectRows(Source, each ([Kind] = "Page")),
+		    #"Expanded Data1" = Table.ExpandTableColumn(#"Filtered Rows2", "Data", {"Column1", "Column2", "Column3", "Column4", "Column5", "Column6", "Column7", "Column8", "Column9", "Column10", "Column11", "Column12", "Column13", "Column14"}, {"Data.Column1", "Data.Column2", "Data.Column3", "Data.Column4", "Data.Column5", "Data.Column6", "Data.Column7", "Data.Column8", "Data.Column9", "Data.Column10", "Data.Column11", "Data.Column12", "Data.Column13", "Data.Column14"}),
+		    #"Removed Top Rows" = Table.Skip(#"Expanded Data1",21),
+		    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+		    #"Inserted Text After Delimiter" = Table.AddColumn(#"Promoted Headers", "Date", each Text.AfterDelimiter([Lohnart], "bis "), type text),
+		    #"Replaced Value" = Table.ReplaceValue(#"Inserted Text After Delimiter",":","",Replacer.ReplaceText,{"Date"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Replaced Value",{{"Date", type date}}),
+		    #"Filled Down" = Table.FillDown(#"Changed Type",{"Date"}),
+		    #"Removed Top Rows1" = Table.Skip(#"Filled Down",1),
+		    #"Filtered Rows1" = Table.SelectRows(#"Removed Top Rows1", each ([Betrag] <> null)),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Filtered Rows1",{{"Betrag", type number}}),
+		    #"Filtered Rows" = Table.SelectRows(#"Changed Type1", each ([Lohnart] <> null)),
+		    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Filtered Rows", {"Betrag"}),
+		    #"Grouped Rows" = Table.Group(#"Removed Errors", {"Lohnart", "Date"}, {{"Betrag", each List.Sum([Betrag]), type nullable number}})
+		in
+		    #"Grouped Rows"
+		in
+		    Source
+	mAttributes: [ FunctionQueryBinding = "{""exemplarFormulaName"":""Transform Sample File""}" ]
+	lineageTag: f171c4ec-2c6d-4590-a268-cc3cc7972ec9
+	queryGroup: 'Transform File from Payslips\Helper Queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression Parameter2 = #"Sample File (2)" meta [IsParameterQuery=true, BinaryIdentifier=#"Sample File (2)", Type="Binary", IsParameterQueryRequired=true]
+	lineageTag: 4f230092-64a3-4fe7-a37f-8eea2aec8409
+	queryGroup: 'Transform File from Expenses\Helper Queries'
+
+	annotation PBI_ResultType = Binary
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression 'Transform Sample File (2)' = ```
+		let
+		    Source = Pdf.Tables(Parameter2, [Implementation="1.3"]),
+		    // Filter to include only page data rows
+		    #"Filtered Rows1" = Table.SelectRows(Source, each Text.Contains([Id], "Page")),
+		    // Expand the Data column into individual columns
+		    #"Expanded Data" = Table.ExpandTableColumn(#"Filtered Rows1", "Data", {"Column1", "Column2", "Column3", "Column4", "Column5", "Column6"}, {"Data.Column1", "Data.Column2", "Data.Column3", "Data.Column4", "Data.Column5", "Data.Column6"}),
+		    
+		    // Add page numbers for reference
+		    #"Added Page Number" = Table.AddColumn(#"Expanded Data", "PageNum", each if Text.Contains([Id], "Page") then Text.Range([Id], 4, 3) else null, type text),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Page Number",{{"Data.Column2", type date}}),
+		    #"Renamed Columns3" = Table.RenameColumns(#"Changed Type1",{{"Data.Column2", "Date"}}),
+		    
+		    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Renamed Columns3", {{"Data.Column5", type number}}, "en-DE"),
+		    #"Changed Type with Locale1" = Table.TransformColumnTypes(#"Changed Type with Locale", {{"Data.Column6", type number}}, "en-DE"),
+		    #"Added Conditional Column" = Table.AddColumn(#"Changed Type with Locale1", "Amount", each if [Data.Column5] = null then [Data.Column6] else [Data.Column5]),
+		    #"Renamed Columns" = Table.RenameColumns(#"Added Conditional Column",{{"Data.Column3", "Description"}}),
+		    
+		    // Add index for transaction grouping
+		    #"Added Index" = Table.AddIndexColumn(#"Renamed Columns", "Index", 0, 1),
+		    
+		    // Mark actual transactions (rows with dates and amounts)
+		    #"Added Transaction Group" = Table.AddColumn(#"Added Index", "TransactionGroup", each 
+		        if [Amount] <> null or [Description] <> "" then [Index] else null, type number),
+		    
+		    // Fill down transaction groups to group related rows
+		    #"Filled Transaction Groups" = Table.FillDown(#"Added Transaction Group", {"TransactionGroup"}),
+		    
+		    // Remove rows with errors in critical columns
+		    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Filled Transaction Groups", {"TransactionGroup", "Amount", "Date"}),
+		    
+		    // Group by transaction to combine descriptions
+		    #"Grouped Transactions" = Table.Group(#"Removed Errors", {"TransactionGroup", "Date", "Amount"}, {
+		        {"Description", each Text.Combine(List.RemoveNulls(List.Transform(Table.Column(_, "Description"), each if _ = "" then null else _)), " "), type text},
+		        {"PageRef", each Text.Combine(List.RemoveNulls(List.Distinct(Table.Column(_, "PageNum"))), ","), type text}
+		    }),
+		    
+		    // Remove null or empty descriptions
+		    #"Filtered Rows" = Table.SelectRows(#"Grouped Transactions", each [Description] <> null and [Description] <> ""),
+		    
+		    // Remove the TransactionGroup column and sort by date
+		    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows", {"TransactionGroup"}),
+		    
+		    // Clean up descriptions (remove null text and excessive spaces)
+		    #"Cleaned Descriptions" = Table.TransformColumns(#"Removed Columns", {
+		        {"Description", each 
+		            try
+		                Text.Trim(Text.Replace(Text.Replace(Text.From(_ ?? ""), "null", ""), "  ", " "))
+		            otherwise
+		                "", type text}
+		    }),
+		    
+		    // Filter out rows without dates or amounts
+		    #"Filtered Valid Transactions" = Table.SelectRows(#"Cleaned Descriptions", each [Date] <> null and [Amount] <> null),
+		    
+		    // Sort by date
+		    #"Sorted Rows" = Table.Sort(#"Filtered Valid Transactions", {{"Date", Order.Ascending}}),
+		    
+		    // Add month and year columns for easier analysis
+		    #"Added Month" = Table.AddColumn(#"Sorted Rows", "Month", each try Date.Month([Date]) otherwise null, Int64.Type),
+		    #"Added Year" = Table.AddColumn(#"Added Month", "Year", each try Date.Year([Date]) otherwise null, Int64.Type),
+		    
+		    // Categorize as debit or credit
+		    #"Added Category" = Table.AddColumn(#"Added Year", "Category", each 
+		        try
+		            if [Amount] < 0 then "Debit" else "Credit"
+		        otherwise
+		            "Unknown", type text),
+		    // Add absolute amount column for easier analysis
+		    #"Added Absolute Amount" = Table.AddColumn(#"Added Category", "AbsoluteAmount", each 
+		        try
+		            Number.Abs([Amount])
+		        otherwise
+		            null, type number),
+		    
+		    // Final column reordering
+		    #"Reordered Columns" = Table.ReorderColumns(#"Added Absolute Amount", {"Date", "Description", "Amount", "AbsoluteAmount", "Category", "Month", "Year", "PageRef"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Reordered Columns",{{"Amount", type number}})
+		in
+		    #"Changed Type"
+		```
+	lineageTag: 36cfb293-f749-48e2-89d0-170d96ef37a0
+	queryGroup: 'Transform File from Expenses'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'Sample File (2)' = ```
+		let
+		    // Read all PDF files from the specified folder
+		    SourceFolder = Folder.Files("C:\Users\berlin\Desktop\Expenses"),
+		    
+		    // Filter to include only PDF files (exclude folders and non-PDF files)
+		    FilteredFiles = Table.SelectRows(SourceFolder, each [Extension] = ".pdf" and not [Attributes]?[Directory]?),
+		    Navigation1 = FilteredFiles{13}[Content]
+		in
+		    Navigation1
+		```
+	lineageTag: 408996f2-56ca-448d-aadb-fbb1ad57508f
+	queryGroup: 'Transform File from Expenses\Helper Queries'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Binary
+
+expression 'Transform File (2)' = ```
+		let
+		    Source = (Parameter2 as binary) => let
+		    Source = Pdf.Tables(Parameter2, [Implementation="1.3"]),
+		    // Filter to include only page data rows
+		    #"Filtered Rows1" = Table.SelectRows(Source, each Text.Contains([Id], "Page")),
+		    // Expand the Data column into individual columns
+		    #"Expanded Data" = Table.ExpandTableColumn(#"Filtered Rows1", "Data", {"Column1", "Column2", "Column3", "Column4", "Column5", "Column6"}, {"Data.Column1", "Data.Column2", "Data.Column3", "Data.Column4", "Data.Column5", "Data.Column6"}),
+		    
+		    // Add page numbers for reference
+		    #"Added Page Number" = Table.AddColumn(#"Expanded Data", "PageNum", each if Text.Contains([Id], "Page") then Text.Range([Id], 4, 3) else null, type text),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Page Number",{{"Data.Column2", type date}}),
+		    #"Renamed Columns3" = Table.RenameColumns(#"Changed Type1",{{"Data.Column2", "Date"}}),
+		    
+		    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Renamed Columns3", {{"Data.Column5", type number}}, "en-DE"),
+		    #"Changed Type with Locale1" = Table.TransformColumnTypes(#"Changed Type with Locale", {{"Data.Column6", type number}}, "en-DE"),
+		    #"Added Conditional Column" = Table.AddColumn(#"Changed Type with Locale1", "Amount", each if [Data.Column5] = null then [Data.Column6] else [Data.Column5]),
+		    #"Renamed Columns" = Table.RenameColumns(#"Added Conditional Column",{{"Data.Column3", "Description"}}),
+		    
+		    // Add index for transaction grouping
+		    #"Added Index" = Table.AddIndexColumn(#"Renamed Columns", "Index", 0, 1),
+		    
+		    // Mark actual transactions (rows with dates and amounts)
+		    #"Added Transaction Group" = Table.AddColumn(#"Added Index", "TransactionGroup", each 
+		        if [Amount] <> null or [Description] <> "" then [Index] else null, type number),
+		    
+		    // Fill down transaction groups to group related rows
+		    #"Filled Transaction Groups" = Table.FillDown(#"Added Transaction Group", {"TransactionGroup"}),
+		    
+		    // Remove rows with errors in critical columns
+		    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Filled Transaction Groups", {"TransactionGroup", "Amount", "Date"}),
+		    
+		    // Group by transaction to combine descriptions
+		    #"Grouped Transactions" = Table.Group(#"Removed Errors", {"TransactionGroup", "Date", "Amount"}, {
+		        {"Description", each Text.Combine(List.RemoveNulls(List.Transform(Table.Column(_, "Description"), each if _ = "" then null else _)), " "), type text},
+		        {"PageRef", each Text.Combine(List.RemoveNulls(List.Distinct(Table.Column(_, "PageNum"))), ","), type text}
+		    }),
+		    
+		    // Remove null or empty descriptions
+		    #"Filtered Rows" = Table.SelectRows(#"Grouped Transactions", each [Description] <> null and [Description] <> ""),
+		    
+		    // Remove the TransactionGroup column and sort by date
+		    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows", {"TransactionGroup"}),
+		    
+		    // Clean up descriptions (remove null text and excessive spaces)
+		    #"Cleaned Descriptions" = Table.TransformColumns(#"Removed Columns", {
+		        {"Description", each 
+		            try
+		                Text.Trim(Text.Replace(Text.Replace(Text.From(_ ?? ""), "null", ""), "  ", " "))
+		            otherwise
+		                "", type text}
+		    }),
+		    
+		    // Filter out rows without dates or amounts
+		    #"Filtered Valid Transactions" = Table.SelectRows(#"Cleaned Descriptions", each [Date] <> null and [Amount] <> null),
+		    
+		    // Sort by date
+		    #"Sorted Rows" = Table.Sort(#"Filtered Valid Transactions", {{"Date", Order.Ascending}}),
+		    
+		    // Add month and year columns for easier analysis
+		    #"Added Month" = Table.AddColumn(#"Sorted Rows", "Month", each try Date.Month([Date]) otherwise null, Int64.Type),
+		    #"Added Year" = Table.AddColumn(#"Added Month", "Year", each try Date.Year([Date]) otherwise null, Int64.Type),
+		    
+		    // Categorize as debit or credit
+		    #"Added Category" = Table.AddColumn(#"Added Year", "Category", each 
+		        try
+		            if [Amount] < 0 then "Debit" else "Credit"
+		        otherwise
+		            "Unknown", type text),
+		    // Add absolute amount column for easier analysis
+		    #"Added Absolute Amount" = Table.AddColumn(#"Added Category", "AbsoluteAmount", each 
+		        try
+		            Number.Abs([Amount])
+		        otherwise
+		            null, type number),
+		    
+		    // Final column reordering
+		    #"Reordered Columns" = Table.ReorderColumns(#"Added Absolute Amount", {"Date", "Description", "Amount", "AbsoluteAmount", "Category", "Month", "Year", "PageRef"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Reordered Columns",{{"Amount", type number}})
+		in
+		    #"Changed Type"
+		in
+		    Source
+		```
+	mAttributes: [ FunctionQueryBinding = "{""exemplarFormulaName"":""Transform Sample File (2)""}" ]
+	lineageTag: 15df07c6-419a-4176-8933-accd588bf515
+	queryGroup: 'Transform File from Expenses\Helper Queries'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression 'Payroll Legend' =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("nVbJbhtHEP2VBnOhAFGxJa/wiUIUxolhCyFjA14OPTM1M231dA96oUT9jC8B8hM5xT+WVz0LKcmig5w47OVVddWrV/Xhw+Th5HDyytZGuoCvc7lxVmsRNi2JUMsgchmosk5dkxeFKktyZELa98KWopWbBgv4dqKgIuZBWeOFMryToFpnc/Jemepo8unww+QYZhbkKVzrI/GaQrBienZKPq/fHmBrGWSIwbqNMBSEl1riU+a5dQUgBE6HmsRZ02q7IRKnZKhUsP+G96XJaYv2Ih1lGNnYCK+lETRcdJSTWuMRsgzkhISnW/87T0/gznw1W1AtNQdnHr9+IRekU6VWeY273ZaYjqcOgIsQefZTDt7bGLwqKHnjqIpYFAmlFLJyRBzAQxF9hBMbUSKStapqcjNNa9Kjy71Xj+DJim/jVkXJsWVnJ5OeCmENLOeIPOEtaxKXsqKtHTHtLfPyQYf4GBCn1kS8Z/7jaj7+63N7KFob8KuSe440GFHwA31LORa34F5odUHi42Qx/zgR0wVy47A/19pecmoOmCUfJ6u0u3KSX7fd7Jx50tFDNiFz8TY5VjYAr3LW+/9DjY4QPRkyQqTxz2zuJP4pxzQ2DYkKURfz7Prr3xWN9kH7m3Q5BN9zHTsv5BWTyhTC2xQdT3l0KmyQExOcyuKOoWfA/M1Jc0FmDdYwqVw01aHQZXGEvTemsgxaE7hVw4qPLnF8F0tM/VgziG/r1BoZ6sP5HCi/IzXfMdCS8Qz1bQsd1MMHXAMuI8RUW98hHt2BiqYjbGLbXjyWnvNSU0V7fdPWVDPUaAMtQsL2Qh73auYDRXJ3oFItIEN97kDj0tkmsaKjUw9zcgvm7D0W3g2XESdraBYUCDLqn495LaQXGZcOJT0c6mM404M/ui/pycove1P9LdM97ON7Mp1Qz/fmdx/sk28nPaH+8f1U74N+ek/+E/ar/5L1fehcW4vLt4kCYinzOqPrWIl//no2PT7Y4YSxZpZLX0MQkl5wimWmCUQu0BiWlGpc8C2ufObKAm6hl7w0uYXdFSgxz6GsZ8uwODgcmdAXIoSdkmTA86ZlucGDeh+f9z7+arOg8gtiMX992x9uCJ9tNhuVF3HwrUUjYse29iT6s89Z27gLuKFvuJmPGfoPOngh2pihdW0hRGe278wPdnRPF5fodSTe4hQpfUf9bofNc2fpAjeuYAq4UKbopeiY6/2HZYNJ4511F7Nz9/XPRjHwfCyVVD3sPASVW86auPtgeshutR5GEZeAwUmF1hRSL5+CTVeKfeAtxWRy1KB7DUd7UD+4xHoxX4j3ER0moqn8rBw4JDOL9b6RoI5T/LrOvM0ir+ZOtZ0E01GFqriZGjDSj5ZOxtie0oy5dV9bkUWhuiGKm8jNmYrJ189VPSyLyWuQGxWEiaY2KCAhEUKkrTlKihCcld0kMExksvgcfUhFm+RPgqq0VhbXGhRXPbwGjdVRb7yIxHGHFevGN7HkvDSlTq/1zJndhRQp6M4Qi1SdL2CtTN2Y042MKioHcKd80nu15p/c+qGWj1mEzpTJunFrCdSC4/aTNR34GCUxVeWNMa/gI9yQ4QAY0xWwcsP0UCh+Ibi1VnKIz/C6NAVYFoFrWWsElv/flPTd4qutVoXcbCnckgNjGhatsXbTZo//LI2UXqOtYE5CmK7FMpQujXdXs9KlIVU1WXS+G93gPF1xRJnpI+F4iII1JvhoJsVueAeLzBksVIqQZ+VbyWyXqaTT+oalCsoqh1GMk1RZUMqw3Rkm+DXm12J4NeeqJt2KSwWy9FmjDmknaycPuqw1Um8D+OaWWu9EEHOrMXFXBOR2xBxcA/SnfwE=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [#"#" = _t, Category = _t, Explanation = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Category", type text}, {"Explanation", type text}, {"#", Int64.Type}})
+		in
+		    #"Changed Type"
+	lineageTag: 8b28cbd7-838f-46e0-b61a-c41557fbc6f5
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

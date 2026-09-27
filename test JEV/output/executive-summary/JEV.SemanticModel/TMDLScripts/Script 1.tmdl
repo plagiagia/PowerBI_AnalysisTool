@@ -1,0 +1,103 @@
+createOrReplace
+
+	table Payslips
+		lineageTag: 7b6c59b2-93dc-40e2-9f2d-3560477a9f12	
+
+		measure 'Month Netto' = 
+			VAR netto =
+			CALCULATE(MAX(Payslips[Betrag]), Payslips[Lohnart]="Gesetzl. Netto (EBeschV)")
+			RETURN
+			IF(netto>=[Running Total Expenses], "Green", "Red")
+			
+		measure 'Total Netto' =
+			TOTALYTD(SUM(Payslips[Betrag]),DT_Calendar[Date], CONTAINSSTRING(Payslips[Lohnart], "Netto"))
+			
+
+		measure 'PY Total Netto' =
+			CALCULATE([Total Netto], SAMEPERIODLASTYEAR(DT_Calendar[Date]))
+
+		measure 'Total Gross Salary' = 
+			CALCULATE(SUM(Payslips[Betrag]), Payslips[Lohnart] = "Gesamtbrutto (EBeschV)")
+
+		measure 'Total Deductions' = 
+			SUMX(FILTER(Payslips, Payslips[Lohnart] IN {
+				"Lohnsteuer, lfd.", "Lohnsteuer, EZ", 
+				"Krankenversicherung, lfd.", "Rentenversicherung, lfd.", 
+				"Arbeitslosenvers., lfd.", "Pflegeversicherung, lfd."
+			}), Betrag)
+
+		measure 'Employer Payroll Contribution %' = 
+			(SUMX(FILTER(Payslips, Payslips[Lohnart] = "Summe ges. Abzüge"), Betrag) 
+			/ SUMX(FILTER(Payslips, Payslips[Lohnart] = "Gesamtbrutto (EBeschV)"), Betrag)) * 100
+
+		measure 'Total Employer Benefits' = 
+			SUMX(FILTER(Payslips, Payslips[Lohnart] IN {
+				"AG Zuschuss Firmenabo", "GwV Jobticket"
+			}), Betrag)
+
+		measure 'Net Salary to Gross Salary Ratio (%)' = 
+			(SUMX(FILTER(Payslips, Payslips[Lohnart] = "Gesetzl. Netto (EBeschV)"), Betrag) 
+			/ SUMX(FILTER(Payslips, Payslips[Lohnart] = "Gesamtbrutto (EBeschV)"), Betrag)) * 100
+
+		measure 'Inflation Compensation %' = 
+			(SUMX(FILTER(Payslips, Payslips[Lohnart] = "Inflationsgeld"), Betrag) 
+			/ SUMX(FILTER(Payslips, Payslips[Lohnart] = "Gesamtbrutto (EBeschV)"), Betrag)) * 100
+
+		column Lohnart
+			dataType: string
+			lineageTag: 0f454ea0-611c-41de-9558-364d56cc46a6
+			summarizeBy: none
+			sourceColumn: Lohnart
+
+			annotation SummarizationSetBy = Automatic
+
+		column Betrag
+			dataType: double
+			formatString: "€"\ #,0.00;-"€"\ #,0.00;"€"\ #,0.00
+			lineageTag: 93358a82-5506-469f-9c62-d0ea60663c0b
+			summarizeBy: none
+			sourceColumn: Betrag
+
+			annotation SummarizationSetBy = User
+
+		column Date
+			dataType: dateTime
+			formatString: yyyy-mm
+			lineageTag: 75607164-f28b-4022-a2a8-6babe5c2947a
+			summarizeBy: none
+			sourceColumn: Date
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+			annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+		column isExtra =
+				
+				IF(AND(Payslips[Betrag]>0, NOT Payslips[Lohnart] IN {"Tarifentgelt", "Gesamtbrutto (EBeschV)","Gesetzl. Netto (EBeschV)", "Summe Be- und Abzüge"}),1,0)
+			formatString: 0
+			lineageTag: 61a05b3c-2fd7-43c4-a1b5-a811650ac7ab
+			summarizeBy: sum
+
+			annotation SummarizationSetBy = Automatic
+
+		partition Payslips = m
+			mode: import
+			source =
+					let
+					    Source = Folder.Files("C:\Users\berlin\Desktop\Payslips"),
+					    #"Removed Other Columns" = Table.SelectColumns(Source,{"Name", "Content"}),
+					    #"Filtered Hidden Files1" = Table.SelectRows(#"Removed Other Columns", each [Attributes]?[Hidden]? <> true),
+					    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File", each #"Transform File"([Content])),
+					    #"Removed Other Columns1" = Table.SelectColumns(#"Invoke Custom Function1", {"Transform File"}),
+					    #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Other Columns1", "Transform File", Table.ColumnNames(#"Transform File"(#"Sample File"))),
+					    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Table Column1",{{"Lohnart", type text}, {"Betrag", type number}, {"Date", type date}}),
+					    #"Sorted Rows" = Table.Sort(#"Changed Type",{{"Date", Order.Descending}})
+					in
+					    #"Sorted Rows"
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigation
+

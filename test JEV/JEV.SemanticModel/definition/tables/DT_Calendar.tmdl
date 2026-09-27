@@ -1,0 +1,55 @@
+table DT_Calendar
+	lineageTag: e3031b0d-8069-4637-9c29-e05965354f8f
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: Short Date
+		lineageTag: 52f289ce-3956-4a0d-8252-2fa1c6712044
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year = YEAR(DT_Calendar[Date])
+		formatString: 0
+		lineageTag: 7f3aa3e3-6d06-47e8-b640-90850f065817
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter = QUARTER(DT_Calendar[Date])
+		formatString: 0
+		lineageTag: a50dbc35-a724-455e-8666-8e308007f06d
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month = MONTH(DT_Calendar[Date])
+		formatString: 0
+		lineageTag: 2af0f7e5-0384-46a8-99b1-88d24b72ed04
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column vizQuarter = "Q" & DT_Calendar[Quarter]
+		lineageTag: 6692c574-13e3-42e3-aa1e-f9e2c6efc30e
+		summarizeBy: none
+		sortByColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Name' = FORMAT(DT_Calendar[Date], "MMM")
+		lineageTag: fbfc882c-c4a8-4349-9c77-9f51ab669d42
+		summarizeBy: none
+		sortByColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DT_Calendar = calculated
+		mode: import
+		source = CALENDARAUTO()
+
+	annotation PBI_Id = c9d256e03fe549eb89f43dd2dfa00451
+

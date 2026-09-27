@@ -1,0 +1,37 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: el-GR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup 'Transform File from Payslips'
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup 'Transform File from Payslips\Helper Queries'
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup 'Transform File from Expenses'
+
+	annotation PBI_QueryGroupOrder = 4
+
+queryGroup 'Transform File from Expenses\Helper Queries'
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["Payslips","Parameter1","Transform Sample File","Sample File","Transform File","DT_Categories","Expenses_New","Parameter2","Transform Sample File (2)","Sample File (2)","Transform File (2)","Payroll Legend"]
+
+annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
+
+ref table Payslips
+ref table DT_Categories
+ref table DT_Calendar
+ref table Expenses_New
+
+ref cultureInfo en-US
+
